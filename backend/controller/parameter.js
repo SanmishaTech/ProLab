@@ -1,23 +1,21 @@
-const Patient = require("../Schema/patient");
+const Parameter = require("../Schema/parameters");
 const User = require("../Schema/userSchema");
 const mongoose = require("mongoose");
 
-const Servicescontroller = {
+const parameterController = {
   createThread: async (req, res, next) => {
     try {
-      const { name, age, phone, gender, userId } = req.body;
-      const newPatient = await new Patient({
+      const { name, unit, fieldType } = req.body;
+      const newService = new Parameter({
         name,
-        age,
-        phone,
-        gender,
-        userId,
+        unit,
+        fieldType,
       });
-      const newPatients = await newPatient.save();
+      const newServics = await newService.save();
 
       res.json({
         message: "Patients created successfully",
-        patient: newPatients,
+        service: newServics,
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -25,8 +23,13 @@ const Servicescontroller = {
   },
   getServices: async (req, res, next) => {
     try {
-      const patient = await Patient.find();
-      res.status(200).json(patient);
+      //   const userId = req.params.userId;
+      //   const usertobefound = new mongoose.Types.ObjectId(userId);
+      //   const patient = await Parameter.find({
+      //     userId: usertobefound,
+      //   });
+      const parameter = await Parameter.find();
+      res.status(200).json(parameter);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -34,7 +37,7 @@ const Servicescontroller = {
   getServicesbyId: async (req, res, next) => {
     try {
       const patientId = req.params.patientId;
-      const services = await Patient.findById(patientId);
+      const services = await Parameter.findById(patientId);
       res.status(200).json(services);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -68,7 +71,7 @@ const Servicescontroller = {
         },
       ];
 
-      const patient = await Patient.aggregate(agg);
+      const patient = await Parameter.aggregate(agg);
       res.status(200).json(patient);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -79,7 +82,7 @@ const Servicescontroller = {
       const patientId = req.params.patientId;
       const { name, age, phone, gender } = req.body;
 
-      const newService = await Patient.findByIdAndUpdate(
+      const newService = await Parameter.findByIdAndUpdate(
         patientId,
         {
           name,
@@ -99,4 +102,4 @@ const Servicescontroller = {
     }
   },
 };
-module.exports = Servicescontroller;
+module.exports = parameterController;

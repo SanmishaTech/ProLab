@@ -18,6 +18,7 @@ var ReferenceRoutes = require("./routes/referenceRoutes");
 var RegistrationRoutes = require("./routes/Registration");
 var HolidayRoutes = require("./routes/holidayRoutes");
 var DepartmentRoutes = require("./routes/departmentRoutes");
+var ParameterRoutes = require("./routes/parameterRoutes");
 
 var app = express();
 const corsOptions = {
@@ -47,6 +48,7 @@ app.use("/api/reference", ReferenceRoutes);
 app.use("/api/registration", RegistrationRoutes);
 app.use("/api/department", DepartmentRoutes);
 app.use("/api/holiday", HolidayRoutes);
+app.use("/api/parameter", ParameterRoutes);
 
 app.use(express.static(path.join(__dirname, "./dist")));
 

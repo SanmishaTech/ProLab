@@ -28,6 +28,7 @@ function App() {
         <Route path="/holiday" element={<Dashboard />} />
         <Route path="/services" element={<Dashboard />} />
         <Route path="/department" element={<Dashboard />} />
+        <Route path="/parameter" element={<Dashboard />} />
       </Routes>
     </>
   );

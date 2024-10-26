@@ -8,6 +8,7 @@ import Dashboardholiday from "@/Components/Holiday/Registertable";
 import DashboardPage from "@/Components/Registration/Dashbordcomp/Registertable";
 import Dashboarddepartment from "@/Components/Department/Registertable";
 import DashboardServices from "@/Components/Services/Registertable";
+import Dashboardparameter from "@/Components/Parameter/Registertable";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 const Dashboard = () => {
@@ -33,6 +34,7 @@ const Dashboard = () => {
         {location.pathname === "/services" && <DashboardServices />}
         {location.pathname === "/holiday" && <Dashboardholiday />}
         {location.pathname === "/department" && <Dashboarddepartment />}
+        {location.pathname === "/parameter" && <Dashboardparameter />}
       </main>
     </div>
   );
