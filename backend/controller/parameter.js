@@ -36,7 +36,7 @@ const parameterController = {
   },
   getServicesbyId: async (req, res, next) => {
     try {
-      const patientId = req.params.patientId;
+      const patientId = req.params.parameterId;
       const services = await Parameter.findById(patientId);
       res.status(200).json(services);
     } catch (error) {
@@ -79,16 +79,15 @@ const parameterController = {
   },
   updateThreads: async (req, res, next) => {
     try {
-      const patientId = req.params.patientId;
-      const { name, age, phone, gender } = req.body;
+      const patientId = req.params.parameterId;
+      const { name, unit, fieldType } = req.body;
 
       const newService = await Parameter.findByIdAndUpdate(
         patientId,
         {
-          name,
-          age,
-          phone,
-          gender,
+          name: name,
+          unit: unit,
+          fieldType: fieldType,
         },
         { new: true }
       );
@@ -97,6 +96,19 @@ const parameterController = {
       }
 
       res.json({ message: "Service updated successfully.", newService });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+  deleteThread: async (req, res, next) => {
+    try {
+      const patientId = req.params.parameterId;
+      const newService = await Parameter.findByIdAndDelete(patientId);
+      if (!newService) {
+        return res.status(404).json({ message: "Service not found." });
+      }
+
+      res.json({ message: "Service deleted successfully.", newService });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

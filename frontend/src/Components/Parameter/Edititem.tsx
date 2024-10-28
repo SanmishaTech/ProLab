@@ -43,7 +43,14 @@ interface AddItemProps {
   }) => void;
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
+const AddItem: React.FC<AddItemProps> = ({
+  onAdd,
+  typeofschema,
+  editid,
+  setToggleedit,
+  toggleedit,
+  editfetch,
+}) => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
   const [SelectedValue, setSelectedValue] = useState("");
@@ -54,9 +61,19 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [date, setDate] = useState<Date | null>(null);
   const [description, setdescription] = useState("");
   const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    const fetcheditdetails = async () => {
+      const response = await axios.get(`/api/${editfetch}`).then((res) => {
+        console.log(res.data);
+      });
+      setFormData(response.data);
+    };
+    fetcheditdetails();
+  }, []);
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
-    await axios.post("/api/parameter", formData).then(() => {
+    await axios.put(`/api/${editid}`, formData).then(() => {
       window.location.reload();
     });
     setName("");
@@ -97,16 +114,19 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
     });
     return [...allFieldstorender];
   };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Holiday</Button>
+        <Button variant="ghost" className="w-full text-start">
+          Edit
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Holiday</DialogTitle>
+          <DialogTitle>Edit</DialogTitle>
           <DialogDescription>
-            Enter the details of the Holiday you want to add to the order.
+            Enter the details of the Components you want to edit.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

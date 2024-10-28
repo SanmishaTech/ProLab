@@ -4,11 +4,14 @@ import {
   File,
   PlusCircle,
   Search,
+  Pencil,
+  Trash,
   MoreHorizontal,
   ListFilter,
 } from "lucide-react";
-
+import axios from "axios";
 import { Badge } from "@/components/ui/badge";
+import AlertDialogbox from "./AlertBox";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -52,6 +55,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
+import Edititem from "./Edititem";
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 
@@ -61,6 +65,7 @@ export default function Dashboard({
   userAvatar = "/placeholder-user.jpg",
   tableColumns = {},
   AddItem,
+  typeofschema,
   tableData = [],
   onAddProduct = () => {},
   onExport = () => {},
@@ -68,6 +73,9 @@ export default function Dashboard({
   onProductAction = () => {},
 }) {
   const navigate = useNavigate();
+  const [toggleedit, setToggleedit] = useState(false);
+  const [editid, setEditid] = useState();
+  const [toggledelete, setToggledelete] = useState();
   // State to manage expanded rows (array of _id)
   const [expandedRows, setExpandedRows] = useState([]);
 
@@ -84,6 +92,20 @@ export default function Dashboard({
     });
   };
 
+  const handleEdit = async (id, url) => {
+    console.log("Edit clicked");
+    setToggleedit(true);
+    setEditid({
+      id: id,
+      url: url,
+    });
+    // Implement edit functionality here
+  };
+
+  const handleDelete = (id) => {
+    console.log("Delete clicked");
+    // Implement delete functionality here
+  };
   return (
     <div className="flex min-h-screen w-full flex-col ">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:px-6">
@@ -147,6 +169,13 @@ export default function Dashboard({
           </DropdownMenu>
         </header>
 
+        {/* {toggleedit && (
+          <Edititem
+            editid={editid}
+            toogleedit={setToggleedit}
+            typeofschema={typeofschema}
+          />
+        )} */}
         {/* Main Content */}
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <Tabs defaultValue="all">
@@ -199,7 +228,7 @@ export default function Dashboard({
                     Add Product
                   </span>
                 </Button> */}
-                <AddItem />
+                <AddItem typeofschema={typeofschema} />
               </div>
             </div>
             <TabsContent value="all">
@@ -213,12 +242,14 @@ export default function Dashboard({
                     <TableHeader>
                       <TableRow>
                         {tableColumns?.headers?.map((header, index) => (
-                          <TableHead
-                            key={index}
-                            className={header.hiddenOn ? header.hiddenOn : ""}
-                          >
-                            {header.label}
-                          </TableHead>
+                          <>
+                            <TableHead
+                              key={index}
+                              className={header.hiddenOn ? header.hiddenOn : ""}
+                            >
+                              {header.label}
+                            </TableHead>
+                          </>
                         ))}
                         {/* <TableHead>Services</TableHead> */}
                       </TableRow>
@@ -234,21 +265,54 @@ export default function Dashboard({
                                   header.hiddenOn ? header.hiddenOn : ""
                                 }
                               >
-                                {header.key === "patientName"
-                                  ? row.patientName
-                                  : header.key === "patientAge"
-                                  ? row.patientAge
-                                  : header.key === "gender"
-                                  ? row.gender
-                                  : header.key === "phone"
-                                  ? row.phone
-                                  : header.key === "referralName"
-                                  ? row.referralName
-                                  : header.key === "paymentMode"
-                                  ? `₹${row.paymentMode}`
-                                  : row[header.key]}
+                                {header.key === "one" ? (
+                                  row.one
+                                ) : header.key === "action" ? (
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        className="h-8 w-8 p-0"
+                                      >
+                                        <span className="sr-only">
+                                          Open menu
+                                        </span>
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel>
+                                        Actions
+                                      </DropdownMenuLabel>
+                                      <Edititem
+                                        editid={row?.edit}
+                                        toogleedit={setToggleedit}
+                                        typeofschema={typeofschema}
+                                        setToggleedit={setToggleedit}
+                                        toggleedit={toggleedit}
+                                        editfetch={row?.editfetch}
+                                      />
+                                      <DropdownMenuSeparator />
+
+                                      <AlertDialogbox url={row?.delete} />
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                ) : header.key === "two" ? (
+                                  row.two
+                                ) : header.key === "three" ? (
+                                  row.three
+                                ) : header.key === "four" ? (
+                                  row.four
+                                ) : header.key === "five" ? (
+                                  row.five
+                                ) : header.key === "six" ? (
+                                  `₹${row.six}`
+                                ) : (
+                                  row[header.key]
+                                )}
                               </TableCell>
                             ))}
+
                             {/* <TableCell>
                               <Button
                                 variant="ghost"

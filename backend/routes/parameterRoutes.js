@@ -4,8 +4,8 @@ const parameterController = require("../controller/parameter");
 
 router.post("/", parameterController.createThread);
 router.get("/allparameter", parameterController.getServices);
-router.get("/reference/:referenceId", parameterController.getServicesbyId);
-router.put("/update/:referenceId", parameterController.updateThreads);
-// router.delete("/delete/:serviceId", Servicescontroller.deleteThread);
+router.put("/update/:parameterId", parameterController.updateThreads);
+router.delete("/delete/:parameterId", parameterController.deleteThread);
+router.get("/reference/:parameterId", parameterController.getServicesbyId);
 
 module.exports = router;
