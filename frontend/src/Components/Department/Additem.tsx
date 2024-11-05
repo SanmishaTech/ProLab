@@ -38,12 +38,13 @@ interface AddItemProps {
   onAdd: (item: {
     id: string;
     name: string;
-    description: string;
-    userId: string;
+    unit: string;
+    fieldType: string;
   }) => void;
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onAdd }) => {
+const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema, add }) => {
+  console.log("THis is add", add);
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
   const [SelectedValue, setSelectedValue] = useState("");
@@ -53,45 +54,72 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd }) => {
   const [name, setName] = useState("");
   const [date, setDate] = useState<Date | null>(null);
   const [description, setdescription] = useState("");
+  const [formData, setFormData] = useState({});
   const handleAdd = async () => {
-    console.log("Name", name);
-    console.log("Date", date);
     // const service = services.find((s) => s.name === SelectedValue);
-    await axios
-      .post("/api/department", {
-        name: name,
-        description: description,
-        userId: User?._id,
-      })
-      .then(() => {
-        window.location.reload();
-      });
+    console.log(formData);
+    await axios.post(`/api/department`, formData).then(() => {
+      window.location.reload();
+    });
     setName("");
     setDate(null);
     // Reset form fields
     setHandleopen(false);
   };
+  function capitalizeText(text) {
+    return text.replace(/\b\w/g, (char) => char.toUpperCase());
+  }
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value, // dynamically set key-value pairs
+    }));
+  };
+  const addFields = (typeofschema) => {
+    const allFieldstorender = [];
+    Object.entries(typeofschema).map(([key, value]) => {
+      console.log(key, value);
+
+      if (value === "String") {
+        allFieldstorender.push(
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="price" className="text-right">
+              {capitalizeText(key)}
+            </Label>
+            <Input
+              id="name"
+              name={key}
+              onChange={handleChange}
+              // placeholder="Enter name"
+              value={formData[key]}
+              className="col-span-3"
+            />
+          </div>
+        );
+      }
+    });
+    return [...allFieldstorender];
+  };
   return (
-    <Dialog open={handleopen} onOpenChange={(open) => setHandleopen(open)}>
+    <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setHandleopen(true)}>
-          Add Holiday
-        </Button>
+        <Button variant="outline">Add Department</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Holiday</DialogTitle>
+          <DialogTitle>Add New Department</DialogTitle>
           <DialogDescription>
-            Enter the details of the Holiday you want to add to the order.
+            Enter the details of the Department you want to add to the order.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
-
-          <div className="grid grid-cols-4 items-center gap-4">
+          {addFields(typeofschema)}
+          {/* <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="price" className="text-right">
-              Name
+              Namea
             </Label>
             <Input
               id="name"
@@ -103,7 +131,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd }) => {
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="price" className="text-right">
-              Description
+              Unit
             </Label>
             <Input
               id="name"
@@ -113,11 +141,38 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd }) => {
               className="col-span-3"
             />
           </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="price" className="text-right">
+              Date
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[280px] justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon />
+                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div> */}
         </div>
 
         <DialogFooter>
           <Button onClick={handleAdd} type="button">
-            Add Service
+            Submit
           </Button>
         </DialogFooter>
       </DialogContent>

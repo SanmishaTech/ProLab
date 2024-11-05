@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const departmentSchema = new mongoose.Schema({
   name: { type: String },
   description: { type: String },
-
+  adn: { type: String },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 

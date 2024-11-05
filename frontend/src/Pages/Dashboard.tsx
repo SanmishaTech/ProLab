@@ -9,6 +9,9 @@ import DashboardPage from "@/Components/Registration/Dashbordcomp/Registertable"
 import Dashboarddepartment from "@/Components/Department/Registertable";
 import DashboardServices from "@/Components/Services/Registertable";
 import Dashboardparameter from "@/Components/Parameter/Registertable";
+import DashboardparameterGroup from "@/Components/ParameterGroup/Registertable";
+import DashboardContainer from "@/Components/Container/Registertable";
+import Specimen from "@/Components/Specimen/Registertable";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 const Dashboard = () => {
@@ -16,6 +19,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
+
   useEffect(() => {
     if (!User?._id) {
       navigate("/");
@@ -35,6 +39,9 @@ const Dashboard = () => {
         {location.pathname === "/holiday" && <Dashboardholiday />}
         {location.pathname === "/department" && <Dashboarddepartment />}
         {location.pathname === "/parameter" && <Dashboardparameter />}
+        {location.pathname === "/parametergroup" && <DashboardparameterGroup />}
+        {location.pathname === "/specimen" && <Specimen />}
+        {location.pathname === "/container" && <DashboardContainer />}
       </main>
     </div>
   );

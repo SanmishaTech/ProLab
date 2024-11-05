@@ -66,7 +66,7 @@ export default function Dashboard({
   tableColumns = {},
   AddItem,
   typeofschema,
-  tableData = [],
+  tableData = [] ?? [],
   onAddProduct = () => {},
   onExport = () => {},
   onFilterChange = () => {},

@@ -29,8 +29,18 @@ export const navItems: NavItem[] = [
     icon: "dashboardIcon",
   },
   {
+    title: "Specimen",
+    href: "/specimen",
+    icon: "dashboardIcon",
+  },
+  {
     title: "Parameters",
     href: "/parameter",
+    icon: "dashboardIcon",
+  },
+  {
+    title: "Parameter Group",
+    href: "/parametergroup",
     icon: "dashboardIcon",
   },
   {

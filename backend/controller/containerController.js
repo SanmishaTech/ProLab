@@ -1,15 +1,12 @@
-const Department = require("../Schema/department");
+const Department = require("../Schema/container");
 const mongoose = require("mongoose");
 
 const Servicescontroller = {
   createThread: async (req, res, next) => {
     try {
-      const { name, description, adn, userId } = req.body;
+      const { container } = req.body;
       const newService = new Department({
-        name,
-        description,
-        adn,
-        userId,
+        container,
       });
       const newServics = await newService.save();
       res.json({
@@ -47,14 +44,12 @@ const Servicescontroller = {
   updateThreads: async (req, res, next) => {
     try {
       const doctorId = req.params.departmentId;
-      const { name, description, adn, userId } = req.body;
+      const { container } = req.body;
 
       const newService = await Department.findByIdAndUpdate(
         doctorId,
         {
-          name,
-          description,
-          adn,
+          container,
         },
         { new: true }
       );
@@ -63,6 +58,19 @@ const Servicescontroller = {
       }
 
       res.json({ message: "Service updated successfully.", newService });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+  deleteThread: async (req, res, next) => {
+    try {
+      const doctorId = req.params.specimenId;
+      const newService = await Department.findByIdAndDelete(doctorId);
+      if (!newService) {
+        return res.status(404).json({ message: "Service not found." });
+      }
+
+      res.json({ message: "Service deleted successfully.", newService });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

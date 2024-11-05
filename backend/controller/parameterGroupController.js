@@ -1,19 +1,19 @@
-const Parameter = require("../Schema/parameters");
+const ParameterGroup = require("../Schema/department");
 const User = require("../Schema/userSchema");
 const mongoose = require("mongoose");
 
 const parameterController = {
   createThread: async (req, res, next) => {
     try {
-      const { description, sortby } = req.body;
-      const newService = new Parameter({
+      const { description, sortBy } = req.body;
+      const newService = new ParameterGroup({
         description,
-        sortby,
+        sortBy,
       });
       const newServics = await newService.save();
 
       res.json({
-        message: "parameter group created successfully",
+        message: "ParameterGroup group created successfully",
         service: newServics,
       });
     } catch (error) {
@@ -24,10 +24,10 @@ const parameterController = {
     try {
       //   const userId = req.params.userId;
       //   const usertobefound = new mongoose.Types.ObjectId(userId);
-      //   const patient = await Parameter.find({
+      //   const patient = await ParameterGroup.find({
       //     userId: usertobefound,
       //   });
-      const parameter = await Parameter.find();
+      const parameter = await ParameterGroup.find();
       res.status(200).json(parameter);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -36,7 +36,7 @@ const parameterController = {
   getServicesbyId: async (req, res, next) => {
     try {
       const patientId = req.params.patientId;
-      const services = await Parameter.findById(patientId);
+      const services = await ParameterGroup.findById(patientId);
       res.status(200).json(services);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -70,7 +70,7 @@ const parameterController = {
         },
       ];
 
-      const patient = await Parameter.aggregate(agg);
+      const patient = await ParameterGroup.aggregate(agg);
       res.status(200).json(patient);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -79,15 +79,13 @@ const parameterController = {
   updateThreads: async (req, res, next) => {
     try {
       const patientId = req.params.patientId;
-      const { name, age, phone, gender } = req.body;
+      const { description, sortBy } = req.body;
 
-      const newService = await Parameter.findByIdAndUpdate(
+      const newService = await ParameterGroup.findByIdAndUpdate(
         patientId,
         {
-          name,
-          age,
-          phone,
-          gender,
+          description,
+          sortBy,
         },
         { new: true }
       );

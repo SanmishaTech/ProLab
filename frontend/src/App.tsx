@@ -29,6 +29,9 @@ function App() {
         <Route path="/services" element={<Dashboard />} />
         <Route path="/department" element={<Dashboard />} />
         <Route path="/parameter" element={<Dashboard />} />
+        <Route path="/parametergroup" element={<Dashboard />} />
+        <Route path="/specimen" element={<Dashboard />} />
+        <Route path="/container" element={<Dashboard />} />
       </Routes>
     </>
   );

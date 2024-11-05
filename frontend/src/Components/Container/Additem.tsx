@@ -43,7 +43,8 @@ interface AddItemProps {
   }) => void;
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
+const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema, add }) => {
+  console.log("THis is add", add);
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
   const [SelectedValue, setSelectedValue] = useState("");
@@ -56,7 +57,8 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [formData, setFormData] = useState({});
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
-    await axios.post("/api/parameter", formData).then(() => {
+    console.log(formData);
+    await axios.post(`/api/container`, formData).then(() => {
       window.location.reload();
     });
     setName("");
@@ -64,7 +66,6 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
     // Reset form fields
     setHandleopen(false);
   };
-
   function capitalizeText(text) {
     return text.replace(/\b\w/g, (char) => char.toUpperCase());
   }
@@ -91,7 +92,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
               id="name"
               name={key}
               onChange={handleChange}
-              placeholder="Enter name"
+              // placeholder="Enter name"
               value={formData[key]}
               className="col-span-3"
             />
@@ -104,13 +105,13 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Parameters</Button>
+        <Button variant="outline">Add Container</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Parameters</DialogTitle>
+          <DialogTitle>Add New Container</DialogTitle>
           <DialogDescription>
-            Enter the details of the Parameters you want to add to the order.
+            Enter the details of the Container you want to add to the order.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

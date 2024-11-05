@@ -161,7 +161,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd }) => {
 
         <DialogFooter>
           <Button onClick={handleAdd} type="button">
-            Add Service
+            Submit
           </Button>
         </DialogFooter>
       </DialogContent>

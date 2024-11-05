@@ -13,15 +13,13 @@ export default function Dashboardholiday() {
   const [error, setError] = useState(null);
 
   const typeofschema = {
-    name: "String",
-    description: "String",
-    adn: "String",
+    specimen: "String",
   };
 
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/department/alldepartment`)
+      .get(`/api/specimen/allspecimen`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -36,17 +34,15 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Department" },
+        { label: "Specimen" },
       ],
       searchPlaceholder: "Search registrations...",
       userAvatar: "/path-to-avatar.jpg",
       tableColumns: {
-        title: "Department",
-        description: "Manage Department and view their details.",
+        title: "Specimen",
+        description: "Manage Specimen and view their details.",
         headers: [
-          { label: "Department", key: "one" },
-          { label: "description", key: "two" },
-          { label: "Alternate Description", key: "three" },
+          { label: "Specimen", key: "one" },
           { label: "Action", key: "action" },
         ],
         // tabs: [
@@ -103,30 +99,31 @@ export default function Dashboardholiday() {
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data?.map((item) => {
-    const services = item?.services || [];
-    const paidAmount = item?.paymentMode?.paidAmount || 0;
+  if (!data) return [];
+  const mappedTableData =
+    data &&
+    data?.map((item) => {
+      const services = item?.services || [];
+      const paidAmount = item?.paymentMode?.paidAmount || 0;
 
-    // Calculate the total service price based on each service's populated details.
-    const totalServicePrice = services.reduce((acc, service) => {
-      const servicePrice = service?.serviceId?.price || 0; // Replace 'price' with the actual field name for service price
-      return acc + servicePrice;
-    }, 0);
+      // Calculate the total service price based on each service's populated details.
+      const totalServicePrice = services.reduce((acc, service) => {
+        const servicePrice = service?.serviceId?.price || 0; // Replace 'price' with the actual field name for service price
+        return acc + servicePrice;
+      }, 0);
 
-    // Calculate balance amount based on total service price and paid amount.
-    const balanceAmount =
-      totalServicePrice - paidAmount > 0 ? totalServicePrice - paidAmount : 0;
-    return {
-      _id: item?._id,
-      one: item?.name || "Unknown",
-      two: item?.description || "Unit not provided",
-      three: item?.adn || "Field Type not provided",
-      edit: `department/update/${item?._id}`,
-      delete: `department/delete/${item?._id}`,
-      editfetch: `department/reference/${item?._id}`,
-      // two: item?. || "Unknown",
-    };
-  });
+      // Calculate balance amount based on total service price and paid amount.
+      const balanceAmount =
+        totalServicePrice - paidAmount > 0 ? totalServicePrice - paidAmount : 0;
+      return {
+        _id: item?._id,
+        one: item?.specimen || "Unknown",
+        edit: `specimen/update/${item?._id}`,
+        delete: `specimen/delete/${item?._id}`,
+        editfetch: `specimen/reference/${item?._id}`,
+        // two: item?. || "Unknown",
+      };
+    });
 
   return (
     <div className="p-4">

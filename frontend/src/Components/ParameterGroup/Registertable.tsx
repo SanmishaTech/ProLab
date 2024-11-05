@@ -13,15 +13,14 @@ export default function Dashboardholiday() {
   const [error, setError] = useState(null);
 
   const typeofschema = {
-    name: "String",
     description: "String",
-    adn: "String",
+    sortBy: "String",
   };
 
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/department/alldepartment`)
+      .get(`/api/parametergroup/allparametergroup`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -36,17 +35,16 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Department" },
+        { label: "Parameters" },
       ],
       searchPlaceholder: "Search registrations...",
       userAvatar: "/path-to-avatar.jpg",
       tableColumns: {
-        title: "Department",
-        description: "Manage Department and view their details.",
+        title: "Parameters",
+        description: "Manage Holiday and view their details.",
         headers: [
-          { label: "Department", key: "one" },
-          { label: "description", key: "two" },
-          { label: "Alternate Description", key: "three" },
+          { label: "description", key: "one" },
+          { label: "sortBy", key: "two" },
           { label: "Action", key: "action" },
         ],
         // tabs: [
@@ -118,12 +116,13 @@ export default function Dashboardholiday() {
       totalServicePrice - paidAmount > 0 ? totalServicePrice - paidAmount : 0;
     return {
       _id: item?._id,
-      one: item?.name || "Unknown",
-      two: item?.description || "Unit not provided",
-      three: item?.adn || "Field Type not provided",
-      edit: `department/update/${item?._id}`,
-      delete: `department/delete/${item?._id}`,
-      editfetch: `department/reference/${item?._id}`,
+      one: item?.description || "Unknown",
+      two: item?.sortBy || "Unit not provided",
+      three: item?.fieldType || "Field Type not provided",
+      add: `/parametergroup`,
+      edit: `/parametergroup/update/${item?._id}`,
+      delete: `/parametergroup/delete/${item?._id}`,
+      editfetch: `/parametergroup/reference/${item?._id}`,
       // two: item?. || "Unknown",
     };
   });
