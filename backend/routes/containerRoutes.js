@@ -9,4 +9,3 @@ router.put("/update/:departmentId", containerController.updateThreads);
 router.delete("/delete/:specimenId", containerController.deleteThread);
 
 module.exports = router;
-x[]

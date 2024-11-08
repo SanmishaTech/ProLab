@@ -19,8 +19,33 @@ export default function Dashboardholiday() {
   // Define the schema with various input types
   const typeofschema = {
     name: { type: "String", label: "Name" },
-    description: { type: "String", label: "Description" },
-    adn: { type: "String", label: "Alternate Description" },
+    code: { type: "String", label: "Test code" },
+    abbrivation: { type: "String", label: "Abbreviation" },
+    specimen: {
+      type: "Select",
+      label: "Specimen",
+      options: [
+        { value: "specimen1", label: "Specimen 1" },
+        { value: "specimen2", label: "Specimen 2" },
+        // Add more options as needed
+      ],
+    },
+    price: { type: "Number", label: "Price" },
+    department: {
+      type: "Select",
+      label: "Department",
+      options: [
+        { value: "department1", label: "Department 1" },
+        { value: "department2", label: "Department 2" },
+        // Add more options as needed
+      ],
+    },
+    profile: { type: "Checkbox", label: "Profile" },
+    machineInterface: { type: "Checkbox", label: "Machine Interface" },
+    sortOrder: { type: "Number", label: "Sort Order" },
+    isFormTest: { type: "Checkbox", label: "Is Form Test" },
+    isSinglePageReport: { type: "Checkbox", label: "Is Single Page Report" },
+
     // sortBy: { type: "Number", label: "Sort By" },
     // date: { type: "Date", label: "Date" },
     // category: {
@@ -40,7 +65,7 @@ export default function Dashboardholiday() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/parametergroup/allparametergroup`)
+      .get(`/api/testmaster/alltestmaster`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -63,9 +88,12 @@ export default function Dashboardholiday() {
         title: "Parameter Group",
         description: "Manage Parameter Group and view their details.",
         headers: [
-          { label: "name", key: "name" },
-          { label: "Description", key: "description" },
-          { label: "Alternate Description", key: "adn" },
+          { label: "Name", key: "name" },
+          { label: "Test code", key: "code" },
+          { label: "Specimen", key: "specimen" },
+          { label: "Price", key: "price" },
+          { label: "Department", key: "department" },
+          { label: "Profile", key: "profile" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -135,8 +163,10 @@ export default function Dashboardholiday() {
     return {
       _id: item?._id,
       name: item?.name || "Name not provided",
-      description: item?.description || "Description not provided",
-      adn: item?.adn || "Alternate name not provided",
+      code: item?.code || "Code not provided",
+      specimen: item?.specimen || "Specimen not provided",
+      price: item?.price || "Price not provided",
+      department: item?.department || "Department not provided",
       action: "actions", // Placeholder for action buttons
       // Additional fields can be added here
     };

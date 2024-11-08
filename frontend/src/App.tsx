@@ -32,6 +32,9 @@ function App() {
         <Route path="/parametergroup" element={<Dashboard />} />
         <Route path="/specimen" element={<Dashboard />} />
         <Route path="/container" element={<Dashboard />} />
+        <Route path="/testmaster" element={<Dashboard />} />
+        <Route path="/testlinkmaster" element={<Dashboard />} />
+        <Route path="/formcomponent" element={<Dashboard />} />
       </Routes>
     </>
   );

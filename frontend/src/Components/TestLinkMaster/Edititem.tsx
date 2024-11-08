@@ -1,6 +1,6 @@
 // components/AddItem.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -38,9 +38,14 @@ import axios from "axios";
 interface AddItemProps {
   onAdd: (item: any) => void;
   typeofschema: Record<string, any>;
+  editid: string;
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
+const AddItem: React.FC<AddItemProps> = ({
+  onAdd,
+  typeofschema = {},
+  editid,
+}) => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
@@ -49,19 +54,34 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (editid) {
+      axios
+        .get(`/api/testmasterlink/reference/${editid}`)
+        .then((res) => {
+          setFormData(res.data);
+        })
+        .catch((err) => {
+          console.error("Error fetching data:", err);
+        });
+    }
+    return () => {
+      setFormData({});
+      setHandleopen(false);
+    };
+  }, [editid]);
   const handleAdd = async () => {
     setLoading(true);
     try {
-      await axios.post(`/api/department`, formData);
-      onAdd(formData); // Notify parent component
-      setFormData({
-        name: formData.test.name,
-        description: formData.parameterGroup.name,
-        adn: formData.parameter.name,
-      });
-      setFormData({});
-      setHandleopen(false);
-      setError("");
+      await axios
+        .put(`/api/testmasterlink/update/${editid}`, formData)
+        .then((res) => {
+          console.log("ppaapppppp", res.data);
+          // onAdd(res.data.newService);
+          setFormData(res.data.newService);
+          setHandleopen(false);
+          setError("");
+        });
     } catch (err) {
       setError("Failed to add parameter group. Please try again.");
       console.error(err);
@@ -86,6 +106,10 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   // Dynamically render form fields based on the schema
   const addFields = (schema: Record<string, any>) => {
     const allFieldsToRender = [];
+
+    if (!schema || Object.keys(schema).length === 0) {
+      return <p>No fields available to display.</p>; // Or handle this case as you prefer
+    }
 
     Object.entries(schema).forEach(([key, value]) => {
       const fieldType = value.type;
@@ -175,10 +199,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
               </Label>
               <Select onValueChange={(value) => handleChange(key, value)}>
                 <SelectTrigger className="col-span-3">
-                  <SelectValue
-                    placeholder={`Select ${label.toLowerCase()}`}
-                    value={formData[key] || ""}
-                  />
+                  <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -195,29 +216,23 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
           );
           break;
 
-        // Add this case in the addFields method
-        case "Checkbox":
-          allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor={key} className="text-right">
-                {label}
-              </Label>
-              <div className="col-span-3 flex items-center space-x-2">
-                <Checkbox
-                  id={key}
-                  checked={formData[key] || false}
-                  onCheckedChange={(checked) => handleChange(key, checked)}
-                />
-                <label
-                  htmlFor={key}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {label}
-                </label>
-              </div>
-            </div>
-          );
-          break;
+        // case "Checkbox":
+        //   allFieldsToRender.push(
+        //     <div
+        //       style={{ justifyContent: "space-evenly" }}
+        //       key={key}
+        //       className="flex items-center space-x-4"
+        //     >
+        //       <Label htmlFor={key}>{label}</Label>
+
+        //       <Checkbox
+        //         id={key}
+        //         checked={formData[key] || false}
+        //         onCheckedChange={(checked) => handleChange(key, checked)}
+        //       />
+        //     </div>
+        //   );
+        //   break;
 
         // Add more cases for different field types as needed
 
@@ -233,13 +248,15 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Parameter Group</Button>
+        <Button variant="ghost" className="w-full">
+          Edit
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Parameter Group</DialogTitle>
+          <DialogTitle>Edit item</DialogTitle>
           <DialogDescription>
-            Enter the details of the Parameter Group you want to add.
+            Enter the details of the item you want to edit.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

@@ -1,15 +1,34 @@
-const Department = require("../Schema/department");
+const Department = require("../Schema/testMaster");
 const mongoose = require("mongoose");
 
 const Servicescontroller = {
   createThread: async (req, res, next) => {
     try {
-      const { name, description, adn, userId } = req.body;
+      const {
+        name,
+        code,
+        Abbrivation,
+        specimen,
+        price,
+        department,
+        profile,
+        machineInterface,
+        sortOrder,
+        isFormTest,
+        isSinglePageReport,
+      } = req.body;
       const newService = new Department({
         name,
-        description,
-        adn,
-        userId,
+        code,
+        Abbrivation,
+        specimen,
+        price,
+        department,
+        profile,
+        machineInterface,
+        sortOrder,
+        isFormTest,
+        isSinglePageReport,
       });
       const newServics = await newService.save();
       res.json({
@@ -37,7 +56,7 @@ const Servicescontroller = {
   },
   getServicesbyId: async (req, res, next) => {
     try {
-      const doctorId = req.params.referenceId;
+      const doctorId = req.params.testmasterId;
       const services = await Department.findById(doctorId);
       res.status(200).json(services);
     } catch (error) {
@@ -46,15 +65,35 @@ const Servicescontroller = {
   },
   updateThreads: async (req, res, next) => {
     try {
-      const doctorId = req.params.departmentId;
-      const { name, description, adn, userId } = req.body;
+      const doctorId = req.params.testmasterId;
+      const {
+        name,
+        code,
+        Abbrivation,
+        specimen,
+        price,
+        department,
+        profile,
+        machineInterface,
+        sortOrder,
+        isFormTest,
+        isSinglePageReport,
+      } = req.body;
 
       const newService = await Department.findByIdAndUpdate(
         doctorId,
         {
           name,
-          description,
-          adn,
+          code,
+          Abbrivation,
+          specimen,
+          price,
+          department,
+          profile,
+          machineInterface,
+          sortOrder,
+          isFormTest,
+          isSinglePageReport,
         },
         { new: true }
       );
@@ -63,6 +102,19 @@ const Servicescontroller = {
       }
 
       res.json({ message: "Service updated successfully.", newService });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+  deleteThread: async (req, res, next) => {
+    try {
+      const doctorId = req.params.testmasterId;
+      const newService = await Department.findByIdAndDelete(doctorId);
+      if (!newService) {
+        return res.status(404).json({ message: "Service not found." });
+      }
+
+      res.json({ message: "Service deleted successfully.", newService });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

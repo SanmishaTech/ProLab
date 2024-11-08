@@ -22,6 +22,8 @@ var ParameterRoutes = require("./routes/parameterRoutes");
 var ParameterGroupRoutes = require("./routes/parameterGroup");
 var SpecimenRoutes = require("./routes/specimenRoutes");
 var ContainerRoutes = require("./routes/containerRoutes");
+var TestMasterRoutes = require("./routes/TestMasterRoutes");
+var TestLinkMaster = require("./routes/testlinkmasterRoutes");
 
 var app = express();
 const corsOptions = {
@@ -55,6 +57,8 @@ app.use("/api/parameter", ParameterRoutes);
 app.use("/api/parametergroup", ParameterGroupRoutes);
 app.use("/api/specimen", SpecimenRoutes);
 app.use("/api/container", ContainerRoutes);
+app.use("/api/testmaster", TestMasterRoutes);
+app.use("/api/testmasterlink", TestLinkMaster);
 
 app.use(express.static(path.join(__dirname, "./dist")));
 

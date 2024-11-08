@@ -3,10 +3,9 @@
 const mongoose = require("mongoose");
 
 const departmentSchema = new mongoose.Schema({
-  name: { type: String },
+  name: { type: String, required: true },
   description: { type: String },
-  adn: { type: String },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  adn: { type: String, required: true },
 });
 
 const Department = mongoose.model("Department", departmentSchema);

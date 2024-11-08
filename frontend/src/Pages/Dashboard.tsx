@@ -11,6 +11,9 @@ import DashboardServices from "@/Components/Services/Registertable";
 import Dashboardparameter from "@/Components/Parameter/Registertable";
 import DashboardparameterGroup from "@/Components/ParameterGroup/Registertable";
 import DashboardContainer from "@/Components/Container/Registertable";
+import DashboardTestMaster from "@/Components/TestMaster/Registertable";
+import DashboardTestLinkMaster from "@/Components/TestLinkMaster/Registertable";
+import TestCard from "@/Pages/TestCard";
 import Specimen from "@/Components/Specimen/Registertable";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
@@ -42,6 +45,9 @@ const Dashboard = () => {
         {location.pathname === "/parametergroup" && <DashboardparameterGroup />}
         {location.pathname === "/specimen" && <Specimen />}
         {location.pathname === "/container" && <DashboardContainer />}
+        {location.pathname === "/testmaster" && <DashboardTestMaster />}
+        {location.pathname === "/testlinkmaster" && <DashboardTestLinkMaster />}
+        {location.pathname === "/formcomponent" && <TestCard />}
       </main>
     </div>
   );

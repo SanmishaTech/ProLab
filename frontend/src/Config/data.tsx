@@ -22,10 +22,19 @@ export const navItems: NavItem[] = [
       },
     ],
   },
-
   {
-    title: "Services",
-    href: "/services",
+    title: "Test Master",
+    href: "/testmaster",
+    icon: "dashboardIcon",
+  },
+  {
+    title: "Test Link Master",
+    href: "/testlinkmaster",
+    icon: "dashboardIcon",
+  },
+  {
+    title: "Container",
+    href: "/container",
     icon: "dashboardIcon",
   },
   {

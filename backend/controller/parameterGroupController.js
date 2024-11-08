@@ -1,14 +1,15 @@
-const ParameterGroup = require("../Schema/department");
+const ParameterGroup = require("../Schema/parameterGroup");
 const User = require("../Schema/userSchema");
 const mongoose = require("mongoose");
 
 const parameterController = {
   createThread: async (req, res, next) => {
     try {
-      const { description, sortBy } = req.body;
+      const { name, description, adn } = req.body;
       const newService = new ParameterGroup({
+        name,
         description,
-        sortBy,
+        adn,
       });
       const newServics = await newService.save();
 
@@ -35,7 +36,7 @@ const parameterController = {
   },
   getServicesbyId: async (req, res, next) => {
     try {
-      const patientId = req.params.patientId;
+      const patientId = req.params.parameterId;
       const services = await ParameterGroup.findById(patientId);
       res.status(200).json(services);
     } catch (error) {
@@ -78,14 +79,15 @@ const parameterController = {
   },
   updateThreads: async (req, res, next) => {
     try {
-      const patientId = req.params.patientId;
-      const { description, sortBy } = req.body;
+      const patientId = req.params.parameterId;
+      const { name, description, adn } = req.body;
 
       const newService = await ParameterGroup.findByIdAndUpdate(
         patientId,
         {
+          name,
           description,
-          sortBy,
+          adn,
         },
         { new: true }
       );

@@ -2,8 +2,9 @@
 const mongoose = require("mongoose");
 
 const parameterGroupSchema = new mongoose.Schema({
+  name: { type: String },
   description: { type: String },
-  sortBy: { type: Number },
+  adn: { type: String },
 });
 
 const ParameterGroup = mongoose.model("ParameterGroup", parameterGroupSchema);
