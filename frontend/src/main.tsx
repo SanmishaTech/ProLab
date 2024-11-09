@@ -24,7 +24,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <Provider store={store}>
         <React.StrictMode>
           <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-            {" "}
             <App />
           </ThemeProvider>
         </React.StrictMode>

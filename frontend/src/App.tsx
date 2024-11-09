@@ -34,7 +34,9 @@ function App() {
         <Route path="/container" element={<Dashboard />} />
         <Route path="/testmaster" element={<Dashboard />} />
         <Route path="/testlinkmaster" element={<Dashboard />} />
-        <Route path="/formcomponent" element={<Dashboard />} />
+        <Route path="/associatemaster" element={<Dashboard />} />
+        <Route path="/associatemaster/add" element={<Dashboard />} />
+        <Route path="/associatemaster/edit/:id" element={<Dashboard />} />
       </Routes>
     </>
   );

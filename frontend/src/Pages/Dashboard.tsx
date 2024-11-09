@@ -13,8 +13,10 @@ import DashboardparameterGroup from "@/Components/ParameterGroup/Registertable";
 import DashboardContainer from "@/Components/Container/Registertable";
 import DashboardTestMaster from "@/Components/TestMaster/Registertable";
 import DashboardTestLinkMaster from "@/Components/TestLinkMaster/Registertable";
-import TestCard from "@/Pages/TestCard";
+import DashboardAssociateMaster from "@/Components/AssociateMaster/Registertable";
 import Specimen from "@/Components/Specimen/Registertable";
+import TestCard from "@/Components/AssociateMaster/TestCard";
+import EditCard from "@/Components/AssociateMaster/Edittestcard";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 const Dashboard = () => {
@@ -47,7 +49,13 @@ const Dashboard = () => {
         {location.pathname === "/container" && <DashboardContainer />}
         {location.pathname === "/testmaster" && <DashboardTestMaster />}
         {location.pathname === "/testlinkmaster" && <DashboardTestLinkMaster />}
-        {location.pathname === "/formcomponent" && <TestCard />}
+        {location.pathname === "/associatemaster" && (
+          <DashboardAssociateMaster />
+        )}
+        {location.pathname === "/associatemaster/add" && <TestCard />}
+        {/\/associatemaster\/edit\/\d+/.test(location.pathname) && (
+          <EditCard />
+        )}{" "}
       </main>
     </div>
   );

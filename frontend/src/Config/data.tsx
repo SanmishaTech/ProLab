@@ -28,6 +28,11 @@ export const navItems: NavItem[] = [
     icon: "dashboardIcon",
   },
   {
+    title: "Associate Master",
+    href: "/associatemaster",
+    icon: "dashboardIcon",
+  },
+  {
     title: "Test Link Master",
     href: "/testlinkmaster",
     icon: "dashboardIcon",

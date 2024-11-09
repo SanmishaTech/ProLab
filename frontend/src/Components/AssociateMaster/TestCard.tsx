@@ -1,12 +1,11 @@
 "use client";
 
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { MoveLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "./Use-toast";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -34,10 +33,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import axios from "axios";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+
 import { Separator } from "@/components/ui/separator";
 
 const profileFormSchema = z.object({
-  departmentType: z.string().optional(),
+  associateType: z.string().optional(),
   salutation: z.string().optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
@@ -118,9 +121,7 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 // This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {
-  bio: "I own a computer.",
-};
+const defaultValues: Partial<ProfileFormValues> = {};
 
 function ProfileForm() {
   const form = useForm<ProfileFormValues>({
@@ -133,31 +134,34 @@ function ProfileForm() {
   //     name: "urls",
   //     control: form.control,
   //   });
+  const navigate = useNavigate();
 
-  function onSubmit(data: ProfileFormValues) {
-    console.log(data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
+  async function onSubmit(data: ProfileFormValues) {
+    // console.log("Sas", data);
+    console.log("ppappappa");
+    // Implement actual profile update logic here
+    await axios.post(`/api/associatemaster`, data).then((res) => {
+      console.log("ppappappa", res.data);
+      toast.success("Profile updated successfully");
+      navigate("/associatemaster");
     });
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8 pb-[2rem]"
+      >
         {" "}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
             className="flex-1"
             control={form.control}
-            name="departmentType"
+            name="associateType"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Department Type</FormLabel>
+                <FormLabel>Associate Type</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -165,7 +169,7 @@ function ProfileForm() {
                 >
                   <FormControl className="w-full">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department type" />
+                      <SelectValue placeholder="Select Associate type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -175,7 +179,7 @@ function ProfileForm() {
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  This is the type of department you are selecting.
+                  This is the type of Associate you are selecting.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -424,23 +428,31 @@ function ProfileForm() {
             )}
           />
         </div>
-        <Button type="submit">Update profile</Button>
+        <div className="flex justify-end w-full ">
+          <Button className="self-center mr-8" type="submit">
+            Update profile
+          </Button>
+        </div>
       </form>
     </Form>
   );
 }
 
 export default function SettingsProfilePage() {
+  const navigate = useNavigate();
   return (
     <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
-      <Button onClick={() => window.history.back()} className="ml-4 flex gap-2">
+      <Button
+        onClick={() => navigate("/associatemaster")}
+        className="ml-4 flex gap-2 m-8 mb-4"
+      >
         <MoveLeft className="w-5" />
         Back
       </Button>
 
       <CardHeader>
-        <CardTitle>Profile</CardTitle>
-        <CardDescription>Deploy your new project in one-click.</CardDescription>
+        <CardTitle>Associate Master</CardTitle>
+        <CardDescription>Associate master</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6 ">
