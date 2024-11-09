@@ -15,6 +15,7 @@ import DashboardTestMaster from "@/Components/TestMaster/Registertable";
 import DashboardTestLinkMaster from "@/Components/TestLinkMaster/Registertable";
 import DashboardAssociateMaster from "@/Components/AssociateMaster/Registertable";
 import Specimen from "@/Components/Specimen/Registertable";
+import DashboardTestcard from "@/Components/TestMaster/Edittestcard";
 import TestCard from "@/Components/AssociateMaster/TestCard";
 import EditCard from "@/Components/AssociateMaster/Edittestcard";
 import { useNavigate } from "react-router-dom";
@@ -48,6 +49,7 @@ const Dashboard = () => {
         {location.pathname === "/specimen" && <Specimen />}
         {location.pathname === "/container" && <DashboardContainer />}
         {location.pathname === "/testmaster" && <DashboardTestMaster />}
+        {location.pathname === "/testmaster/add" && <DashboardTestcard />}
         {location.pathname === "/testlinkmaster" && <DashboardTestLinkMaster />}
         {location.pathname === "/associatemaster" && (
           <DashboardAssociateMaster />

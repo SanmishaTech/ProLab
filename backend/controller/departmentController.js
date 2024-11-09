@@ -67,5 +67,18 @@ const Servicescontroller = {
       res.status(500).json({ error: error.message });
     }
   },
+  deleteThread: async (req, res, next) => {
+    try {
+      const doctorId = req.params.doctorId;
+      const newService = await Department.findByIdAndDelete(doctorId);
+      if (!newService) {
+        return res.status(404).json({ message: "Service not found." });
+      }
+
+      res.json({ message: "Service deleted successfully.", newService });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
 };
 module.exports = Servicescontroller;

@@ -89,13 +89,13 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Test Link Master" },
+        { label: "Department Master" },
       ],
-      searchPlaceholder: "Search Test Link Master...",
+      searchPlaceholder: "Search Department Master...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Test Link Master",
-        description: "Manage Test Link Master and view their details.",
+        title: "Department Master",
+        description: "Manage Department Master and view their details.",
         headers: [
           { label: "name", key: "name" },
           { label: "description", key: "description" },
@@ -173,7 +173,7 @@ export default function Dashboardholiday() {
           name: item?.name || "Name not provided",
           description: item?.description || "Description not provided",
           adn: item?.adn || "Alternate Description not provided",
-
+          delete: `/department/delete/${item?._id}`,
           action: "actions", // Placeholder for action buttons
           // Additional fields can be added here
         };

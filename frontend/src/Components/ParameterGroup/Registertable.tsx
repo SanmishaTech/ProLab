@@ -137,6 +137,7 @@ export default function Dashboardholiday() {
       name: item?.name || "Name not provided",
       description: item?.description || "Description not provided",
       adn: item?.adn || "Alternate name not provided",
+      delete: `/parametergroup/delete/${item?._id}`,
       action: "actions", // Placeholder for action buttons
       // Additional fields can be added here
     };

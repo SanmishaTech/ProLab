@@ -80,13 +80,13 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Parameter Group" },
+        { label: "Test  Master" },
       ],
-      searchPlaceholder: "Search Parameter Group...",
+      searchPlaceholder: "Search Test  Master...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Parameter Group",
-        description: "Manage Parameter Group and view their details.",
+        title: "Test  Master",
+        description: "Manage Test  Master and view their details.",
         headers: [
           { label: "Name", key: "name" },
           { label: "Test code", key: "code" },
@@ -111,7 +111,7 @@ export default function Dashboardholiday() {
 
   // Handlers for actions
   const handleAddProduct = () => {
-    console.log("Add Parameter Group clicked");
+    console.log("Add Test  Master clicked");
     // The AddItem component now handles the modal, so no additional logic needed here
   };
 
@@ -134,7 +134,7 @@ export default function Dashboardholiday() {
       // Implement delete functionality, possibly with confirmation
       // Example:
       /*
-      if (confirm("Are you sure you want to delete this parameter group?")) {
+      if (confirm("Are you sure you want to delete this Test  Master?")) {
         axios.delete(`/api/parametergroup/delete/${product._id}`)
           .then(() => {
             // Refresh data

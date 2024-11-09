@@ -81,6 +81,7 @@ const AddItem: React.FC<AddItemProps> = ({
           setFormData(res.data);
           setHandleopen(false);
           setError("");
+          window.location.reload();
         });
     } catch (err) {
       setError("Failed to add parameter group. Please try again.");

@@ -7,36 +7,36 @@ export const navItems: NavItem[] = [
     icon: "dashboardIcon",
   },
 
-  {
-    title: "Registration",
-    href: "/registrationlist",
-    icon: "settingsIcon",
-    children: [
-      {
-        title: "Registration",
-        href: "/registration",
-      },
-      {
-        title: "All Registration",
-        href: "/registrationlist",
-      },
-    ],
-  },
-  {
-    title: "Test Master",
-    href: "/testmaster",
-    icon: "dashboardIcon",
-  },
+  // {
+  //   title: "Registration",
+  //   href: "/registrationlist",
+  //   icon: "settingsIcon",
+  //   children: [
+  //     {
+  //       title: "Registration",
+  //       href: "/registration",
+  //     },
+  //     {
+  //       title: "All Registration",
+  //       href: "/registrationlist",
+  //     },
+  //   ],
+  // },
+  // {
+  //   title: "Test Master",
+  //   href: "/testmaster",
+  //   icon: "dashboardIcon",
+  // },
   {
     title: "Associate Master",
     href: "/associatemaster",
     icon: "dashboardIcon",
   },
-  {
-    title: "Test Link Master",
-    href: "/testlinkmaster",
-    icon: "dashboardIcon",
-  },
+  // {
+  //   title: "Test Link Master",
+  //   href: "/testlinkmaster",
+  //   icon: "dashboardIcon",
+  // },
   {
     title: "Container",
     href: "/container",
@@ -61,28 +61,6 @@ export const navItems: NavItem[] = [
     title: "Department",
     href: "/department",
     icon: "dashboardIcon",
-  },
-  {
-    title: "Holiday",
-    href: "/holiday",
-    icon: "dashboardIcon",
-  },
-
-  {
-    title: "Reports",
-    href: "/reports",
-    icon: "reportsIcon",
-    children: [
-      {
-        title: "Sales",
-        href: "/reports/sales",
-      },
-      {
-        title: "Expenses",
-        href: "/reports/expenses",
-        disabled: true,
-      },
-    ],
   },
 ];
 

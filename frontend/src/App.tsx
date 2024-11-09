@@ -5,6 +5,7 @@ import Login from "@/Packages/Login/Login";
 import Dashboard from "./Pages/Dashboard";
 import { Toaster, toast } from "sonner";
 import { useLocation } from "react-router-dom";
+import { Editor } from "@/Components/Editor/Editor";
 import Navbar from "@/Navbar/Navbarcomp";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -33,10 +34,12 @@ function App() {
         <Route path="/specimen" element={<Dashboard />} />
         <Route path="/container" element={<Dashboard />} />
         <Route path="/testmaster" element={<Dashboard />} />
+        <Route path="/testmaster/add" element={<Dashboard />} />
         <Route path="/testlinkmaster" element={<Dashboard />} />
         <Route path="/associatemaster" element={<Dashboard />} />
         <Route path="/associatemaster/add" element={<Dashboard />} />
         <Route path="/associatemaster/edit/:id" element={<Dashboard />} />
+        <Route path="/editor" element={<Editor />} />
       </Routes>
     </>
   );

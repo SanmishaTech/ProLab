@@ -58,7 +58,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
       setHandleopen(false);
       setError("");
     } catch (err) {
-      setError("Failed to add parameter group. Please try again.");
+      setError("Failed to add Test  Master. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -228,13 +228,13 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Parameter Group</Button>
+        <Button variant="outline">Add Test Master</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Parameter Group</DialogTitle>
+          <DialogTitle>Add New Test Master</DialogTitle>
           <DialogDescription>
-            Enter the details of the Parameter Group you want to add.
+            Enter the details of the Test Master you want to add.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
