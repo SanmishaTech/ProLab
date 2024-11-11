@@ -39,7 +39,6 @@ function App() {
         <Route path="/associatemaster" element={<Dashboard />} />
         <Route path="/associatemaster/add" element={<Dashboard />} />
         <Route path="/associatemaster/edit/:id" element={<Dashboard />} />
-        <Route path="/editor" element={<Editor />} />
       </Routes>
     </>
   );

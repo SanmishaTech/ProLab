@@ -15,7 +15,7 @@ import DashboardTestMaster from "@/Components/TestMaster/Registertable";
 import DashboardTestLinkMaster from "@/Components/TestLinkMaster/Registertable";
 import DashboardAssociateMaster from "@/Components/AssociateMaster/Registertable";
 import Specimen from "@/Components/Specimen/Registertable";
-import DashboardTestcard from "@/Components/TestMaster/Edittestcard";
+import DashboardTestcard from "@/Components/Testmaster/TestCard";
 import TestCard from "@/Components/AssociateMaster/TestCard";
 import EditCard from "@/Components/AssociateMaster/Edittestcard";
 import { useNavigate } from "react-router-dom";

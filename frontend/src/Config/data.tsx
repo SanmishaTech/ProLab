@@ -22,11 +22,11 @@ export const navItems: NavItem[] = [
   //     },
   //   ],
   // },
-  // {
-  //   title: "Test Master",
-  //   href: "/testmaster",
-  //   icon: "dashboardIcon",
-  // },
+  {
+    title: "Test Master",
+    href: "/testmaster",
+    icon: "dashboardIcon",
+  },
   {
     title: "Associate Master",
     href: "/associatemaster",
