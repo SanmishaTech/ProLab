@@ -47,8 +47,7 @@ const profileFormSchema = z.object({
   code: z.string().optional(),
   abbrivation: z.string().optional(),
   specimen: z.string().optional(),
-  price: z.number().optional(),
-
+  price: z.any().optional(),
   department: z.string().optional(),
   profile: z.boolean().optional(),
   isFormTest: z.boolean().optional(),
