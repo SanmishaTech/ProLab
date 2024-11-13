@@ -26,6 +26,8 @@ export default {
         secondarylight: "hsl(var(--secondary)/0.4)",
         accentmedium: "hsl(var(--accent)/0.6)",
         accentlight: "hsl(var(--accent)/0.4)",
+        iconActive: "hsl(var(--iconextremedark))",
+        iconDark: "hsl(var(--icondark))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

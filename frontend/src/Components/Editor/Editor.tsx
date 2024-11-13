@@ -21,7 +21,7 @@ export const Editor = ({ placeholder, readonly, onChange, onBlur, value }) => {
       config={config}
       tabIndex={1}
       onBlur={onBlur} // preferred to use only this option to update the content for performance reasons
-      onChange={onChange}
+      // onChange={onChange}
     />
   );
 };

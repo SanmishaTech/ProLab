@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 const AddItem = () => {
   const navigate = useNavigate();
   const handleAdd = () => {
-    navigate("/associatemaster/add");
+    navigate("/testmaster/add");
   };
   return (
     <Button onClick={handleAdd} variant="outline">
@@ -23,7 +23,7 @@ const AddItem = () => {
 const Edititem = (id: string) => {
   const navigate = useNavigate();
   const handleAdd = () => {
-    navigate(`/associatemaster/edit/${id?.id}`);
+    navigate(`/testmaster/edit/${id?.id}`);
   };
   return (
     <Button onClick={handleAdd} variant="ghost" className="w-full">
@@ -104,7 +104,7 @@ export default function Dashboardholiday() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/associatemaster/allassociates`)
+      .get(`/api/testmaster/alltestmaster`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -119,18 +119,17 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Associate Master" },
+        { label: "Test  Master" },
       ],
-      searchPlaceholder: "Search Associate Master...",
+      searchPlaceholder: "Search Test Master...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Associate Master",
-        description: "Manage Associate Master and view their details.",
+        title: "Test Master",
+        description: "Manage Test Master and view their details.",
         headers: [
-          { label: "Associate Type", key: "associateType" },
-          { label: "First Name", key: "firstName" },
-          { label: "Last Name", key: "lastName" },
-          { label: "Mobile", key: "mobile" },
+          { label: "Test Name", key: "name" },
+          { label: "Test code", key: "code" },
+          { label: "Test price", key: "price" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -201,11 +200,10 @@ export default function Dashboardholiday() {
         console.log("This is item", item);
         return {
           _id: item?._id,
-          associateType: item?.associateType || "Associate Type not provided",
-          firstName: item?.firstName || "First Name not provided",
-          lastName: item?.lastName || "Last Name not provided",
-          mobile: item?.mobile || "Mobile not provided",
-          delete: `/associatemaster/delete/${item?._id}`,
+          name: item?.name || "Associate Type not provided",
+          code: item?.code || "First Name not provided",
+          price: item?.price || "Last Name not provided",
+          delete: `/testmaster/delete/${item?._id}`,
           action: "actions", // Placeholder for action buttons
           // Additional fields can be added here
         };

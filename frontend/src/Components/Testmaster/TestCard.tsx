@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -44,14 +44,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 const profileFormSchema = z.object({
   template: z.string().optional(),
   name: z.string().optional(),
-  testCode: z.string().optional(),
+  code: z.string().optional(),
   abbrivation: z.string().optional(),
   specimen: z.string().optional(),
-  prerequisite: z.string().optional(),
-  price: z.number().optional(),
+  price: z.string().optional(),
   department: z.string().optional(),
-  consentForm: z.string().optional(),
-  interpretedText: z.string().optional(),
   profile: z.boolean().optional(),
   isFormTest: z.boolean().optional(),
   sortOrder: z.number().optional(),
@@ -73,20 +70,48 @@ function ProfileForm() {
   const [content, setContent] = useState("");
   const [consent, setconsent] = useState("");
   const [interpretation, setinterpretation] = useState("");
+  const [specimen, setSpecimen] = useState<any[]>([]);
+  const [department, setDepartment] = useState<any[]>([]);
   //   const { fields, append } = useFieldArray({
   //     name: "urls",
   //     control: form.control,
   //   });
+
+  useEffect(() => {
+    const fetchSpecimen = async () => {
+      try {
+        const response = await axios.get(`/api/specimen/allspecimen`);
+        console.log(response.data);
+        setSpecimen(response.data);
+      } catch (error) {
+        console.error("Error fetching specimen:", error);
+      }
+    };
+    const fetchDepartment = async () => {
+      try {
+        const response = await axios.get(`/api/department/alldepartment`);
+        console.log(response.data);
+        setDepartment(response.data);
+      } catch (error) {
+        console.error("Error fetching department:", error);
+      }
+    };
+    fetchDepartment();
+    fetchSpecimen();
+  }, []);
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
     // console.log("Sas", data);
     console.log("ppappappa");
+    data.prerquisite = content;
+    data.consentForm = consent;
+    data.interpretedText = interpretation;
     // Implement actual profile update logic here
-    await axios.post(`/api/associatemaster`, data).then((res) => {
+    await axios.post(`/api/testmaster`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Profile updated successfully");
-      navigate("/associatemaster");
+      navigate("/testmaster");
     });
   }
 
@@ -104,7 +129,7 @@ function ProfileForm() {
             name="template"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Associate Type</FormLabel>
+                <FormLabel>Template</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -144,7 +169,7 @@ function ProfileForm() {
           />
           <FormField
             control={form.control}
-            name="testCode"
+            name="code"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Test Code</FormLabel>
@@ -190,11 +215,11 @@ function ProfileForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="china">China</SelectItem>
-                    <SelectItem value="india">India</SelectItem>
-                    <SelectItem value="usa">USA</SelectItem>
-                    <SelectItem value="uk">UK</SelectItem>
-                    <SelectItem value="france">France</SelectItem>
+                    {specimen?.map((specimen) => (
+                      <SelectItem key={specimen._id} value={specimen._id}>
+                        {specimen.specimen}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormDescription>What is your country?</FormDescription>
@@ -243,10 +268,11 @@ function ProfileForm() {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="china">China</SelectItem>
-                    <SelectItem value="india">India</SelectItem>
-                    <SelectItem value="usa">USA</SelectItem>
-                    <SelectItem value="uk">UK</SelectItem>
-                    <SelectItem value="france">France</SelectItem>
+                    {department?.map((department) => (
+                      <SelectItem key={department._id} value={department._id}>
+                        {department.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormDescription>
@@ -269,26 +295,7 @@ function ProfileForm() {
             onBlur={setinterpretation}
           />
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 max-w-full p-4">
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                {/* <FormLabel>Address</FormLabel> */}
-                <FormControl className="flex items-center gap-2">
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormDescription>What is your name of Address</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
+        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
             control={form.control}
             name="address"
@@ -362,7 +369,7 @@ function ProfileForm() {
               </FormItem>
             )}
           />
-        </div>
+        </div> */}
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
             Update profile
@@ -378,7 +385,7 @@ export default function SettingsProfilePage() {
   return (
     <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
       <Button
-        onClick={() => navigate("/associatemaster")}
+        onClick={() => navigate("/testmaster")}
         className="ml-4 flex gap-2 m-8 mb-4"
       >
         <MoveLeft className="w-5" />
@@ -386,8 +393,8 @@ export default function SettingsProfilePage() {
       </Button>
 
       <CardHeader>
-        <CardTitle>Associate Master</CardTitle>
-        <CardDescription>Associate master</CardDescription>
+        <CardTitle>Test Master</CardTitle>
+        <CardDescription>Test master</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6 ">

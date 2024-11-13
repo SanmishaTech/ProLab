@@ -23,6 +23,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Editor } from "@/Components/Editor/Editor";
+
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -34,117 +36,115 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-
+import { Checkbox } from "@/components/ui/checkbox";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 const profileFormSchema = z.object({
-  associateType: z.string().optional(),
-  salutation: z.string().optional(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  organization: z
-    .string()
-    .min(2, {
-      message: "Organization must be at least 2 characters.",
-    })
-    .max(30, {
-      message: "Organization must not be longer than 30 characters.",
-    }),
-  country: z
-    .string()
-    .min(2, {
-      message: "Country must be at least 2 characters.",
-    })
-    .max(30, {
-      message: "Country must not be longer than 30 characters.",
-    }),
-  state: z
-    .string()
-    .min(2, {
-      message: "State must be at least 2 characters.",
-    })
-    .max(30, {
-      message: "State must not be longer than 30 characters.",
-    }),
-  city: z
-    .string()
-    .min(2, {
-      message: "City must be at least 2 characters.",
-    })
-    .max(30, {
-      message: "City must not be longer than 30 characters.",
-    }),
-  address: z
-    .string()
-    .min(2, {
-      message: "Address must be at least 2 characters.",
-    })
-    .max(30, {
-      message: "Address must not be longer than 30 characters.",
-    }),
-  telephone: z
-    .string()
-    .min(2, {
-      message: "Telephone must be at least 2 characters.",
-    })
-    .max(30, {
-      message: "Telephone must not be longer than 30 characters.",
-    }),
-  mobile: z
-    .string()
-    .min(2, {
-      message: "Mobile must be at least 2 characters.",
-    })
-    .max(30, {
-      message: "Mobile must not be longer than 30 characters.",
-    }),
-  email: z
-    .string()
-    .min(2, {
-      message: "Email must be at least 2 characters.",
-    })
-    .max(30, {
-      message: "Email must not be longer than 30 characters.",
-    }),
-  degree: z
-    .string()
-    .min(2, {
-      message: "Degree must be at least 2 characters.",
-    })
-    .max(30, {
-      message: "Degree must not be longer than 30 characters.",
-    }),
+  template: z.string().optional(),
+  name: z.string().optional(),
+  code: z.string().optional(),
+  abbrivation: z.string().optional(),
+  specimen: z.string().optional(),
+  price: z.string().optional(),
+  department: z.string().optional(),
+  profile: z.boolean().optional(),
+  isFormTest: z.boolean().optional(),
+  sortOrder: z.number().optional(),
+  machineInterface: z.boolean().optional(),
+  isSinglePageReport: z.boolean().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 // This can come from your database or API.
+const defaultValues: Partial<ProfileFormValues> = {};
 
 function ProfileForm({ formData }) {
-  console.log("This is formData", formData);
-  const defaultValues: Partial<ProfileFormValues> = formData;
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
     mode: "onChange",
   });
   const { id } = useParams();
-
   const { reset } = form;
 
-  // Reset form values when formData changes
+  const [content, setContent] = useState("");
+  const [consent, setconsent] = useState("");
+  const [interpretation, setinterpretation] = useState("");
+  const [specimen, setSpecimen] = useState([]);
+  const [department, setDepartment] = useState([]);
+
+  useEffect(() => {
+    const fetchSpecimen = async () => {
+      try {
+        const response = await axios.get(`/api/specimen/allspecimen`);
+        console.log(response.data);
+        setSpecimen(response.data);
+      } catch (error) {
+        console.error("Error fetching specimen:", error);
+      }
+    };
+    const fetchDepartment = async () => {
+      try {
+        const response = await axios.get(`/api/department/alldepartment`);
+        console.log(response.data);
+        setDepartment(response.data);
+      } catch (error) {
+        console.error("Error fetching department:", error);
+      }
+    };
+    fetchDepartment();
+    fetchSpecimen();
+  }, []);
+
+  useEffect(() => {
+    const fetchSpecimen = async () => {
+      try {
+        const response = await axios.get(`/api/specimen/allspecimen`);
+        console.log(response.data);
+        setSpecimen(response.data);
+      } catch (error) {
+        console.error("Error fetching specimen:", error);
+      }
+    };
+    const fetchDepartment = async () => {
+      try {
+        const response = await axios.get(`/api/department/alldepartment`);
+        console.log(response.data);
+        setDepartment(response.data);
+      } catch (error) {
+        console.error("Error fetching department:", error);
+      }
+    };
+    fetchDepartment();
+    fetchSpecimen();
+  }, []);
+
   useEffect(() => {
     reset(formData);
+    setContent(formData?.prerquisite);
+    setconsent(formData?.consentForm);
+    setinterpretation(formData?.interpretedText);
   }, [formData, reset]);
-
+  //   const { fields, append } = useFieldArray({
+  //     name: "urls",
+  //     control: form.control,
+  //   });
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
     // console.log("Sas", data);
-    await axios.put(`/api/associatemaster/update/${id}`, data).then((res) => {
+    console.log("ppappappa");
+    data.prerequisite = content;
+    data.consentForm = consent;
+    data.interpretedText = interpretation;
+    // Implement actual profile update logic here
+    await axios.put(`/api/testmaster/update/${id}`, data).then((res) => {
+      console.log("ppappappa", res.data);
       toast.success("Profile updated successfully");
-      navigate("/associatemaster");
+      navigate("/testmaster");
     });
   }
 
@@ -159,18 +159,17 @@ function ProfileForm({ formData }) {
           <FormField
             className="flex-1"
             control={form.control}
-            name="associateType"
+            name="template"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Associate Type</FormLabel>
+                <FormLabel>Template</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value}
+                  defaultValue={field.value}
                   className="w-full"
                 >
                   <FormControl className="w-full">
-                    <SelectTrigger value={field.value}>
-                      {" "}
+                    <SelectTrigger>
                       <SelectValue placeholder="Select Associate type" />
                     </SelectTrigger>
                   </FormControl>
@@ -188,60 +187,43 @@ function ProfileForm({ formData }) {
             )}
           />
           <FormField
-            className="flex-1"
             control={form.control}
-            name="salutation"
+            name="name"
             render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>select Salutation</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  className="w-full"
-                  value={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="baby">Baby</SelectItem>
-                    <SelectItem value="dr">Dr</SelectItem>
-                    <SelectItem value="mr">Mr</SelectItem>
-                    <SelectItem value="mrs">Mrs</SelectItem>
-                    <SelectItem value="ms">Ms</SelectItem>
-                    <SelectItem value="lab">Lab</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription>How should we address you?</FormDescription>
+              <FormItem>
+                <FormLabel>Test Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Test name..." {...field} />
+                </FormControl>
+                <FormDescription>What is your Test name?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="firstName"
+            name="code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First Name</FormLabel>
+                <FormLabel>Test Code</FormLabel>
                 <FormControl>
-                  <Input placeholder="First name..." {...field} />
+                  <Input placeholder="Test code..." {...field} />
                 </FormControl>
-                <FormDescription>What is your first name?</FormDescription>
+                <FormDescription>What is your Test Code?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="lastName"
+            name="abbrivation"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Last Name</FormLabel>
+                <FormLabel>Abbrivation</FormLabel>
                 <FormControl>
-                  <Input placeholder="Last name..." {...field} />
+                  <Input placeholder="abbrivation..." {...field} />
                 </FormControl>
-                <FormDescription>What is your last name?</FormDescription>
+                <FormDescription>What is abbrivation?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -249,17 +231,53 @@ function ProfileForm({ formData }) {
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
+            className="flex-1"
             control={form.control}
-            name="organization"
+            name="specimen"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>select Specimen</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Specimen " />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {specimen?.map((specimen) => (
+                      <SelectItem key={specimen._id} value={specimen._id}>
+                        {specimen.specimen}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>What is your country?</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className=" p-4 space-y-4">
+          <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Prereqizite
+          </Label>
+          <Editor value={content} onChange={setContent} onBlur={setContent} />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-full p-4">
+          <FormField
+            control={form.control}
+            name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Organization</FormLabel>
+                <FormLabel>Price</FormLabel>
                 <FormControl>
-                  <Input placeholder="Organization..." {...field} />
+                  <Input placeholder="Price..." {...field} />
                 </FormControl>
-                <FormDescription>
-                  What is your name of organization
-                </FormDescription>
+                <FormDescription>What is your name of Price.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -267,18 +285,18 @@ function ProfileForm({ formData }) {
           <FormField
             className="flex-1"
             control={form.control}
-            name="country"
+            name="department"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>select Country</FormLabel>
+                <FormLabel>Select Department</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
-                  value={field.value}
+                  defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a Country" />
+                      <SelectValue placeholder="Select a Department " />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -289,73 +307,27 @@ function ProfileForm({ formData }) {
                     <SelectItem value="france">France</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription>What is your country?</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            className="flex-1"
-            control={form.control}
-            name="state"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>select State</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  className="w-full"
-                  value={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a State" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="maharashtra">Maharashtra</SelectItem>
-                    <SelectItem value="gujarat">Gujarat</SelectItem>
-                    <SelectItem value="rajasthan">Rajasthan</SelectItem>
-                    <SelectItem value="tamilnadu">Tamilnadu</SelectItem>
-                    <SelectItem value="telangana">Telangana</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription>What is your State?</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            className="flex-1"
-            control={form.control}
-            name="city"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>select City</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  className="w-full"
-                  value={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="dombivli">Dombivli</SelectItem>
-                    <SelectItem value="bangalore">Bangalore</SelectItem>
-                    <SelectItem value="mumbai">Mumbai</SelectItem>
-                    <SelectItem value="chennai">Chennai</SelectItem>
-                    <SelectItem value="delhi">Delhi</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription>What is your country?</FormDescription>
+                <FormDescription>
+                  What Department you belong to?
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
+        <div>
+          <Label>Consent Form</Label>
+          <Editor value={consent} onChange={setconsent} onBlur={setconsent} />
+        </div>
+        <div>
+          <Label>Interpretetion Text</Label>
+          <Editor
+            value={interpretation}
+            onChange={setinterpretation}
+            onBlur={setinterpretation}
+          />
+        </div>
+        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
             control={form.control}
             name="address"
@@ -429,7 +401,7 @@ function ProfileForm({ formData }) {
               </FormItem>
             )}
           />
-        </div>
+        </div> */}
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
             Update profile
@@ -442,11 +414,12 @@ function ProfileForm({ formData }) {
 
 export default function SettingsProfilePage() {
   const navigate = useNavigate();
-  const { id } = useParams();
   const [formData, setFormData] = useState<any>({});
+  const { id } = useParams();
+
   useEffect(() => {
     const fetchData = async () => {
-      const response = await axios.get(`/api/associatemaster/reference/${id}`);
+      const response = await axios.get(`/api/testmaster/reference/${id}`);
       console.log(response.data);
       setFormData(response.data);
     };
@@ -460,7 +433,7 @@ export default function SettingsProfilePage() {
   return (
     <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
       <Button
-        onClick={() => navigate("/associatemaster")}
+        onClick={() => navigate("/testmaster")}
         className="ml-4 flex gap-2 m-8 mb-4"
       >
         <MoveLeft className="w-5" />
@@ -468,8 +441,8 @@ export default function SettingsProfilePage() {
       </Button>
 
       <CardHeader>
-        <CardTitle>Associate Master</CardTitle>
-        <CardDescription>Associate master</CardDescription>
+        <CardTitle>Test Master</CardTitle>
+        <CardDescription>Test master</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6 ">

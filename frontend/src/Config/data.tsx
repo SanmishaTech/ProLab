@@ -1,4 +1,5 @@
 import { NavItem } from "@/types";
+import { Icon } from "lucide-react";
 
 export const navItems: NavItem[] = [
   {
@@ -6,62 +7,69 @@ export const navItems: NavItem[] = [
     href: "/dashboard",
     icon: "dashboardIcon",
   },
+  {
+    title: "Masters",
+    href: "/lab",
+    icon: "dashboardIcon",
+    children: [
+      {
+        title: "Department",
+        href: "/department",
+        icon: "department",
+      },
+    ],
+  },
+  {
+    title: "Test Related Master",
+    href: "/testmaster",
+    icon: "sad",
+    children: [
+      {
+        title: "Test Master",
+        href: "/testmaster",
+        icon: "test",
+      },
+      {
+        title: "Container",
+        href: "/container",
+        icon: "container",
+      },
+      {
+        title: "Parameters",
+        href: "/parameter",
+        icon: "pipette",
+      },
+      {
+        title: "Parameter Group",
+        href: "/parametergroup",
+        icon: "pipette",
+      },
+    ],
+  },
+
+  {
+    title: "Lab Setup",
+    href: "/lab",
+    icon: "Asdsad",
+    children: [
+      {
+        title: "Associate Master",
+        href: "/associatemaster",
+        icon: "Associate",
+      },
+      {
+        title: "Specimen",
+        href: "/specimen",
+        icon: "specimen",
+      },
+    ],
+  },
 
   // {
-  //   title: "Registration",
-  //   href: "/registrationlist",
-  //   icon: "settingsIcon",
-  //   children: [
-  //     {
-  //       title: "Registration",
-  //       href: "/registration",
-  //     },
-  //     {
-  //       title: "All Registration",
-  //       href: "/registrationlist",
-  //     },
-  //   ],
-  // },
-  {
-    title: "Test Master",
-    href: "/testmaster",
-    icon: "dashboardIcon",
-  },
-  {
-    title: "Associate Master",
-    href: "/associatemaster",
-    icon: "dashboardIcon",
-  },
-  // {
-  //   title: "Test Link Master",
+  //   title: "Parameter Link Master",
   //   href: "/testlinkmaster",
   //   icon: "dashboardIcon",
   // },
-  {
-    title: "Container",
-    href: "/container",
-    icon: "dashboardIcon",
-  },
-  {
-    title: "Specimen",
-    href: "/specimen",
-    icon: "dashboardIcon",
-  },
-  {
-    title: "Parameters",
-    href: "/parameter",
-    icon: "dashboardIcon",
-  },
-  {
-    title: "Parameter Group",
-    href: "/parametergroup",
-    icon: "dashboardIcon",
-  },
-  {
-    title: "Department",
-    href: "/department",
-    icon: "dashboardIcon",
-  },
 ];
 
 export const LoginSchema = [

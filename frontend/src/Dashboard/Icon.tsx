@@ -30,8 +30,15 @@ import {
   User,
   User2Icon,
   UserX2Icon,
+  Pipette,
+  Beaker,
+  Handshake,
+  FlaskConical,
+  FlaskConicalOff,
   X,
+  Building2,
 } from "lucide-react";
+import specimen from "@/images/icons8-specimen-container.svg";
 
 export type Icon = LucideIcon;
 
@@ -63,6 +70,12 @@ export const Icons: Record<string, Icon> = {
   sun: SunMedium,
   moon: Moon,
   laptop: Laptop,
+  pipette: Pipette,
+  container: Beaker,
+  test: FlaskConical,
+  Associate: Handshake,
+  specimen: FlaskConicalOff,
+  department: Building2,
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

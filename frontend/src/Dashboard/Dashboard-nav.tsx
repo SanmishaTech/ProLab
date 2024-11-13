@@ -55,7 +55,7 @@ export function DashboardNav({
                     <TooltipTrigger asChild>
                       <AccordionTrigger
                         className={cn(
-                          "flex items-center justify-between pl-2 pr-2 w-full gap-2 overflow-hidden rounded-md py-2 text-sm font-medium hover:bg-secondary hover:text-accent-foreground",
+                          "flex items-center justify-between pl-2 pr-2 w-full gap-2 overflow-hidden rounded-md py-2 text-sm font-medium hover:bg-secondary hover:text-iconActive",
                           isActive ? "bg-nav text-black" : "transparent",
                           item.disabled && "cursor-not-allowed opacity-80"
                         )}
@@ -66,8 +66,8 @@ export function DashboardNav({
                             <Icon
                               className={`ml-3 size-5 flex-none ${
                                 isActive
-                                  ? "text-accent text-black"
-                                  : "text-accentlight"
+                                  ? "text-iconActive text-black"
+                                  : "text-iconActive"
                               }`}
                             />
                           )}
@@ -109,7 +109,7 @@ export function DashboardNav({
                           className={cn(
                             "flex items-center gap-2 overflow-hidden rounded-md py-1 text-sm font-medium hover:bg-secondary hover:text-accent-foreground",
                             isChildActive
-                              ? "bg-accent text-accent"
+                              ? "bg-accent text-iconActive"
                               : "transparent",
                             child.disabled && "cursor-not-allowed opacity-80"
                           )}
@@ -121,8 +121,8 @@ export function DashboardNav({
                             <ChildIcon
                               className={`ml-6 size-4 flex-none ${
                                 isChildActive
-                                  ? "text-accent"
-                                  : "text-accentlight"
+                                  ? "text-iconActive"
+                                  : "text-iconDark"
                               }`}
                             />
                           )}

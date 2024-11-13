@@ -4,6 +4,8 @@
 
 @layer base {
   :root {
+    --iconextremedark: 0 0% 12%;
+    --icondark: 0 0% 60%;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -60,6 +62,10 @@
 }
 
 @layer base {
+  .lucide {
+    color: #202127;
+    stroke-width: 1px;
+  }
   * {
     @apply border-border;
   }
