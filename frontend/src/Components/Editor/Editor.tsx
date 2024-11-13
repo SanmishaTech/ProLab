@@ -8,7 +8,6 @@ export const Editor = ({ placeholder, readonly, onChange, onBlur, value }) => {
   const config = useMemo(
     () => ({
       readonly: readonly ?? false,
-      placeholder: placeholder || "Start typing...",
     }),
     [placeholder, readonly]
   );
@@ -19,6 +18,7 @@ export const Editor = ({ placeholder, readonly, onChange, onBlur, value }) => {
       ref={editor}
       value={value}
       config={config}
+      placeholder=""
       tabIndex={1}
       onBlur={onBlur} // preferred to use only this option to update the content for performance reasons
       // onChange={onChange}

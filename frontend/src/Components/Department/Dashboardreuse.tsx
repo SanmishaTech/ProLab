@@ -285,7 +285,10 @@ export default function Dashboard({
                                         <MoreHorizontal className="h-4 w-4" />
                                       </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
+                                    <DropdownMenuContent
+                                      align="center"
+                                      className="w-full flex-col items-center flex justify-center"
+                                    >
                                       <DropdownMenuLabel>
                                         Actions
                                       </DropdownMenuLabel>

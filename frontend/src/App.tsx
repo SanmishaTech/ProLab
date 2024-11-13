@@ -5,12 +5,50 @@ import Login from "@/Packages/Login/Login";
 import Dashboard from "./Pages/Dashboard";
 import { Toaster, toast } from "sonner";
 import { useLocation } from "react-router-dom";
+
+import {
+  Calculator,
+  Calendar,
+  CreditCard,
+  Settings,
+  Smile,
+  User,
+} from "lucide-react";
+
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command";
+import { Icons } from "@/Dashboard/Icon";
 import { Editor } from "@/Components/Editor/Editor";
 import Navbar from "@/Navbar/Navbarcomp";
+import { navItems } from "@/Config/data";
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  console.log("This is data", navItems);
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
+
   useEffect(() => {
     if (location.pathname === "/") {
       setIsLoggedIn(false);
@@ -20,6 +58,44 @@ function App() {
   }, [location.pathname]);
   return (
     <>
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandInput placeholder="Type a command or search..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          {navItems.map((item) => {
+            if (item.children && item.children.length > 0) {
+              return (
+                <CommandGroup heading={item.title}>
+                  {item.children?.map((child) => {
+                    console.log("This is child", child);
+                    const Icon = Icons[child.icon || "arrowRight675.  "];
+                    const isActive = location.pathname === child.href;
+
+                    return (
+                      <div className="flex items-center gap-2 w-full">
+                        <CommandItem
+                          key={child.title}
+                          className="w-full flex items-center gap-2 overflow-hidden rounded-md py-1 text-sm font-medium hover:bg-secondary hover:text-iconActive"
+                          onSelect={() => {
+                            navigate(child.href);
+                            setOpen(false);
+                          }}
+                        >
+                          {Icon && (
+                            <Icon className={`ml-3 size-5 flex-none `} />
+                          )}
+
+                          {child.title}
+                        </CommandItem>
+                      </div>
+                    );
+                  })}
+                </CommandGroup>
+              );
+            }
+          })}
+        </CommandList>
+      </CommandDialog>
       <Toaster position="top-right" />
       <Routes>
         <Route path="/" element={<Login />} />

@@ -123,7 +123,11 @@ function ProfileForm({ formData }) {
   }, []);
 
   useEffect(() => {
-    reset(formData);
+    reset({
+      ...formData,
+      specimen: formData.specimen?._id,
+      department: formData.department?._id,
+    });
     setContent(formData?.prerquisite);
     setconsent(formData?.consentForm);
     setinterpretation(formData?.interpretedText);
@@ -240,7 +244,8 @@ function ProfileForm({ formData }) {
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
-                  defaultValue={field.value}
+                  value={field.value}
+                  defaultValue={formData?.specimen?._id}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -292,6 +297,7 @@ function ProfileForm({ formData }) {
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
+                  value={field.value}
                   defaultValue={field.value}
                 >
                   <FormControl>
@@ -300,11 +306,11 @@ function ProfileForm({ formData }) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="china">China</SelectItem>
-                    <SelectItem value="india">India</SelectItem>
-                    <SelectItem value="usa">USA</SelectItem>
-                    <SelectItem value="uk">UK</SelectItem>
-                    <SelectItem value="france">France</SelectItem>
+                    {department?.map((department) => (
+                      <SelectItem key={department._id} value={department._id}>
+                        {department.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormDescription>
@@ -436,7 +442,7 @@ export default function SettingsProfilePage() {
         onClick={() => navigate("/testmaster")}
         className="ml-4 flex gap-2 m-8 mb-4"
       >
-        <MoveLeft className="w-5" />
+        <MoveLeft className="w-5 text-white" />
         Back
       </Button>
 

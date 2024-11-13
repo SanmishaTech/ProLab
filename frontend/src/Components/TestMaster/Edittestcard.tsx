@@ -474,7 +474,7 @@ export default function SettingsProfilePage() {
         onClick={() => navigate("/associatemaster")}
         className="ml-4 flex gap-2 m-8 mb-4"
       >
-        <MoveLeft className="w-5" />
+        <MoveLeft className="w-5 text-white" />
         Back
       </Button>
 

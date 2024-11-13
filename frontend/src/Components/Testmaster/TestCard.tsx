@@ -47,7 +47,8 @@ const profileFormSchema = z.object({
   code: z.string().optional(),
   abbrivation: z.string().optional(),
   specimen: z.string().optional(),
-  price: z.string().optional(),
+  price: z.number().optional(),
+
   department: z.string().optional(),
   profile: z.boolean().optional(),
   isFormTest: z.boolean().optional(),
@@ -147,7 +148,7 @@ function ProfileForm() {
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  This is the type of Associate you are selecting.
+                  Select template you want to use.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -162,7 +163,7 @@ function ProfileForm() {
                 <FormControl>
                   <Input placeholder="Test name..." {...field} />
                 </FormControl>
-                <FormDescription>What is your Test name?</FormDescription>
+                <FormDescription>What is Test name?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -176,7 +177,7 @@ function ProfileForm() {
                 <FormControl>
                   <Input placeholder="Test code..." {...field} />
                 </FormControl>
-                <FormDescription>What is your Test Code?</FormDescription>
+                <FormDescription>What is Test Code?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -267,7 +268,6 @@ function ProfileForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="china">China</SelectItem>
                     {department?.map((department) => (
                       <SelectItem key={department._id} value={department._id}>
                         {department.name}
@@ -275,9 +275,7 @@ function ProfileForm() {
                     ))}
                   </SelectContent>
                 </Select>
-                <FormDescription>
-                  What Department you belong to?
-                </FormDescription>
+                <FormDescription>Select The department</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -388,7 +386,7 @@ export default function SettingsProfilePage() {
         onClick={() => navigate("/testmaster")}
         className="ml-4 flex gap-2 m-8 mb-4"
       >
-        <MoveLeft className="w-5" />
+        <MoveLeft className="w-5 text-white" />
         Back
       </Button>
 
