@@ -166,7 +166,7 @@ function ProfileForm({ formData }) {
             name="template"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Template</FormLabel>
+                <FormLabel>Associate</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}

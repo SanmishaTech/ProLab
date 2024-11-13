@@ -1,5 +1,3 @@
-// components/AddItem.tsx
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -12,161 +10,165 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import axios from "axios";
 
 interface AddItemProps {
   onAdd: (item: {
-    id: string;
-    name: string;
-    unit: string;
-    fieldType: string;
+    selectTest: string;
+    startTime: string;
+    endTime: string;
+    hoursNeeded: string;
+    urgentHours: string;
+    monday: boolean;
+    tuesday: boolean;
+    wednesday: boolean;
+    thursday: boolean;
+    friday: boolean;
+    saturday: boolean;
+    sunday: boolean;
   }) => void;
+  typeofschema: any; // Add the type for the schema here
 }
 
 const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
-  const user = localStorage.getItem("user");
-  const User = JSON.parse(user);
   const [SelectedValue, setSelectedValue] = useState("");
   const [services, setServices] = useState<any[]>([]);
   const [error, setError] = useState("");
   const [handleopen, setHandleopen] = useState(false);
-  const [name, setName] = useState("");
-  const [date, setDate] = useState<Date | null>(null);
-  const [description, setdescription] = useState("");
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState<any>({
+    selectTest: "",
+    startTime: "",
+    endTime: "",
+    hoursNeeded: "",
+    urgentHours: "",
+    monday: false,
+    tuesday: false,
+    wednesday: false,
+    thursday: false,
+    friday: false,
+    saturday: false,
+    sunday: false,
+  });
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get(`/api/testmaster/alltestmaster`);
+         setServices(response.data);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      }
+    };
+    fetchServices();
+  }, []);
+
   const handleAdd = async () => {
-    // const service = services.find((s) => s.name === SelectedValue);
-    await axios.post("/api/parameter", formData).then(() => {
+    try {
+      await axios.post("/api/tatmaster", formData);
       window.location.reload();
-    });
-    setName("");
-    setDate(null);
-    // Reset form fields
+    } catch (error) {
+      setError("Failed to add the item.");
+    }
     setHandleopen(false);
   };
 
-  function capitalizeText(text) {
-    return text.replace(/\b\w/g, (char) => char.toUpperCase());
-  }
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prevData: any) => ({
       ...prevData,
-      [name]: value, // dynamically set key-value pairs
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
-  const addFields = (typeofschema) => {
-    const allFieldstorender = [];
-    Object.entries(typeofschema).map(([key, value]) => {
-      console.log(key, value);
 
+  const addFields = (typeofschema: any) => {
+    return Object.entries(typeofschema).map(([key, value]) => {
       if (value === "String") {
-        allFieldstorender.push(
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
+        return (
+          <div className="grid grid-cols-4 items-center gap-4" key={key}>
+            <Label htmlFor={key} className="text-right">
               {capitalizeText(key)}
             </Label>
             <Input
-              id="name"
+              id={key}
               name={key}
               onChange={handleChange}
-              placeholder="Enter name"
-              value={formData[key]}
+              placeholder={`Enter ${key}`}
+              value={formData[key] || ""}
               className="col-span-3"
             />
           </div>
         );
       }
+      return null;
     });
-    return [...allFieldstorender];
   };
+
+  function capitalizeText(text: string) {
+    return text.replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Parameters</Button>
+        <Button variant="outline">Add TaT</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Parameters</DialogTitle>
+          <DialogTitle>Add New Turnaround Time</DialogTitle>
           <DialogDescription>
-            Enter the details of the Parameters you want to add to the order.
+            Enter the details of the TaT you want to add to the order.
           </DialogDescription>
         </DialogHeader>
+
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
-          {addFields(typeofschema)}
-          {/* <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Namea
-            </Label>
-            <Input
-              id="name"
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter name"
-              value={name}
-              className="col-span-3"
-            />
-          </div>
+
+          {/* Dropdown to select test master */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Unit
+            <Label htmlFor="selectTest" className="text-right">
+              Select Test
             </Label>
-            <Input
-              id="name"
-              onChange={(e) => setdescription(e.target.value)}
-              placeholder="Enter description"
-              value={description}
-              className="col-span-3"
-            />
+            <Select
+              id="selectTest"
+              name="selectTest"
+              value={formData.selectTest}
+              onValueChange={(value) => setFormData((prev) => ({ ...prev, selectTest: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Test" />
+              </SelectTrigger>
+              <SelectContent>
+                {services.map((service) => (
+                  <SelectItem key={service.id} value={service.name}>
+                    {service.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Date
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[280px] justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
+
+          {/* Checkboxes for each day of the week */}
+          <div className="grid gap-4 py-4">
+            {["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].map((day) => (
+              <div className="flex items-center gap-2" key={day}>
+                <Checkbox
+                  id={day}
+                  name={day}
+                  checked={formData[day]}
+                  onCheckedChange={(checked) => handleChange({ target: { name: day, checked } } as any)}
                 />
-              </PopoverContent>
-            </Popover>
-          </div> */}
+                <Label htmlFor={day}>{capitalizeText(day)}</Label>
+              </div>
+            ))}
+          </div>
+
+          {/* Dynamically render other input fields based on the typeofschema */}
+          {addFields(typeofschema)}
         </div>
 
         <DialogFooter>
