@@ -59,7 +59,7 @@ export default function Dashboardholiday() {
   const typeofschema = {
     name: {
       type: "String",
-      label: "name",
+      label: "Name",
     },
     description: {
       type: "String",
@@ -97,8 +97,8 @@ export default function Dashboardholiday() {
         title: "Department Master",
         description: "Manage Department Master and view their details.",
         headers: [
-          { label: "name", key: "name" },
-          { label: "description", key: "description" },
+          { label: "Name", key: "name" },
+          { label: "Description", key: "description" },
           { label: "Alternate Description", key: "adn" },
           { label: "Action", key: "action" },
         ],

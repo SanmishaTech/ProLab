@@ -129,7 +129,7 @@ function ProfileForm() {
             name="template"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Template</FormLabel>
+                <FormLabel>Associate</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -147,7 +147,7 @@ function ProfileForm() {
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Select template you want to use.
+                  Select Associate you want to use.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
