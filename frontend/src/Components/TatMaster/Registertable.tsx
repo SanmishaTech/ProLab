@@ -34,13 +34,13 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Parameters" },
+        { label: "TaT Master" },
       ],
       searchPlaceholder: "Search registrations...",
       userAvatar: "/path-to-avatar.jpg",
       tableColumns: {
-        title: "Parameters",
-        description: "Manage Parameters and view their details.",
+        title: "TaT Master",
+        description: "Manage TaT Master and view their details.", 
         headers: [
           { label: "Name", key: "one" },
           { label: "Unit", key: "two" },

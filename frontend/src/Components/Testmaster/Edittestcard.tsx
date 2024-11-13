@@ -225,7 +225,7 @@ function ProfileForm({ formData }) {
               <FormItem>
                 <FormLabel>Abbrivation</FormLabel>
                 <FormControl>
-                  <Input placeholder="abbrivation..." {...field} />
+                  <Input placeholder="Abbrivation..." {...field} />
                 </FormControl>
                 <FormDescription>What is abbrivation?</FormDescription>
                 <FormMessage />
@@ -240,7 +240,7 @@ function ProfileForm({ formData }) {
             name="specimen"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>select Specimen</FormLabel>
+                <FormLabel>Select Specimen</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
