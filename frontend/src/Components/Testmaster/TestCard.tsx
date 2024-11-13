@@ -188,7 +188,7 @@ function ProfileForm() {
               <FormItem>
                 <FormLabel>Abbrivation</FormLabel>
                 <FormControl>
-                  <Input placeholder="abbrivation..." {...field} />
+                  <Input placeholder="Abbrivation..." {...field} />
                 </FormControl>
                 <FormDescription>What is abbrivation?</FormDescription>
                 <FormMessage />
@@ -203,7 +203,7 @@ function ProfileForm() {
             name="specimen"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>select Specimen</FormLabel>
+                <FormLabel>Select Specimen</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
@@ -222,7 +222,7 @@ function ProfileForm() {
                     ))}
                   </SelectContent>
                 </Select>
-                <FormDescription>What is your country?</FormDescription>
+                <FormDescription>Select the Specimen</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

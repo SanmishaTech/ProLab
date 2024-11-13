@@ -15,6 +15,8 @@ import DashboardTestMaster from "@/Components/Testmaster/Registertable";
 import Dashboardedittestcard from "@/Components/Testmaster/Edittestcard";
 import DashboardTestLinkMaster from "@/Components/TestLinkMaster/Registertable";
 import DashboardAssociateMaster from "@/Components/AssociateMaster/Registertable";
+import DashboardTatMaster from "@/Components/TatMaster/Registertable";
+import DashboardTatCard from "@/Components/TatMaster/";
 import Specimen from "@/Components/Specimen/Registertable";
 import DashboardTestcard from "@/Components/Testmaster/TestCard";
 import TestCard from "@/Components/AssociateMaster/TestCard";
@@ -54,14 +56,15 @@ const Dashboard = () => {
         {/\/testmaster\/edit\/\d+/.test(location.pathname) && (
           <Dashboardedittestcard />
         )}
-
+ 
         {location.pathname === "/testlinkmaster" && <DashboardTestLinkMaster />}
         {location.pathname === "/associatemaster" && (
           <DashboardAssociateMaster />
         )}
         {location.pathname === "/associatemaster/add" && <TestCard />}
         {/\/associatemaster\/edit\/\d+/.test(location.pathname) && <EditCard />}
-      </main>
+        {location.pathname === "/tatmaster" && <DashboardTatMaster />}
+        </main>
     </div>
   );
 };

@@ -44,6 +44,11 @@ export const navItems: NavItem[] = [
         href: "/parametergroup",
         icon: "pipette",
       },
+      {
+        title: "TaT Master",
+        href: "/tatmaster",
+        icon: "Tat",
+      },
     ],
   },
 
