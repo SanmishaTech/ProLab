@@ -54,6 +54,11 @@ export const navItems: NavItem[] = [
         href: "/tatmaster",
         icon: "Tat",
       },
+      {
+        title: "Reason Master",
+        href: "/reason",
+        icon: "test",
+      },
     ],
   },
 
