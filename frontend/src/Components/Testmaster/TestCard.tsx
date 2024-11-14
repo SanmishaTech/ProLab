@@ -40,6 +40,7 @@ import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import MultiSelectorComponent from "./profile";
 
 const profileFormSchema = z.object({
   template: z.string().optional(),
@@ -72,6 +73,7 @@ function ProfileForm() {
   const [interpretation, setinterpretation] = useState("");
   const [specimen, setSpecimen] = useState<any[]>([]);
   const [department, setDepartment] = useState<any[]>([]);
+  const [formData, setFormData] = useState<any>({});
   //   const { fields, append } = useFieldArray({
   //     name: "urls",
   //     control: form.control,
@@ -107,13 +109,18 @@ function ProfileForm() {
     data.prerquisite = content;
     data.consentForm = consent;
     data.interpretedText = interpretation;
-    // Implement actual profile update logic here
+    data.profile = formData;
+
     await axios.post(`/api/testmaster`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Profile updated successfully");
       navigate("/testmaster");
     });
   }
+
+  useEffect(() => {
+    console.log("This is formData", formData);
+  }, [formData]);
 
   return (
     <Form {...form}>
@@ -291,6 +298,9 @@ function ProfileForm() {
             onChange={setinterpretation}
             onBlur={setinterpretation}
           />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-full p-4">
+          <MultiSelectorComponent setData={setFormData} />
         </div>
         {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField

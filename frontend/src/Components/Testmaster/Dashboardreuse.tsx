@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import MultiSelectorComponent from "./profile";
 import {
   Table,
   TableBody,
@@ -224,6 +225,8 @@ export default function Dashboard({
                     Export
                   </span>
                 </Button>
+                <MultiSelectorComponent />
+
                 {/* <Button size="sm" className="h-8 gap-1" onClick={onAddProduct}>
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">

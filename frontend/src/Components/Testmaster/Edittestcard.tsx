@@ -40,6 +40,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useParams } from "react-router-dom";
+import MultiSelectorComponent from "./profile";
 import { useNavigate } from "react-router-dom";
 const profileFormSchema = z.object({
   template: z.string().optional(),
@@ -332,6 +333,13 @@ function ProfileForm({ formData }) {
             onChange={setinterpretation}
             onBlur={setinterpretation}
           />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-full p-4">
+          <MultiSelectorComponent
+            setData={setFormData}
+            defaultValue={formData}
+          />
+          -
         </div>
         {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField

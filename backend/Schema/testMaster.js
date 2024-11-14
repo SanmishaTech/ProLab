@@ -12,7 +12,7 @@ const testSchema = new mongoose.Schema({
   consentForm: { type: String },
   interpretedText: { type: String },
   department: { type: mongoose.Schema.Types.ObjectId, ref: "Department" },
-  profile: { type: Boolean },
+  profile: [{ type: mongoose.Schema.Types.ObjectId, ref: "TestMaster" }],
   machineInterface: { type: Boolean },
   sortOrder: { type: Number },
   isFormTest: { type: Boolean },

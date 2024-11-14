@@ -49,11 +49,16 @@ const Servicescontroller = {
     try {
       // const userId = req.params.userId;
       // const usertobefound = new mongoose.Types.ObjectId(userId);
-      const doctor = await Department.find();
-      // .populate({
-      //   path: "services",
-      //   populate: { path: "services" },
-      // });
+      const doctor = await Department.find()
+        .populate({
+          path: "specimen",
+        })
+        .populate({
+          path: "department",
+        })
+        .populate({
+          path: "profile",
+        });
 
       res.status(200).json(doctor);
     } catch (error) {
