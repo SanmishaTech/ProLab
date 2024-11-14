@@ -10,46 +10,38 @@ const tatController = {
         endTime,
         hoursNeeded,
         urgentHours,
-        monday,
-        tuesday,
-        wednesday,
-        thursday,
-        friday,
-        saturday,
-        sunday,
+        weekday,
       } = req.body;
+
       const newService = new TatMaster({
         selectTest,
         startTime,
         endTime,
         hoursNeeded,
         urgentHours,
-        monday,
-        tuesday,
-        wednesday,
-        thursday,
-        friday,
-        saturday,
-        sunday,
+        weekday,
       });
+
       const newServices = await newService.save();
-      res,
-        json({
-          message: "Service created successfully",
-          service: newServices,
-        });
+
+      res.json({
+        message: "Service created successfully",
+        service: newServices,
+      });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
 
-  getServices: async (res) => {
-    const tatTest = await TatMaster.find();
-    res.status(200).json(tatTest);
+  getServices: async (req, res) => {
+    try {
+      const tatTest = await TatMaster.find().populate("selectTest");
+      res.status(200).json(tatTest);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   },
-  catch(error) {
-    res.status(500).json({ error: error.message });
-  },
+
   getServicesbyId: async (req, res) => {
     try {
       const tatTestId = req.params.tatTestId;
@@ -59,6 +51,7 @@ const tatController = {
       res.status(500).json({ error: error.message });
     }
   },
+
   updateThreads: async (req, res) => {
     try {
       const tatTestId = req.params.tatTestId;
@@ -68,15 +61,10 @@ const tatController = {
         endTime,
         hoursNeeded,
         urgentHours,
-        monday,
-        tuesday,
-        wednesday,
-        thursday,
-        friday,
-        saturday,
-        sunday,
+        weekday,
       } = req.body;
-      const newService = await TatMaster.findByIdAndUpdate(
+
+      const updatedService = await TatMaster.findByIdAndUpdate(
         tatTestId,
         {
           selectTest,
@@ -84,21 +72,19 @@ const tatController = {
           endTime,
           hoursNeeded,
           urgentHours,
-          monday,
-          tuesday,
-          wednesday,
-          thursday,
-          friday,
-          saturday,
-          sunday,
+          weekday,
         },
         { new: true }
       );
-      if (!newService) {
+
+      if (!updatedService) {
         return res.status(404).json({ message: "Service not found." });
       }
 
-      res.json({ message: "Service updated successfully.", newService });
+      res.json({
+        message: "Service updated successfully.",
+        service: updatedService,
+      });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -107,14 +93,20 @@ const tatController = {
   deleteThread: async (req, res) => {
     try {
       const tatTestId = req.params.tatTestId;
-      const newService = await TatMaster.findByIdAndDelete(tatTestId);
-      if (!newService) {
+      const deletedService = await TatMaster.findByIdAndDelete(tatTestId);
+
+      if (!deletedService) {
         return res.status(404).json({ message: "Service not found." });
       }
 
-      res.json({ message: "Service deleted successfully.", newService });
+      res.json({
+        message: "Service deleted successfully.",
+        service: deletedService,
+      });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
 };
+
+module.exports = tatController;

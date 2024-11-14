@@ -12,14 +12,17 @@ export default function Dashboardholiday() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const typeofschema = {
-    name: "String",
-    unit: "String",
-    fieldType: "String",
+    selectTest: "String",
+    startTime: "Date",
+    endTime: "Date",
+    hoursNeeded: "Number",
+    urgentHours: "Number",
+    weekday: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
   };
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/parameter/allparameter`)
+      .get(`/api/tatmaster/alltatmaster`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -42,9 +45,12 @@ export default function Dashboardholiday() {
         title: "TaT Master",
         description: "Manage TaT Master and view their details.", 
         headers: [
-          { label: "Name", key: "one" },
-          { label: "Unit", key: "two" },
-          { label: "fieldType", key: "three" },
+          { label: "Select Test", key: "one" },
+          { label: "Start Time", key: "two" },
+          { label: "End Time", key: "three" },
+          { label: "Hours Needed", key: "four" },
+          { label: "Urgent Hours", key: "five" },
+          { label: "Weekday", key: "six" },
           { label: "Action", key: "action" },
         ],
         // tabs: [
@@ -103,26 +109,26 @@ export default function Dashboardholiday() {
   // Map the API data to match the Dashboard component's expected tableData format
   const mappedTableData = data?.map((item) => {
     const services = item?.services || [];
-    const paidAmount = item?.paymentMode?.paidAmount || 0;
+    
+    // Capitalize the first letter of each weekday
+    const capitalizedWeekday = item?.weekday?.map(day => {
+      return day.charAt(0).toUpperCase() + day.slice(1); // Capitalize first letter
+    }) || ["Weekday not provided"];
 
-    // Calculate the total service price based on each service's populated details.
-    const totalServicePrice = services.reduce((acc, service) => {
-      const servicePrice = service?.serviceId?.price || 0; // Replace 'price' with the actual field name for service price
-      return acc + servicePrice;
-    }, 0);
-
-    // Calculate balance amount based on total service price and paid amount.
-    const balanceAmount =
-      totalServicePrice - paidAmount > 0 ? totalServicePrice - paidAmount : 0;
+    
+  
     return {
       _id: item?._id,
-      one: item?.name || "Unknown",
-      two: item?.unit || "Unit not provided",
-      three: item?.fieldType || "Field Type not provided",
-      edit: `/parameter/update/${item?._id}`,
-      delete: `/parameter/delete/${item?._id}`,
-      editfetch: `/parameter/reference/${item?._id}`,
-      // two: item?. || "Unknown",
+      one: item?.selectTest?.name || "Select Test not provided",
+      two: item?.startTime || "Start Time not provided",
+      three: item?.endTime || "End Time not provided",
+      four: item?.hoursNeeded || "Hours Needed not provided",
+      five: item?.urgentHours || "Urgent Hours not provided",
+      six: capitalizedWeekday.join(", ") || "Weekday not provided",  // Join the weekdays into a string
+  
+      edit: `/tatmaster/update/${item?._id}`,
+      delete: `/tatmaster/delete/${item?._id}`,
+      editfetch: `/tatmaster/reference/${item?._id}`,
     };
   });
 
