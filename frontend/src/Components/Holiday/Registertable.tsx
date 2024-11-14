@@ -3,6 +3,7 @@ import axios from "axios";
 import Dashboard from "./Dashboardreuse";
 import AddItem from "./Additem";
 import userAvatar from "@/images/Profile.jpg";
+import { Button } from "@/components/ui/button";
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
@@ -10,7 +11,11 @@ export default function Dashboardholiday() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const typeofschema = {
+    name: "String",
+    description: "String",
+    date: "Date",
+  };
   useEffect(() => {
     // Fetch data from the API
     axios
@@ -37,9 +42,10 @@ export default function Dashboardholiday() {
         title: "Holiday",
         description: "Manage Holiday and view their details.",
         headers: [
-          { label: "Name", key: "patientName" },
-          { label: "Date", key: "patientAge" },
-          { label: "Description", key: "gender" },
+          { label: "Name", key: "one" },
+          { label: "Description", key: "two" },
+          { label: "Date", key: "three" },
+          { label: "Action", key: "action" },
         ],
         // tabs: [
         //   { label: "All", value: "all" },
@@ -110,10 +116,13 @@ export default function Dashboardholiday() {
       totalServicePrice - paidAmount > 0 ? totalServicePrice - paidAmount : 0;
     return {
       _id: item?._id,
-      patientName: item?.name || "Unknown",
-      patientAge: new Date(item?.date).toLocaleDateString() || "Unkown",
-      gender: item?.description || "Unknown",
-      // patientAge: item?. || "Unknown",
+      one: item?.name || "Unknown",
+      two: item?.description || "Unit not provided",
+      three: new Date(item?.date).toLocaleDateString() || "Unkown",
+      edit: `holiday/update/${item?._id}`,
+      delete: `/holiday/delete/${item?._id}`,
+      editfetch: `/holiday/reference/${item?._id}`,
+      // two: item?. || "Unknown",
     };
   });
 
@@ -130,6 +139,7 @@ export default function Dashboardholiday() {
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
         AddItem={AddItem}
+        typeofschema={typeofschema}
       />
     </div>
   );
