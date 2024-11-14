@@ -7,7 +7,7 @@ const testlinkmasterSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "ParameterGroup",
   },
-  parameter: { type: mongoose.Schema.Types.ObjectId, ref: "Parameter" },
+  parameter: [{ type: mongoose.Schema.Types.ObjectId, ref: "Parameter" }],
 });
 
 const TestLinkMaster = mongoose.model("TestLinkMaster", testlinkmasterSchema);

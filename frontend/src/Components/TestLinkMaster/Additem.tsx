@@ -1,6 +1,6 @@
 // components/AddItem.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import axios from "axios";
@@ -48,14 +50,25 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [error, setError] = useState("");
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
+  const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
 
   const handleAdd = async () => {
     setLoading(true);
     try {
-      await axios.post(`/api/testmasterlink`, formData);
+      setFormData({
+        ...formData,
+        parameter: selectedParameters,
+      });
+      await axios.post(`/api/testmasterlink`, {
+        test: formData.test,
+        parameterGroup: formData.parameterGroup,
+        parameter: selectedParameters,
+      });
       onAdd(formData); // Notify parent component
       setFormData({});
       setHandleopen(false);
+      // window.location.reload();
       setError("");
     } catch (err) {
       setError("Failed to add parameter group. Please try again.");
@@ -77,6 +90,24 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
       [name]: value,
     }));
   };
+
+  useEffect(() => {
+    const fetchparameter = async () => {
+      try {
+        const response = await axios.get(`/api/parameter/allparameter`);
+        console.log(response.data);
+        setSelectedFrameworks(
+          response.data.map((framework) => ({
+            value: framework?._id,
+            label: framework?.name,
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      }
+    };
+    fetchparameter();
+  }, []);
 
   // Dynamically render form fields based on the schema
   const addFields = (schema: Record<string, any>) => {
@@ -240,6 +271,19 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
           {addFields(typeofschema)}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Select Parameters</Label>
+            <MultiSelect
+              className="col-span-3"
+              options={selectedFrameworks}
+              onValueChange={setSelectedParameters}
+              // defaultValue={selectedFrameworks}
+              placeholder="Select frameworks"
+              variant="inverted"
+              animation={2}
+              maxCount={2}
+            />
+          </div>
         </div>
 
         <DialogFooter>

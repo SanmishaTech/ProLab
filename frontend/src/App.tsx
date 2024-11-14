@@ -119,6 +119,7 @@ function App() {
         <Route path="/tatmaster" element={<Dashboard />} />
         <Route path="/tatmaster/add" element={<Dashboard />} />
         <Route path="/tatmaster/edit/:id" element={<Dashboard />} />
+        <Route path="/Formula" element={<Dashboard />} />
       </Routes>
     </>
   );

@@ -48,13 +48,9 @@ const profileFormSchema = z.object({
   code: z.string().optional(),
   abbrivation: z.string().optional(),
   specimen: z.string().optional(),
-  price: z.string().optional(),
+  price: z.any().optional(),
   department: z.string().optional(),
   profile: z.boolean().optional(),
-  isFormTest: z.boolean().optional(),
-  sortOrder: z.number().optional(),
-  machineInterface: z.boolean().optional(),
-  isSinglePageReport: z.boolean().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -76,6 +72,8 @@ function ProfileForm({ formData }) {
   const [interpretation, setinterpretation] = useState("");
   const [specimen, setSpecimen] = useState([]);
   const [department, setDepartment] = useState([]);
+  const [profile, setProfile] = useState([]);
+  const [formdata, setFormData] = useState([]);
 
   useEffect(() => {
     const fetchSpecimen = async () => {
@@ -339,7 +337,6 @@ function ProfileForm({ formData }) {
             setData={setFormData}
             defaultValue={formData}
           />
-          -
         </div>
         {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
