@@ -106,6 +106,7 @@ function App() {
         <Route path="/services" element={<Dashboard />} />
         <Route path="/department" element={<Dashboard />} />
         <Route path="/parameter" element={<Dashboard />} />
+        <Route path="/reason" element={<Dashboard />} />
         <Route path="/parametergroup" element={<Dashboard />} />
         <Route path="/specimen" element={<Dashboard />} />
         <Route path="/container" element={<Dashboard />} />
@@ -119,6 +120,7 @@ function App() {
         <Route path="/tatmaster" element={<Dashboard />} />
         <Route path="/tatmaster/add" element={<Dashboard />} />
         <Route path="/tatmaster/edit/:id" element={<Dashboard />} />
+        <Route path="/Formula" element={<Dashboard />} />
       </Routes>
     </>
   );

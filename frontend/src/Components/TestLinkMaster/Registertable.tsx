@@ -83,14 +83,7 @@ export default function Dashboardholiday() {
         label: item?.name,
       })),
     },
-    parameter: {
-      type: "Select",
-      label: "Parameter",
-      options: parameter?.map((item) => ({
-        value: item?._id,
-        label: item?.name,
-      })),
-    },
+
     // sortBy: { type: "Number", label: "Sort By" },
     // date: { type: "Date", label: "Date" },
     // category: {
@@ -103,7 +96,6 @@ export default function Dashboardholiday() {
     //   ],
     // },
     // isActive: { type: "Checkbox", label: "Is Active" },
-    isbol: { type: "Checkbox", label: "Is bol" },
     // Add more fields as needed
   };
 
@@ -206,10 +198,10 @@ export default function Dashboardholiday() {
         console.log("This is item", item);
         return {
           _id: item?._id,
-          name: item?.test.name || "Name not provided",
+          name: item?.test?.name || "Name not provided",
           parameterGroup:
-            item?.parameterGroup.name || "Description not provided",
-          parameter: item?.parameter.name || "Alternate name not provided",
+            item?.parameterGroup?.name || "Description not provided",
+          parameter: item?.parameter?.name || "Alternate name not provided",
           action: "actions", // Placeholder for action buttons
           // Additional fields can be added here
         };

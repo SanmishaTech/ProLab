@@ -31,6 +31,7 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
   onAdd,
   typeofschema,
   setData,
+  defaultValue,
 }) => {
   const frameworksList = [
     { value: "react", label: "React" },
@@ -97,7 +98,28 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
         <MultiSelect
           options={value}
           onValueChange={setFormData}
-          // defaultValue={value}
+          defaultValue={
+            Array.isArray(defaultValue)
+              ? [
+                  defaultValue.map((value) => ({
+                    value: value?._id,
+                    label: value?.name,
+                  })),
+                ]
+              : defaultValue?.length > 1
+              ? [
+                  defaultValue.map((value) => ({
+                    value: value?._id,
+                    label: value?.name,
+                  })),
+                ]
+              : [
+                  {
+                    label: defaultValue?.name,
+                    value: defaultValue?._id,
+                  },
+                ]
+          }
           placeholder="Select frameworks"
           variant="inverted"
           maxCount={5}

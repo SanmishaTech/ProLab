@@ -47,8 +47,17 @@ const Servicescontroller = {
   },
   getServicesbyId: async (req, res, next) => {
     try {
-      const doctorId = req.params.doctorId;
-      const services = await Department.findById(doctorId);
+      const doctorId = req.params.referenceId;
+      const services = await Department.findById(doctorId)
+        .populate({
+          path: "test",
+        })
+        .populate({
+          path: "parameterGroup",
+        })
+        .populate({
+          path: "parameter",
+        });
       res.status(200).json(services);
     } catch (error) {
       res.status(500).json({ error: error.message });

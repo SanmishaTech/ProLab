@@ -9,6 +9,7 @@ import DashboardPage from "@/Components/Registration/Dashbordcomp/Registertable"
 import Dashboarddepartment from "@/Components/Department/Registertable";
 import DashboardServices from "@/Components/Services/Registertable";
 import Dashboardparameter from "@/Components/Parameter/Registertable";
+import Dashboardreason from "@/Components/Reason/Registertable";
 import DashboardparameterGroup from "@/Components/ParameterGroup/Registertable";
 import DashboardContainer from "@/Components/Container/Registertable";
 import DashboardTestMaster from "@/Components/Testmaster/Registertable";
@@ -21,6 +22,7 @@ import Specimen from "@/Components/Specimen/Registertable";
 import DashboardTestcard from "@/Components/Testmaster/TestCard";
 import TestCard from "@/Components/AssociateMaster/TestCard";
 import EditCard from "@/Components/AssociateMaster/Edittestcard";
+import Formula from "../Components/Formula/Formula";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 const Dashboard = () => {
@@ -48,6 +50,7 @@ const Dashboard = () => {
         {location.pathname === "/holiday" && <Dashboardholiday />}
         {location.pathname === "/department" && <Dashboarddepartment />}
         {location.pathname === "/parameter" && <Dashboardparameter />}
+        {location.pathname === "/reason" && <Dashboardreason />}
         {location.pathname === "/parametergroup" && <DashboardparameterGroup />}
         {location.pathname === "/specimen" && <Specimen />}
         {location.pathname === "/container" && <DashboardContainer />}
@@ -56,7 +59,7 @@ const Dashboard = () => {
         {/\/testmaster\/edit\/\d+/.test(location.pathname) && (
           <Dashboardedittestcard />
         )}
- 
+
         {location.pathname === "/testlinkmaster" && <DashboardTestLinkMaster />}
         {location.pathname === "/associatemaster" && (
           <DashboardAssociateMaster />
@@ -64,7 +67,9 @@ const Dashboard = () => {
         {location.pathname === "/associatemaster/add" && <TestCard />}
         {/\/associatemaster\/edit\/\d+/.test(location.pathname) && <EditCard />}
         {location.pathname === "/tatmaster" && <DashboardTatMaster />}
-        </main>
+        {location.pathname === "/Formula" && <Formula />}
+ 
+      </main>
     </div>
   );
 };

@@ -97,114 +97,116 @@ const AdvancedFormulaBuilder = () => {
   const parameterButtonClass = `${buttonClass} bg-green-100 hover:bg-green-200 text-green-700 text-left`;
 
   return (
-    <Card className="w-full max-w-4xl">
-      <CardHeader>
-        <CardTitle>Formula Builder</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Formula Display */}
-        <div className="p-4 min-h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-wrap gap-2 items-center">
-          {formula.length === 0 ? (
-            <span className="text-gray-400">
-              Your formula will appear here...
-            </span>
-          ) : (
-            formula.map((item, index) => renderFormulaItem(item, index))
-          )}
-        </div>
+    <div className="flex flex-col items-center justify-center w-full h-screen">
+      <Card className="w-full h-screen p-4">
+        <CardHeader>
+          <CardTitle>Formula Builder</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Formula Display */}
+          <div className="p-4 min-h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-wrap gap-2 items-center">
+            {formula.length === 0 ? (
+              <span className="text-gray-400">
+                Your formula will appear here...
+              </span>
+            ) : (
+              formula.map((item, index) => renderFormulaItem(item, index))
+            )}
+          </div>
 
-        {/* Controls */}
-        <div className="grid grid-cols-12 gap-4">
-          {/* Left Panel - Numbers & Operators */}
-          <div className="col-span-8 space-y-4">
-            {/* Numbers */}
-            <div className="grid grid-cols-3 gap-2">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
+          {/* Controls */}
+          <div className="grid grid-cols-12 gap-4">
+            {/* Left Panel - Numbers & Operators */}
+            <div className="col-span-8 space-y-4">
+              {/* Numbers */}
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => addNumber(num)}
+                    className={numberButtonClass}
+                  >
+                    {num}
+                  </button>
+                ))}
                 <button
-                  key={num}
-                  onClick={() => addNumber(num)}
-                  className={numberButtonClass}
+                  onClick={clearFormula}
+                  className={`${buttonClass} bg-red-100 hover:bg-red-200 text-red-700`}
                 >
-                  {num}
+                  Clear
                 </button>
-              ))}
-              <button
-                onClick={clearFormula}
-                className={`${buttonClass} bg-red-100 hover:bg-red-200 text-red-700`}
-              >
-                Clear
-              </button>
+              </div>
+
+              {/* Operators and Brackets */}
+              <div className="grid grid-cols-4 gap-2">
+                <button
+                  onClick={() => addOperator("+")}
+                  className={operatorButtonClass}
+                >
+                  +
+                </button>
+                <button
+                  onClick={() => addOperator("-")}
+                  className={operatorButtonClass}
+                >
+                  −
+                </button>
+                <button
+                  onClick={() => addOperator("×")}
+                  className={operatorButtonClass}
+                >
+                  ×
+                </button>
+                <button
+                  onClick={() => addOperator("÷")}
+                  className={operatorButtonClass}
+                >
+                  ÷
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => addBracket("(")}
+                  className={bracketButtonClass}
+                >
+                  (
+                </button>
+                <button
+                  onClick={() => addBracket(")")}
+                  className={bracketButtonClass}
+                >
+                  )
+                </button>
+              </div>
             </div>
 
-            {/* Operators and Brackets */}
-            <div className="grid grid-cols-4 gap-2">
-              <button
-                onClick={() => addOperator("+")}
-                className={operatorButtonClass}
-              >
-                +
-              </button>
-              <button
-                onClick={() => addOperator("-")}
-                className={operatorButtonClass}
-              >
-                −
-              </button>
-              <button
-                onClick={() => addOperator("×")}
-                className={operatorButtonClass}
-              >
-                ×
-              </button>
-              <button
-                onClick={() => addOperator("÷")}
-                className={operatorButtonClass}
-              >
-                ÷
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => addBracket("(")}
-                className={bracketButtonClass}
-              >
-                (
-              </button>
-              <button
-                onClick={() => addBracket(")")}
-                className={bracketButtonClass}
-              >
-                )
-              </button>
+            {/* Right Panel - Parameters */}
+            <div className="col-span-4 border-l pl-4">
+              <h3 className="font-medium mb-2 text-gray-700">Parameters</h3>
+              <div className="space-y-2">
+                {parameters.map((param) => (
+                  <button
+                    key={param.id}
+                    onClick={() => addParameter(param)}
+                    className={parameterButtonClass}
+                  >
+                    <div className="flex items-center justify-between">
+                      {param.name}
+                      <ChevronRight className="w-4 h-4" />
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Right Panel - Parameters */}
-          <div className="col-span-4 border-l pl-4">
-            <h3 className="font-medium mb-2 text-gray-700">Parameters</h3>
-            <div className="space-y-2">
-              {parameters.map((param) => (
-                <button
-                  key={param.id}
-                  onClick={() => addParameter(param)}
-                  className={parameterButtonClass}
-                >
-                  <div className="flex items-center justify-between">
-                    {param.name}
-                    <ChevronRight className="w-4 h-4" />
-                  </div>
-                </button>
-              ))}
-            </div>
+          {/* Example/Preview */}
+          <div className="text-sm text-gray-500">
+            Example format: ( CBC × (Hematology × 100) × 2 )
           </div>
-        </div>
-
-        {/* Example/Preview */}
-        <div className="text-sm text-gray-500">
-          Example format: ( CBC × (Hematology × 100) × 2 )
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
