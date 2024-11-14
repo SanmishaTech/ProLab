@@ -306,7 +306,7 @@ export default function Dashboard({
                                 ) : header.key === "five" ? (
                                   row.five
                                 ) : header.key === "six" ? (
-                                  `₹${row.six}`
+                                  `${row.six}`
                                 ) : (
                                   row[header.key]
                                 )}
