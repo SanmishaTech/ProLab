@@ -1,21 +1,17 @@
-const Holiday = require("../Schema/holiday");
-const User = require("../Schema/userSchema");
+const Reason = require("../Schema/reason");
 const mongoose = require("mongoose");
 
-const holidayController = {
+const reasonController = {
   createThread: async (req, res, next) => {
     try {
-      const { name, description, date } = req.body;
-      const newService = new Holiday({
+      const { name } = req.body;
+      const newService = new Reason({
         name,
-        description,
-        date,
-        // userId,
       });
       const newServics = await newService.save();
 
       res.json({
-        message: "Patients created successfully",
+        message: "Reason created successfully",
         service: newServics,
       });
     } catch (error) {
@@ -24,17 +20,16 @@ const holidayController = {
   },
   getServices: async (req, res, next) => {
     try {
-      const userId = req.params.userId;
-      const patient = await Holiday.find();
-      res.status(200).json(patient);
+      const reason = await Reason.find();
+      res.status(200).json(reason);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
   getServicesbyId: async (req, res, next) => {
     try {
-      const patientId = req.params.patientId;
-      const services = await Holiday.findById(patientId);
+      const reasonID = req.params.reasonId;
+      const services = await Reason.findById(reasonID);
       res.status(200).json(services);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -68,7 +63,7 @@ const holidayController = {
         },
       ];
 
-      const patient = await Holiday.aggregate(agg);
+      const patient = await Parameter.aggregate(agg);
       res.status(200).json(patient);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -76,16 +71,13 @@ const holidayController = {
   },
   updateThreads: async (req, res, next) => {
     try {
-      const patientId = req.params.referenceId;
-      const { name, description, date } = req.body;
+      const reasonID = req.params.reasonId;
+      const { name, unit, fieldType } = req.body;
 
-      
-      const newService = await Holiday.findByIdAndUpdate(
-        patientId,
+      const newService = await Reason.findByIdAndUpdate(
+        reasonID,
         {
-          name,
-          description,
-          date,
+          name: name,
         },
         { new: true }
       );
@@ -93,25 +85,23 @@ const holidayController = {
         return res.status(404).json({ message: "Service not found." });
       }
 
-      res.json({ message: "Service updated successfully.", newService });
+      res.json({ message: "Reason updated successfully.", newService });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
-
   deleteThread: async (req, res, next) => {
     try {
-      const patientId = req.params.referenceId;
-      const newService = await Holiday.findByIdAndDelete(patientId);
+      const patientId = req.params.reasonId;
+      const newService = await Reason.findByIdAndDelete(patientId);
       if (!newService) {
-        return res.status(404).json({ message: "Service not found." });
+        return res.status(404).json({ message: "Reason not found." });
       }
 
-      res.json({ message: "Service deleted successfully.", newService });
+      res.json({ message: "Reason deleted successfully.", newService });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
-
 };
-module.exports = holidayController;
+module.exports = reasonController;

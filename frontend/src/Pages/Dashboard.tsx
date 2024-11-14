@@ -9,6 +9,7 @@ import DashboardPage from "@/Components/Registration/Dashbordcomp/Registertable"
 import Dashboarddepartment from "@/Components/Department/Registertable";
 import DashboardServices from "@/Components/Services/Registertable";
 import Dashboardparameter from "@/Components/Parameter/Registertable";
+import Dashboardreason from "@/Components/Reason/Registertable";
 import DashboardparameterGroup from "@/Components/ParameterGroup/Registertable";
 import DashboardContainer from "@/Components/Container/Registertable";
 import DashboardTestMaster from "@/Components/Testmaster/Registertable";
@@ -49,6 +50,7 @@ const Dashboard = () => {
         {location.pathname === "/holiday" && <Dashboardholiday />}
         {location.pathname === "/department" && <Dashboarddepartment />}
         {location.pathname === "/parameter" && <Dashboardparameter />}
+        {location.pathname === "/reason" && <Dashboardreason />}
         {location.pathname === "/parametergroup" && <DashboardparameterGroup />}
         {location.pathname === "/specimen" && <Specimen />}
         {location.pathname === "/container" && <DashboardContainer />}
@@ -66,6 +68,7 @@ const Dashboard = () => {
         {/\/associatemaster\/edit\/\d+/.test(location.pathname) && <EditCard />}
         {location.pathname === "/tatmaster" && <DashboardTatMaster />}
         {location.pathname === "/Formula" && <Formula />}
+ 
       </main>
     </div>
   );

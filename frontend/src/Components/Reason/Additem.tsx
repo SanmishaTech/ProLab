@@ -38,8 +38,6 @@ interface AddItemProps {
   onAdd: (item: {
     id: string;
     name: string;
-    description: string;
-    date: Date;
   }) => void;
 }
 
@@ -56,13 +54,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [formData, setFormData] = useState({});
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
-
-    const updatedFormData = {
-      ...formData, // Spread the current form data
-      userId: User?._id, // Add the userId to the form data
-    };
-
-    await axios.post("/api/holiday", formData).then(() => {
+    await axios.post("/api/reason", formData).then(() => {
       window.location.reload();
     });
     setName("");
@@ -82,14 +74,6 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
       [name]: value, // dynamically set key-value pairs
     }));
   };
-
-  const handleChangeDate = (date: Date | null, key: string) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [key]: date ? format(date, "yyyy-MM-dd") : "", // Store formatted date string in formData
-    }));
-  };
-
   const addFields = (typeofschema) => {
     const allFieldstorender = [];
     Object.entries(typeofschema).map(([key, value]) => {
@@ -112,58 +96,19 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
           </div>
         );
       }
-
-      if (value === "Date") {
-        allFieldstorender.push(
-          <div className="grid grid-cols-4 items-center gap-4" key={key}>
-            <Label htmlFor={key} className="text-right">
-              {capitalizeText(key)}{" "}
-              {/* Dynamically capitalize the field name */}
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[280px] justify-start text-left font-normal",
-                    !formData[key] && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon />
-                  {formData[key] ? (
-                    format(new Date(formData[key]), "PPP")
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={formData[key] ? new Date(formData[key]) : null} // Use the formData value
-                  onSelect={(selectedDate) =>
-                    handleChangeDate(selectedDate, key)
-                  } // Update formData on date selection
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        );
-      }
     });
     return [...allFieldstorender];
   };
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Holiday</Button>
+        <Button variant="outline">Add Reason</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Holiday</DialogTitle>
+          <DialogTitle>Add New Reason</DialogTitle>
           <DialogDescription>
-            Enter the details of the holiday.
+            Enter the details of the Reasons you want to add.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

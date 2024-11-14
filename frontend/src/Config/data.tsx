@@ -17,6 +17,11 @@ export const navItems: NavItem[] = [
         href: "/department",
         icon: "department",
       },
+      {
+        title: "Holiday",
+        href: "/holiday",
+        icon: "department",
+      },
     ],
   },
   {
@@ -48,6 +53,11 @@ export const navItems: NavItem[] = [
         title: "TaT Master",
         href: "/tatmaster",
         icon: "Tat",
+      },
+      {
+        title: "Reason Master",
+        href: "/reason",
+        icon: "test",
       },
     ],
   },
