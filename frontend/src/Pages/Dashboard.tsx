@@ -22,6 +22,7 @@ import Specimen from "@/Components/Specimen/Registertable";
 import DashboardTestcard from "@/Components/Testmaster/TestCard";
 import TestCard from "@/Components/AssociateMaster/TestCard";
 import EditCard from "@/Components/AssociateMaster/Edittestcard";
+import Formula from "../Components/Formula/Formula";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 const Dashboard = () => {
@@ -66,6 +67,8 @@ const Dashboard = () => {
         {location.pathname === "/associatemaster/add" && <TestCard />}
         {/\/associatemaster\/edit\/\d+/.test(location.pathname) && <EditCard />}
         {location.pathname === "/tatmaster" && <DashboardTatMaster />}
+        {location.pathname === "/Formula" && <Formula />}
+ 
       </main>
     </div>
   );
