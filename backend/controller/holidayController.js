@@ -5,12 +5,12 @@ const mongoose = require("mongoose");
 const holidayController = {
   createThread: async (req, res, next) => {
     try {
-      const { name, description, date, userId } = req.body;
+      const { name, description, date } = req.body;
       const newService = new Holiday({
         name,
         description,
         date,
-        userId,
+        // userId,
       });
       const newServics = await newService.save();
 
@@ -25,10 +25,7 @@ const holidayController = {
   getServices: async (req, res, next) => {
     try {
       const userId = req.params.userId;
-      const usertobefound = new mongoose.Types.ObjectId(userId);
-      const patient = await Holiday.find({
-        userId: usertobefound,
-      });
+      const patient = await Holiday.find();
       res.status(200).json(patient);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -79,16 +76,16 @@ const holidayController = {
   },
   updateThreads: async (req, res, next) => {
     try {
-      const patientId = req.params.patientId;
-      const { name, age, phone, gender } = req.body;
+      const patientId = req.params.referenceId;
+      const { name, description, date } = req.body;
 
+      
       const newService = await Holiday.findByIdAndUpdate(
         patientId,
         {
           name,
-          age,
-          phone,
-          gender,
+          description,
+          date,
         },
         { new: true }
       );
@@ -101,5 +98,20 @@ const holidayController = {
       res.status(500).json({ error: error.message });
     }
   },
+
+  deleteThread: async (req, res, next) => {
+    try {
+      const patientId = req.params.referenceId;
+      const newService = await Holiday.findByIdAndDelete(patientId);
+      if (!newService) {
+        return res.status(404).json({ message: "Service not found." });
+      }
+
+      res.json({ message: "Service deleted successfully.", newService });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
 };
 module.exports = holidayController;

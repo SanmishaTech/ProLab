@@ -6,6 +6,6 @@ router.post("/", holidayController.createThread);
 router.get("/allholiday/:userId", holidayController.getServices);
 router.get("/reference/:referenceId", holidayController.getServicesbyId);
 router.put("/update/:referenceId", holidayController.updateThreads);
-// router.delete("/delete/:serviceId", Servicescontroller.deleteThread);
+router.delete("/delete/:referenceId", holidayController.deleteThread);
 
 module.exports = router;

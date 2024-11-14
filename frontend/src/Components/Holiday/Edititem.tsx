@@ -39,11 +39,18 @@ interface AddItemProps {
     id: string;
     name: string;
     description: string;
-    date: Date;
+    Date: Date;
   }) => void;
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
+const AddItem: React.FC<AddItemProps> = ({
+  onAdd,
+  typeofschema,
+  editid,
+  setToggleedit,
+  toggleedit,
+  editfetch,
+}) => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
   const [SelectedValue, setSelectedValue] = useState("");
@@ -54,15 +61,19 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [date, setDate] = useState<Date | null>(null);
   const [description, setdescription] = useState("");
   const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    const fetcheditdetails = async () => {
+      const response = await axios.get(`/api/${editfetch}`).then((res) => {
+        console.log(res.data);
+      });
+      setFormData(response.data);
+    };
+    fetcheditdetails();
+  }, []);
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
-
-    const updatedFormData = {
-      ...formData, // Spread the current form data
-      userId: User?._id, // Add the userId to the form data
-    };
-
-    await axios.post("/api/holiday", formData).then(() => {
+    await axios.put(`/api/${editid}`, formData).then(() => {
       window.location.reload();
     });
     setName("");
@@ -154,16 +165,19 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
     });
     return [...allFieldstorender];
   };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Holiday</Button>
+        <Button variant="ghost" className="w-full text-start">
+          Edit
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Holiday</DialogTitle>
+          <DialogTitle>Edit</DialogTitle>
           <DialogDescription>
-            Enter the details of the holiday.
+            Enter the details of the Holiday you want to edit.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
