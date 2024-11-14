@@ -134,7 +134,7 @@ export default function Dashboardholiday() {
   const mappedTableData = data?.map((item) => {
     return {
       _id: item?._id,
-      name: item?.name || "Name not provided",
+      name: item?.name || "Nam e not provided",
       description: item?.description || "Description not provided",
       adn: item?.adn || "Alternate name not provided",
       delete: `/parametergroup/delete/${item?._id}`,
