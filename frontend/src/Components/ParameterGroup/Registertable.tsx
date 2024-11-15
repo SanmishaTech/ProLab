@@ -20,7 +20,7 @@ export default function Dashboardholiday() {
   const typeofschema = {
     name: { type: "String", label: "Name" },
     description: { type: "String", label: "Description" },
-    adn: { type: "String", label: "Alternate Description" },
+    sort: { type: "Number", label: "Sort" },
     // sortBy: { type: "Number", label: "Sort By" },
     // date: { type: "Date", label: "Date" },
     // category: {
@@ -65,7 +65,7 @@ export default function Dashboardholiday() {
         headers: [
           { label: "name", key: "name" },
           { label: "Description", key: "description" },
-          { label: "Alternate Description", key: "adn" },
+          { label: "Sort", key: "sort" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -136,7 +136,7 @@ export default function Dashboardholiday() {
       _id: item?._id,
       name: item?.name || "Nam e not provided",
       description: item?.description || "Description not provided",
-      adn: item?.adn || "Alternate name not provided",
+      sort: item?.sort || "Alternate name not provided",
       delete: `/parametergroup/delete/${item?._id}`,
       action: "actions", // Placeholder for action buttons
       // Additional fields can be added here

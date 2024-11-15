@@ -126,7 +126,6 @@ export default function Dashboardholiday() {
       five: item?.urgentHours || "Urgent Hours not provided",
       six: capitalizedWeekday.join(", ") || "Weekday not provided",  // Join the weekdays into a string
   
-      edit: `/tatmaster/update/${item?._id}`,
       delete: `/tatmaster/delete/${item?._id}`,
       editfetch: `/tatmaster/reference/${item?._id}`,
     };
