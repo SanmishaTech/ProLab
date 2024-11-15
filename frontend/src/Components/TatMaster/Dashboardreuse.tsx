@@ -285,7 +285,7 @@ export default function Dashboard({
                                         Actions
                                       </DropdownMenuLabel>
                                       <Edititem
-                                        editid={row?.edit}
+                                        editid={row?._id}
                                         toogleedit={setToggleedit}
                                         typeofschema={typeofschema}
                                         setToggleedit={setToggleedit}
