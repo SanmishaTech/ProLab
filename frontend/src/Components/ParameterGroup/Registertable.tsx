@@ -18,7 +18,6 @@ export default function Dashboardholiday() {
 
   // Define the schema with various input types
   const typeofschema = {
-    name: { type: "String", label: "Name" },
     description: { type: "String", label: "Description" },
     sort: { type: "Number", label: "Sort" },
     // sortBy: { type: "Number", label: "Sort By" },
@@ -63,7 +62,6 @@ export default function Dashboardholiday() {
         title: "Parameter Group",
         description: "Manage Parameter Group and view their details.",
         headers: [
-          { label: "name", key: "name" },
           { label: "Description", key: "description" },
           { label: "Sort", key: "sort" },
           { label: "Action", key: "action" },
@@ -134,7 +132,6 @@ export default function Dashboardholiday() {
   const mappedTableData = data?.map((item) => {
     return {
       _id: item?._id,
-      name: item?.name || "Nam e not provided",
       description: item?.description || "Description not provided",
       sort: item?.sort || "Alternate name not provided",
       delete: `/parametergroup/delete/${item?._id}`,

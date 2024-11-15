@@ -17,14 +17,17 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-
+import FancyMultiSelect from "./Selectcomponent";
 import { MultiSelect } from "@/components/ui/multi-select";
 
 import axios from "axios";
 
 interface AddItemProps {
-  onAdd: (item: any) => void;
-  typeofschema: Record<string, any>;
+  // other props...
+  setData: (data: any) => void;
+
+  defaultValue?: any;
+  onDataChange: (data: any) => void;
 }
 
 const MultiSelectorComponent: React.FC<AddItemProps> = ({
@@ -45,14 +48,54 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
   const User = JSON.parse(user || "{}");
   const [handleopen, setHandleopen] = useState(false);
   const [value, setValue] = useState<string[]>([]);
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<any>([]);
   const [error, setError] = useState("");
+  const [tempvalue, settempvalue] = useState<string[]>([]);
   const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
+  const arayofformids = [];
+  useEffect(() => {
+    console.log("this is defaultValue", defaultValue);
+    if (defaultValue?.profile) {
+      const arayofformids = defaultValue?.profile.map(
+        (item: any) => item.value
+      );
+      settempvalue(arayofformids);
+    }
+  }, [defaultValue]);
+
+  // useEffect(() => {
+  //   Object.entries(formData).map(([key, value]) => {
+  //     arayofformids.push(value.value);
+  //   });
+  //   console.log("This is asdasdsadasdsad asdsadasdsad", arayofformids);
+  //   setData(arayofformids);
+  // }, [formData]);
+
+  useEffect(() => {
+    const arayofformids = Object.values(formData).map(
+      (item: any) => item.value
+    );
+    console.log("This is arayofformids", arayofformids);
+    settempvalue(arayofformids);
+  }, [formData]);
+
+  useEffect(() => {
+    if (typeof setData === "function") {
+      setData(tempvalue);
+    } else {
+      console.error("setData is not a function");
+    }
+  }, [tempvalue, setData]);
+
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const response = await axios.get(`/api/testmaster/alltestmaster`);
-        setSelectedFrameworks(response.data);
+        const filteredData = response.data.map((item: any) => ({
+          value: item._id,
+          label: item.name,
+        }));
+        setSelectedFrameworks(filteredData);
       } catch (error) {
         console.error("Error fetching services:", error);
       }
@@ -94,8 +137,16 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
             Enter the details of the Parameter Group you want to add.
           </DialogDescription>
         </DialogHeader>
-
-        <MultiSelect
+        <div className="mt-4">
+          <h2 className="text-sm font-semibold">Select Tests</h2>
+        </div>
+        <FancyMultiSelect
+          options={selectedFrameworks}
+          value={formData}
+          onChange={setFormData}
+          defaultValue={defaultValue?.profile}
+        />
+        {/* <MultiSelect
           options={value}
           onValueChange={setFormData}
           defaultValue={
@@ -123,22 +174,12 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
           placeholder="Select frameworks"
           variant="inverted"
           maxCount={5}
-        />
-        <div className="mt-4">
-          <h2 className="text-xl font-semibold">Selected Frameworks:</h2>
-          {/* <ul className="list-disc list-inside">
-            {console.log(formData)}
-            {formData?.map((framework) => (
-              <li key={framework._id}>{framework.name}</li>
-            ))}
-          </ul> */}
-        </div>
+        /> */}
 
         <DialogFooter>
           <Button
             onClick={() => {
               setHandleopen(false);
-              setData(formData);
             }}
             type="button"
           >

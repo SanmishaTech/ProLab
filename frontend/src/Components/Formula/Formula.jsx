@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Minus,
@@ -23,6 +23,10 @@ const AdvancedFormulaBuilder = () => {
   const [formula, setFormula] = useState([]);
   const [activeTab, setActiveTab] = useState("numbers"); // 'numbers' | 'parameters'
 
+  useEffect(() => {
+    const formulaString = formula.map((item) => item.value).join(" ");
+    console.log("This is the formula", formulaString);
+  }, [formula]);
   const addNumber = (num) => {
     if (formula.length > 0 && formula[formula.length - 1].type === "number") {
       const lastItem = formula[formula.length - 1];
@@ -76,13 +80,13 @@ const AdvancedFormulaBuilder = () => {
     }
 
     return (
-      <div key={index} className="flex items-center gap-1">
+      <div key={index} className="flex items-center gap-1 relative">
         <div className={className}>
           {item.type === "parameter" ? item.display : item.value}
         </div>
         <button
           onClick={() => removeItem(index)}
-          className="p-1 hover:bg-red-100 rounded"
+          className="p-1 hover:bg-red-100 rounded absolute top-[-.5rem] right-[-.5rem]"
         >
           <Trash2 className="w-4 h-4 text-red-500" />
         </button>
@@ -113,12 +117,25 @@ const AdvancedFormulaBuilder = () => {
               formula.map((item, index) => renderFormulaItem(item, index))
             )}
           </div>
-
-          {/* Controls */}
+          <div className="col-span-4 border-b p-4">
+            <h3 className="font-medium mb-2 text-gray-700">Parameters</h3>
+            <div className="space-y-2 flex flex-wrap gap-2">
+              {parameters.map((param) => (
+                <button
+                  key={param.id}
+                  onClick={() => addParameter(param)}
+                  className={parameterButtonClass}
+                >
+                  <div className="flex items-center justify-between">
+                    {param.name}
+                    <ChevronRight className="w-4 h-4" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="grid grid-cols-12 gap-4">
-            {/* Left Panel - Numbers & Operators */}
             <div className="col-span-8 space-y-4">
-              {/* Numbers */}
               <div className="grid grid-cols-3 gap-2">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
                   <button
@@ -137,7 +154,6 @@ const AdvancedFormulaBuilder = () => {
                 </button>
               </div>
 
-              {/* Operators and Brackets */}
               <div className="grid grid-cols-4 gap-2">
                 <button
                   onClick={() => addOperator("+")}
@@ -179,28 +195,8 @@ const AdvancedFormulaBuilder = () => {
                 </button>
               </div>
             </div>
-
-            {/* Right Panel - Parameters */}
-            <div className="col-span-4 border-l pl-4">
-              <h3 className="font-medium mb-2 text-gray-700">Parameters</h3>
-              <div className="space-y-2">
-                {parameters.map((param) => (
-                  <button
-                    key={param.id}
-                    onClick={() => addParameter(param)}
-                    className={parameterButtonClass}
-                  >
-                    <div className="flex items-center justify-between">
-                      {param.name}
-                      <ChevronRight className="w-4 h-4" />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
-          {/* Example/Preview */}
           <div className="text-sm text-gray-500">
             Example format: ( CBC × (Hematology × 100) × 2 )
           </div>
