@@ -192,33 +192,33 @@ const AddItem: React.FC<AddItemProps> = ({
           );
           break;
 
-        case "Select":
-          allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor={key} className="text-right">
-                {label}
-              </Label>
-              <Select onValueChange={(value) => handleChange(key, value)}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue
-                    placeholder={`Select ${label.toLowerCase()}`}
-                    value={formData[key] || ""}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>{label}</SelectLabel>
-                    {value.options.map((option: any) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          );
-          break;
+          case "Select":
+            allFieldsToRender.push(
+              <div key={key} className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor={key} className="text-right">
+                  {label}
+                </Label>
+                <Select onValueChange={(value) => handleChange(key, value)}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue
+                      placeholder={`Select ${label.toLowerCase()}`}
+                      value={formData[key] || ""}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>{label}</SelectLabel>
+                      {value?.options?.map((option: any) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            );
+            break;
 
         // case "Checkbox":
         //   allFieldsToRender.push(
@@ -266,6 +266,7 @@ const AddItem: React.FC<AddItemProps> = ({
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
           {addFields(typeofschema)}
+          
         </div>
 
         <DialogFooter>

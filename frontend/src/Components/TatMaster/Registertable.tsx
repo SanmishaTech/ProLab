@@ -12,12 +12,12 @@ export default function Dashboardholiday() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const typeofschema = {
-    selectTest: "String",
-    startTime: "Date",
-    endTime: "Date",
-    hoursNeeded: "Number",
-    urgentHours: "Number",
-    weekday: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+    selectTest: { type: "String", label: "Select Test" },
+    startTime: { type: "String", label: "Start Time" },
+    endTime: { type: "String", label: "End Time" },
+    hoursNeeded: { type: "Number", label: "Hours Needed" },
+    urgentHours: { type: "Number", label: "Urgent Hours" },
+     
   };
   useEffect(() => {
     // Fetch data from the API
