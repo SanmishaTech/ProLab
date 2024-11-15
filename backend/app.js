@@ -25,11 +25,9 @@ var ContainerRoutes = require("./routes/containerRoutes");
 var TestMasterRoutes = require("./routes/TestMasterRoutes");
 var TestLinkMaster = require("./routes/testlinkmasterRoutes");
 var AssociateMaster = require("./routes/associateRoutes");
- 
 var TatMasterRoutes = require("./routes/tatMasterRoutes");
- 
 var ReasonMaster = require("./routes/reasonRoutes");
- 
+var BarcodeRoutes = require("./routes/barcodeRoutes");
 
 var app = express();
 const corsOptions = {
@@ -66,11 +64,9 @@ app.use("/api/container", ContainerRoutes);
 app.use("/api/testmaster", TestMasterRoutes);
 app.use("/api/testmasterlink", TestLinkMaster);
 app.use("/api/associatemaster", AssociateMaster);
- 
 app.use("/api/tatmaster", TatMasterRoutes);
- 
 app.use("/api/reason", ReasonMaster);
- 
+app.use("/api/barcode", BarcodeRoutes);
 
 app.use(express.static(path.join(__dirname, "./dist")));
 
