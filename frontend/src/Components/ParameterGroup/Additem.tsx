@@ -191,28 +191,28 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
           break;
 
         // Add this case in the addFields method
-        case "Checkbox":
-          allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor={key} className="text-right">
-                {label}
-              </Label>
-              <div className="col-span-3 flex items-center space-x-2">
-                <Checkbox
-                  id={key}
-                  checked={formData[key] || false}
-                  onCheckedChange={(checked) => handleChange(key, checked)}
-                />
-                <label
-                  htmlFor={key}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {label}
-                </label>
-              </div>
-            </div>
-          );
-          break;
+        // case "Checkbox":
+        //   allFieldsToRender.push(
+        //     <div key={key} className="grid grid-cols-4 items-center gap-4">
+        //       <Label htmlFor={key} className="text-right">
+        //         {label}
+        //       </Label>
+        //       <div className="col-span-3 flex items-center space-x-2">
+        //         <Checkbox
+        //           id={key}
+        //           checked={formData[key] || false}
+        //           onCheckedChange={(checked) => handleChange(key, checked)}
+        //         />
+        //         <label
+        //           htmlFor={key}
+        //           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        //         >
+        //           {label}
+        //         </label>
+        //       </div>
+        //     </div>
+        //   );
+        //   break;
 
         // Add more cases for different field types as needed
 

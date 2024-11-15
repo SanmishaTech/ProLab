@@ -232,7 +232,7 @@ const AddItem: React.FC<AddItemProps> = ({
         //       <Checkbox
         //         id={key}
         //         checked={formData[key] || false}
-        //         onCheckedChange={(checked) => handleChange(key, checked)}
+        //         onCheckedChange={(checked) => handleChange(key, checked)}  
         //       />
         //     </div>
         //   );

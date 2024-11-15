@@ -69,7 +69,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(`/api/tatmaster/alltatmaster`);
         setServices(response.data);
       } catch (error) {
         console.error("Error fetching services:", error);

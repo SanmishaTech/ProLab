@@ -55,7 +55,7 @@ const tatController = {
   updateThreads: async (req, res) => {
     try {
       const tatTestId = req.params.tatTestId;
-      const {
+      const { 
         selectTest,
         startTime,
         endTime,
