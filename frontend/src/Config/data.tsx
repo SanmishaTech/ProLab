@@ -64,6 +64,11 @@ export const navItems: NavItem[] = [
         href: "/barcode",
         icon: "pipette",
       },
+      {
+        title: "High Lighter Setup",
+        href: "/highlighter",
+        icon: "Tat",
+      },
     ],
   },
 

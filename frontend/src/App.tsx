@@ -108,6 +108,7 @@ function App() {
         <Route path="/parameter" element={<Dashboard />} />
         <Route path="/reason" element={<Dashboard />} />
         <Route path="/barcode" element={<Dashboard />} />
+        <Route path="/highlighter" element={<Dashboard />} />
         <Route path="/parametergroup" element={<Dashboard />} />
         <Route path="/specimen" element={<Dashboard />} />
         <Route path="/container" element={<Dashboard />} />

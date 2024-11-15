@@ -11,6 +11,7 @@ import DashboardServices from "@/Components/Services/Registertable";
 import Dashboardparameter from "@/Components/Parameter/Registertable";
 import Dashboardreason from "@/Components/Reason/Registertable";
 import DashboardBarcode from "@/Components/Barcode/Registertable";
+import DashboardHighlighter from "@/Components/Highlighter/Registertable";
 import DashboardparameterGroup from "@/Components/ParameterGroup/Registertable";
 import DashboardContainer from "@/Components/Container/Registertable";
 import DashboardTestMaster from "@/Components/Testmaster/Registertable";
@@ -53,6 +54,7 @@ const Dashboard = () => {
         {location.pathname === "/parameter" && <Dashboardparameter />}
         {location.pathname === "/reason" && <Dashboardreason />}
         {location.pathname === "/barcode" && <DashboardBarcode />}
+        {location.pathname === "/highlighter" && <DashboardHighlighter />}
         {location.pathname === "/parametergroup" && <DashboardparameterGroup />}
         {location.pathname === "/specimen" && <Specimen />}
         {location.pathname === "/container" && <DashboardContainer />}
