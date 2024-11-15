@@ -59,6 +59,11 @@ export const navItems: NavItem[] = [
         href: "/reason",
         icon: "test",
       },
+      {
+        title: "Barcode Setup",
+        href: "/barcode",
+        icon: "pipette",
+      },
     ],
   },
 
