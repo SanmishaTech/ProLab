@@ -121,6 +121,11 @@ function ProfileForm({ formData }) {
     fetchSpecimen();
   }, []);
 
+  const getformdatafromnextcomponent = (data) => {
+    console.log("Received data:", data);
+    setFormData(data);
+  };
+
   useEffect(() => {
     reset({
       ...formData,
@@ -334,9 +339,9 @@ function ProfileForm({ formData }) {
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-full p-4">
           <MultiSelectorComponent
-            setData={setFormData}
             defaultValue={formData}
-          />
+            setData={getformdatafromnextcomponent}
+          />{" "}
         </div>
         {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField

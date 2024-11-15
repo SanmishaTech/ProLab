@@ -122,6 +122,11 @@ function ProfileForm() {
     console.log("This is formData", formData);
   }, [formData]);
 
+  const getformdatafromnextcomponent = (data) => {
+    console.log("Received data:", data);
+    setFormData(data);
+  };
+
   return (
     <Form {...form}>
       <form
@@ -300,7 +305,7 @@ function ProfileForm() {
           />
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-full p-4">
-          <MultiSelectorComponent setData={setFormData} />
+          <MultiSelectorComponent setData={getformdatafromnextcomponent} />{" "}
         </div>
         {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField

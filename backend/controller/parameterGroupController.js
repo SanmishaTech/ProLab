@@ -5,9 +5,8 @@ const mongoose = require("mongoose");
 const parameterController = {
   createThread: async (req, res, next) => {
     try {
-      const { name, description, sort } = req.body;
+      const { description, sort } = req.body;
       const newService = new ParameterGroup({
-        name,
         description,
         sort,
       });
@@ -80,12 +79,11 @@ const parameterController = {
   updateThreads: async (req, res, next) => {
     try {
       const patientId = req.params.parameterId;
-      const { name, description, sort } = req.body;
+      const { description, sort } = req.body;
 
       const newService = await ParameterGroup.findByIdAndUpdate(
         patientId,
         {
-          name,
           description,
           sort,
         },
