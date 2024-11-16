@@ -12,19 +12,22 @@ export default function Dashboardholiday() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const typeofschema = {
-    selectTest: { type: "String", label: "Select Test" },
-    startTime: { type: "String", label: "Start Time" },
-    endTime: { type: "String", label: "End Time" },
-    hoursNeeded: { type: "Number", label: "Hours Needed" },
-    urgentHours: { type: "Number", label: "Urgent Hours" },
-     
+    patientName: "Checkbox",
+    patientId: "Checkbox",
+    sid: "Checkbox",
+    dateOfAppointment: "Checkbox",
+    timeOfAppointment: "Checkbox",
+    testName: "Checkbox",
+    testAbbreviation: "Checkbox",
+    container: "Checkbox",
   };
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/tatmaster/alltatmaster`)
+      .get(`/api/barcode/allhighlighter`)
       .then((response) => {
         setData(response.data);
+
         setLoading(false);
       })
       .catch((err) => {
@@ -37,20 +40,22 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "TaT Master" },
+        { label: "High Lighter Setup" },
       ],
-      searchPlaceholder: "Search registrations...",
+      searchPlaceholder: "Search...",
       userAvatar: "/path-to-avatar.jpg",
       tableColumns: {
-        title: "TaT Master",
-        description: "Manage TaT Master and view their details.", 
+        title: "Highlighter",
+        description: "Manage Highlighter and view their details.",
         headers: [
-          { label: "Select Test", key: "one" },
-          { label: "Start Time", key: "two" },
-          { label: "End Time", key: "three" },
-          { label: "Hours Needed", key: "four" },
-          { label: "Urgent Hours", key: "five" },
-          { label: "Weekday", key: "six" },
+          { label: "Patient Name", key: "one" },
+          { label: "Patient id", key: "two" },
+          { label: "sid", key: "three" },
+          { label: "Date of Appointment", key: "four" },
+          { label: "Time of Appointment", key: "five" },
+          { label: "Test Name", key: "six" },
+          { label: "Test Abbreviation", key: "seven" },
+          { label: "Container", key: "eight" },
           { label: "Action", key: "action" },
         ],
         // tabs: [
@@ -106,45 +111,48 @@ export default function Dashboardholiday() {
     return <div className="p-4 text-red-500">Error loading registrations.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
-  // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data?.map((item) => {
-    const services = item?.services || [];
-    
-    // Capitalize the first letter of each weekday
-    const capitalizedWeekday = item?.weekday?.map(day => {
-      return day.charAt(0).toUpperCase() + day.slice(1); // Capitalize first letter
-    }) || ["Weekday not provided"];
+  // Ensure data is an array and contains items
+  const mappedTableData =
+    Array.isArray(data) && data.length > 0
+      ? data.map((item) => {
+          const services = item?.services || [];
+          const paidAmount = item?.paymentMode?.paidAmount || 0;
 
-    
-  
-    return {
-      _id: item?._id,
-      one: item?.selectTest?.name || "Select Test not provided",
-      two: item?.startTime || "Start Time not provided",
-      three: item?.endTime || "End Time not provided",
-      four: item?.hoursNeeded || "Hours Needed not provided",
-      five: item?.urgentHours || "Urgent Hours not provided",
-      six: capitalizedWeekday.join(", ") || "Weekday not provided",  // Join the weekdays into a string
-  
-      delete: `/tatmaster/delete/${item?._id}`,
-      editfetch: `/tatmaster/reference/${item?._id}`,
-    };
-  });
+          // Calculate the total service price based on each service's populated details.
+          const totalServicePrice = services.reduce((acc, service) => {
+            const servicePrice = service?.serviceId?.price || 0; // Replace 'price' with the actual field name for service price
+            return acc + servicePrice;
+          }, 0);
 
+          // Calculate balance amount based on total service price and paid amount.
+          const balanceAmount =
+            totalServicePrice - paidAmount > 0
+              ? totalServicePrice - paidAmount
+              : 0;
+
+          return {
+            _id: item?._id,
+            one: item?.patientName,
+            two: item?.patientId,
+            three: item?.sid,
+            four: item?.dateOfAppointment,
+            five: item?.timeOfAppointment,
+            six: item?.testName,
+            seven: item?.testAbbreviation,
+            eight: item?.container,
+            edit: `/barcode/update/${item?._id}`,
+            delete: `/barcode/delete/${item?._id}`,
+            editfetch: `/barcode/reference/${item?._id}`,
+            // two: item?. || "Unknown",
+          };
+        })
+      : [];
   return (
     <div className="p-4">
       <Dashboard
         breadcrumbs={config.breadcrumbs}
         searchPlaceholder={config.searchPlaceholder}
         userAvatar={userAvatar}
-        tableColumns={config.tableColumns}
-        tableData={mappedTableData}
-        onAddProduct={handleAddProduct}
-        onExport={handleExport}
-        onFilterChange={handleFilterChange}
-        onProductAction={handleProductAction}
-        AddItem={AddItem}
-        typeofschema={typeofschema}
       />
     </div>
   );
