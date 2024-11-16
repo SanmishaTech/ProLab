@@ -384,7 +384,7 @@ function ProfileForm() {
         </div> */}
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
-            Update profile
+            Add Profile
           </Button>
         </div>
       </form>
