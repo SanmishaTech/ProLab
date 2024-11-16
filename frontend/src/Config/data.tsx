@@ -107,11 +107,11 @@ export const navItems: NavItem[] = [
         title: "Machine Master",
         href: "/machinemaster",
       },
- 
-       {
-        title: "Container Link Master",
-        href: "/containerlinkmaster",
-      },
+
+      // {
+      //   title: "Container Link Master",
+      //   href: "/containerlinkmaster",
+      // },
       {
         title: "Associate Master",
         href: "/associatemaster",
