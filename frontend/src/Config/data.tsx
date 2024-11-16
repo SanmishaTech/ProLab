@@ -80,21 +80,6 @@ export const navItems: NavItem[] = [
         href: "/tatmaster",
         icon: "Tat",
       },
-      {
-        title: "Reason Master",
-        href: "/reason",
-        icon: "test",
-      },
-      {
-        title: "Barcode Setup",
-        href: "/barcode",
-        icon: "pipette",
-      },
-      {
-        title: "High Lighter Setup",
-        href: "/highlighter",
-        icon: "Tat",
-      },
     ],
   },
 
