@@ -34,7 +34,7 @@ const Servicescontroller = {
   },
   getServicesbyId: async (req, res, next) => {
     try {
-      const doctorId = req.params.doctorId;
+      const doctorId = req.params.departmentId;
       const services = await Department.findById(doctorId);
       res.status(200).json(services);
     } catch (error) {

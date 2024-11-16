@@ -28,8 +28,11 @@ var AssociateMaster = require("./routes/associateRoutes");
 var TatMasterRoutes = require("./routes/tatMasterRoutes");
 var ReasonMaster = require("./routes/reasonRoutes");
 var BarcodeRoutes = require("./routes/barcodeRoutes");
-var HighlighterRoutes = require("./routes/highlighterRoutes");
-
+ var MachineRoutes = require("./routes/machineRoutes");
+var MachineLinkMaster = require("./routes/machineLinkMaster");
+var ContainerLinkMaster = require("./routes/containerLinkMaster");
+ var HighlighterRoutes = require("./routes/highlighterRoutes");
+ 
 var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application
@@ -68,8 +71,11 @@ app.use("/api/associatemaster", AssociateMaster);
 app.use("/api/tatmaster", TatMasterRoutes);
 app.use("/api/reason", ReasonMaster);
 app.use("/api/barcode", BarcodeRoutes);
-app.use("/api/highlighter", HighlighterRoutes);
-
+ app.use("/api/machinemaster", MachineRoutes);
+app.use("/api/machinelinkmaster", MachineLinkMaster);
+app.use("/api/containerlinkmaster", ContainerLinkMaster);
+ app.use("/api/highlighter", HighlighterRoutes);
+ 
 app.use(express.static(path.join(__dirname, "./dist")));
 
 app.get("*", (req, res) => {

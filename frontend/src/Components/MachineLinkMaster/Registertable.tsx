@@ -3,34 +3,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Dashboard from "./Dashboardreuse";
-// import AddItem from "./Additem"; // Corrected import path
+import AddItem from "./Additem"; // Corrected import path
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
-
-const AddItem = () => {
-  const navigate = useNavigate();
-  const handleAdd = () => {
-    navigate("/associatemaster/add");
-  };
-  return (
-    <Button onClick={handleAdd} variant="outline">
-      Add Item
-    </Button>
-  );
-};
-const Edititem = (id: string) => {
-  const navigate = useNavigate();
-  const handleAdd = () => {
-    navigate(`/associatemaster/edit/${id?.id}`);
-  };
-  return (
-    <Button onClick={handleAdd} variant="ghost" className="w-full">
-      Edit Item
-    </Button>
-  );
-};
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -39,50 +15,51 @@ export default function Dashboardholiday() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
-  const [parameter, setParameter] = useState<any[]>([]);
-  const [parameterGroup, setParameterGroup] = useState<any[]>([]);
+  const [machine, setMachine] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
 
   useEffect(() => {
-    // Fetch data from the API
-    const fetchparameter = async () => {
+    const fetchMachine = async () => {
       try {
-        const response = await axios.get(`/api/associatemaster/allassociates`);
-        console.log(response.data);
-        setParameter(response.data);
+        const response = await axios.get(`/api/machinemaster/allmachinemaster`);
+        console.log("This is a mahcine", response.data);
+        setMachine(response.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching machines:", error);
       }
     };
-    const fetchparametergroup = async () => {
-      try {
-        const response = await axios.get(`/api/associatemaster/allassociates`);
-        console.log(response.data);
-        setParameterGroup(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    const fetchtest = async () => {
+    const fetchTests = async () => {
       try {
         const response = await axios.get(`/api/testmaster/alltestmaster`);
         console.log(response.data);
         setTest(response.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching tests:", error);
       }
     };
-    fetchparameter();
-    fetchparametergroup();
-    fetchtest();
+    fetchMachine();
+    fetchTests();
   }, []);
+
   // Define the schema with various input types
-  useEffect(() => {
-    console.log("This is parameter", parameter);
-    console.log("This is parameterGroup", parameterGroup);
-    console.log("This is test", test);
-  }, [parameter, parameterGroup, test]);
   const typeofschema = {
+    name: {
+      type: "Select",
+      label: "Machine Name",
+      options: machine?.map((machine) => ({
+        value: machine?._id,
+        label: machine?.name,
+      })),
+    },
+    test: {
+      type: "Select",
+      label: "Test Name",
+      options: test?.map((test) => ({
+        value: test?._id,
+        label: test?.name,
+      })),
+    },
+
     // sortBy: { type: "Number", label: "Sort By" },
     // date: { type: "Date", label: "Date" },
     // category: {
@@ -95,14 +72,14 @@ export default function Dashboardholiday() {
     //   ],
     // },
     // isActive: { type: "Checkbox", label: "Is Active" },
-    isbol: { type: "Checkbox", label: "Is bol" },
+    // isbol: { type: "Checkbox", label: "Is bol" },
     // Add more fields as needed
   };
 
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/associatemaster/allassociates`)
+      .get(`/api/machinelinkmaster/allmachinelinkmaster`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -117,18 +94,16 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Associate Master" },
+        { label: "Machine Link Master" },
       ],
-      searchPlaceholder: "Search Associate Master...",
+      searchPlaceholder: "Search Machine Link Master...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Associate Master",
-        description: "Manage Associate Master and view their details.",
+        title: "Machine Link Master",
+        description: "Manage Machine Link Master and view their details.",
         headers: [
-          { label: "Associate Type", key: "associateType" },
-          { label: "First Name", key: "firstName" },
-          { label: "Last Name", key: "lastName" },
-          { label: "Mobile", key: "mobile" },
+          { label: "Machine Name", key: "name" },
+          { label: "Test Name", key: "test" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -190,25 +165,21 @@ export default function Dashboardholiday() {
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error)
-    return <div className="p-4 text-red-500">Error loading parameters.</div>;
+    return <div className="p-4 text-red-500">Error loading machines.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data
-    ? data?.map((item) => {
-        console.log("This is item", item);
-        return {
-          _id: item?._id,
-          associateType: item?.associateType || "Associate Type not provided",
-          firstName: item?.firstName || "First Name not provided",
-          lastName: item?.lastName || "Last Name not provided",
-          mobile: item?.mobile || "Mobile not provided",
-          delete: `/associatemaster/delete/${item?._id}`,
-          action: "actions", // Placeholder for action buttons
-          // Additional fields can be added here
-        };
-      })
-    : [];
+  if (!data) return [];
+  const mappedTableData = data?.map((item) => {
+    return {
+      _id: item?._id,
+      name: item?.name?.name || "Machine Name not provided",
+      test: item?.test?.name || "Test Name not provided",
+      delete: `/machinelinkmaster/delete/${item?._id}`,
+      action: "actions", // Placeholder for action buttons
+      // Additional fields can be added here
+    };
+  });
 
   return (
     <div className="p-4">
@@ -218,7 +189,6 @@ export default function Dashboardholiday() {
         userAvatar={config.userAvatar}
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
-        Edititem={Edititem}
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}

@@ -31,8 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { MultiSelect } from "@/components/ui/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import axios from "axios";
@@ -40,9 +38,14 @@ import axios from "axios";
 interface AddItemProps {
   onAdd: (item: any) => void;
   typeofschema: Record<string, any>;
+  editid: string;
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
+const AddItem: React.FC<AddItemProps> = ({
+  onAdd,
+  typeofschema = {},
+  editid,
+}) => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
@@ -50,28 +53,38 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [error, setError] = useState("");
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
-  const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
 
+  useEffect(() => {
+    if (editid) {
+      axios
+        .get(`/api/machinemaster/reference/${editid}`)
+        .then((res) => {
+          setFormData(res.data);
+        })
+        .catch((err) => {
+          console.error("Error fetching data:", err);
+        });
+    }
+    return () => {
+      setFormData({});
+      setHandleopen(false);
+    };
+  }, [editid]);
   const handleAdd = async () => {
     setLoading(true);
     try {
-      setFormData({
-        ...formData,
-        parameter: selectedParameters,
-      });
-      await axios.post(`/api/testmasterlink`, {
-        test: formData.test,
-        parameterGroup: formData.parameterGroup,
-        parameter: selectedParameters,
-      });
-      onAdd(formData); // Notify parent component
-      setFormData({});
-      setHandleopen(false);
-      // window.location.reload();
-      setError("");
+      await axios
+        .put(`/api/machinemaster/update/${editid}`, formData)
+        .then((res) => {
+          console.log("ppaapppppp", res.data);
+          // onAdd(res.data.newService);
+          setFormData(res.data.newService);
+          setHandleopen(false);
+          setError("");
+          window.location.reload();
+        });
     } catch (err) {
-      setError("Failed to add parameter group. Please try again.");
+      setError("Failed to add Machine Master. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -91,27 +104,13 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
     }));
   };
 
-  useEffect(() => {
-    const fetchparameter = async () => {
-      try {
-        const response = await axios.get(`/api/testlinkmaster/alllinkmaster`);
-        console.log(response.data);
-        setSelectedFrameworks(
-          response.data.map((framework) => ({
-            value: framework?._id,
-            label: framework?.name,
-          }))
-        );
-      } catch (error) {
-        console.error("Error fetching services:", error);
-      }
-    };
-    fetchparameter();
-  }, []);
-
   // Dynamically render form fields based on the schema
   const addFields = (schema: Record<string, any>) => {
     const allFieldsToRender = [];
+
+    if (!schema || Object.keys(schema).length === 0) {
+      return <p>No fields available to display.</p>; // Or handle this case as you prefer
+    }
 
     Object.entries(schema).forEach(([key, value]) => {
       const fieldType = value.type;
@@ -221,29 +220,23 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
           );
           break;
 
-        // Add this case in the addFields method
-        case "Checkbox":
-          allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor={key} className="text-right">
-                {label}
-              </Label>
-              <div className="col-span-3 flex items-center space-x-2">
-                <Checkbox
-                  id={key}
-                  checked={formData[key] || false}
-                  onCheckedChange={(checked) => handleChange(key, checked)}
-                />
-                <label
-                  htmlFor={key}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {label}
-                </label>
-              </div>
-            </div>
-          );
-          break;
+        // case "Checkbox":
+        //   allFieldsToRender.push(
+        //     <div
+        //       style={{ justifyContent: "space-evenly" }}
+        //       key={key}
+        //       className="flex items-center space-x-4"
+        //     >
+        //       <Label htmlFor={key}>{label}</Label>
+
+        //       <Checkbox
+        //         id={key}
+        //         checked={formData[key] || false}
+        //         onCheckedChange={(checked) => handleChange(key, checked)}
+        //       />
+        //     </div>
+        //   );
+        //   break;
 
         // Add more cases for different field types as needed
 
@@ -259,31 +252,20 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Parameter Group</Button>
+        <Button variant="ghost" className="w-full">
+          Edit
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Parameter Group</DialogTitle>
+          <DialogTitle>Edit item</DialogTitle>
           <DialogDescription>
-            Enter the details of the Parameter Group you want to add.
+            Enter the details of the item you want to edit.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
           {addFields(typeofschema)}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Select Parameters</Label>
-            <MultiSelect
-              className="col-span-3"
-              options={selectedFrameworks}
-              onValueChange={setSelectedParameters}
-              // defaultValue={selectedFrameworks}
-              placeholder="Select frameworks"
-              variant="inverted"
-              animation={2}
-              maxCount={2}
-            />
-          </div>
         </div>
 
         <DialogFooter>

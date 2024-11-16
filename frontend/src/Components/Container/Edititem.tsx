@@ -104,6 +104,7 @@ const AddItem: React.FC<AddItemProps> = ({
             <Label htmlFor="price" className="text-right">
               {capitalizeText(key)}
             </Label>
+            {console.log("ppappa", formData[key])}
             <Input
               id="name"
               name={key}

@@ -1,6 +1,6 @@
 // components/AddItem.tsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,8 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { MultiSelect } from "@/components/ui/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import axios from "axios";
@@ -50,28 +48,17 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [error, setError] = useState("");
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
-  const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
 
   const handleAdd = async () => {
     setLoading(true);
     try {
-      setFormData({
-        ...formData,
-        parameter: selectedParameters,
-      });
-      await axios.post(`/api/testmasterlink`, {
-        test: formData.test,
-        parameterGroup: formData.parameterGroup,
-        parameter: selectedParameters,
-      });
+      await axios.post(`/api/machinemaster`, formData);
       onAdd(formData); // Notify parent component
       setFormData({});
       setHandleopen(false);
-      // window.location.reload();
       setError("");
     } catch (err) {
-      setError("Failed to add parameter group. Please try again.");
+      setError("Failed to add Machine Master. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -90,24 +77,6 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
       [name]: value,
     }));
   };
-
-  useEffect(() => {
-    const fetchparameter = async () => {
-      try {
-        const response = await axios.get(`/api/testlinkmaster/alllinkmaster`);
-        console.log(response.data);
-        setSelectedFrameworks(
-          response.data.map((framework) => ({
-            value: framework?._id,
-            label: framework?.name,
-          }))
-        );
-      } catch (error) {
-        console.error("Error fetching services:", error);
-      }
-    };
-    fetchparameter();
-  }, []);
 
   // Dynamically render form fields based on the schema
   const addFields = (schema: Record<string, any>) => {
@@ -222,28 +191,28 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
           break;
 
         // Add this case in the addFields method
-        case "Checkbox":
-          allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor={key} className="text-right">
-                {label}
-              </Label>
-              <div className="col-span-3 flex items-center space-x-2">
-                <Checkbox
-                  id={key}
-                  checked={formData[key] || false}
-                  onCheckedChange={(checked) => handleChange(key, checked)}
-                />
-                <label
-                  htmlFor={key}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {label}
-                </label>
-              </div>
-            </div>
-          );
-          break;
+        // case "Checkbox":
+        //   allFieldsToRender.push(
+        //     <div key={key} className="grid grid-cols-4 items-center gap-4">
+        //       <Label htmlFor={key} className="text-right">
+        //         {label}
+        //       </Label>
+        //       <div className="col-span-3 flex items-center space-x-2">
+        //         <Checkbox
+        //           id={key}
+        //           checked={formData[key] || false}
+        //           onCheckedChange={(checked) => handleChange(key, checked)}
+        //         />
+        //         <label
+        //           htmlFor={key}
+        //           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        //         >
+        //           {label}
+        //         </label>
+        //       </div>
+        //     </div>
+        //   );
+        //   break;
 
         // Add more cases for different field types as needed
 
@@ -259,31 +228,18 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Parameter Group</Button>
+        <Button variant="outline">Add Machine Master</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Parameter Group</DialogTitle>
+          <DialogTitle>Add New Machine Master</DialogTitle>
           <DialogDescription>
-            Enter the details of the Parameter Group you want to add.
+            Enter the details of the Machine Master you want to add.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
           {addFields(typeofschema)}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Select Parameters</Label>
-            <MultiSelect
-              className="col-span-3"
-              options={selectedFrameworks}
-              onValueChange={setSelectedParameters}
-              // defaultValue={selectedFrameworks}
-              placeholder="Select frameworks"
-              variant="inverted"
-              animation={2}
-              maxCount={2}
-            />
-          </div>
         </div>
 
         <DialogFooter>

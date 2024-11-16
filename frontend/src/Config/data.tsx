@@ -30,6 +30,31 @@ export const navItems: NavItem[] = [
     icon: "sad",
     children: [
       {
+        title: "test Machine Link Master",
+        href: "/machinelinkmaster",
+      },
+      {
+        title: "Test parameter link Master",
+        href: "/testlinkmaster",
+      },
+      {
+        title: "Formula Master",
+        href: "/formula",
+        icon: "pipette",
+      },
+      {
+        title: "Barcode Setup",
+        href: "/barcode",
+      },
+      {
+        title: "Rejection Reason Master",
+        href: "/reason",
+      },
+      {
+        title: "Highlighter Master",
+        href: "/highlighter",
+      },
+      {
         title: "Test Master",
         href: "/testmaster",
         icon: "test",
@@ -77,6 +102,10 @@ export const navItems: NavItem[] = [
     href: "/lab",
     icon: "Asdsad",
     children: [
+      {
+        title: "Container Link Master",
+        href: "/containerlinkmaster",
+      },
       {
         title: "Associate Master",
         href: "/associatemaster",
