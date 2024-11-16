@@ -94,13 +94,13 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Machine Link Master" },
+        { label: "Test Machine Link" },
       ],
-      searchPlaceholder: "Search Machine Link Master...",
+      searchPlaceholder: "Search Test Machine Link...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Machine Link Master",
-        description: "Manage Machine Link Master and view their details.",
+        title: "Test Machine Link",
+        description: "Manage Test Machine Link and view their details.",
         headers: [
           { label: "Machine Name", key: "name" },
           { label: "Test Name", key: "test" },

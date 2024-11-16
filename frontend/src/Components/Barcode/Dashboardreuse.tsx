@@ -104,7 +104,7 @@ export default function Dashboard({
     e.preventDefault();
     try {
       await axios.put(`/api/barcode/update/${barcodeId}`, formData);
-      toast.success("data Updated Successfully");
+      toast.success("Data Updated Successfully");
     } catch (error) {
       console.log("Error saving data", error);
       alert("Failed to save data");
