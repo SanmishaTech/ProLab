@@ -68,7 +68,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
       onAdd(formData); // Notify parent component
       setFormData({});
       setHandleopen(false);
-      // window.location.reload();
+      window.location.reload();
       setError("");
     } catch (err) {
       setError("Failed to add parameter group. Please try again.");
@@ -94,7 +94,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   useEffect(() => {
     const fetchparameter = async () => {
       try {
-        const response = await axios.get(`/api/testlinkmaster/alllinkmaster`);
+        const response = await axios.get(`/api/parameter/allparameter`);
         console.log(response.data);
         setSelectedFrameworks(
           response.data.map((framework) => ({

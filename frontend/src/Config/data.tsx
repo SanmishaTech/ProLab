@@ -30,7 +30,7 @@ export const navItems: NavItem[] = [
     icon: "sad",
     children: [
       {
-        title: "test Machine Link Master",
+        title: "Test Machine Link Master",
         href: "/machinelinkmaster",
       },
       {
@@ -54,6 +54,7 @@ export const navItems: NavItem[] = [
         title: "Highlighter Master",
         href: "/highlighter",
       },
+
       {
         title: "Test Master",
         href: "/testmaster",
@@ -103,6 +104,11 @@ export const navItems: NavItem[] = [
     icon: "Asdsad",
     children: [
       {
+        title: "Machine Master",
+        href: "/machinemaster",
+      },
+
+      {
         title: "Container Link Master",
         href: "/containerlinkmaster",
       },
@@ -111,6 +117,7 @@ export const navItems: NavItem[] = [
         href: "/associatemaster",
         icon: "Associate",
       },
+
       {
         title: "Specimen",
         href: "/specimen",
@@ -118,7 +125,6 @@ export const navItems: NavItem[] = [
       },
     ],
   },
-
   // {
   //   title: "Parameter Link Master",
   //   href: "/testlinkmaster",
