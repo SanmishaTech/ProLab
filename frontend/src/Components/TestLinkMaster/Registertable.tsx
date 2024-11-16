@@ -35,7 +35,7 @@ export default function Dashboardholiday() {
         const response = await axios.get(
           `/api/parametergroup/allparametergroup`
         );
-        console.log(response.data);
+        console.log("Parameterlink", response.data);
         setParameterGroup(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -80,7 +80,7 @@ export default function Dashboardholiday() {
       label: "Parameter Group",
       options: parameterGroup?.map((item) => ({
         value: item?._id,
-        label: item?.name,
+        label: item?.description,
       })),
     },
 
@@ -127,7 +127,7 @@ export default function Dashboardholiday() {
         headers: [
           { label: "name", key: "name" },
           { label: "Parameter Group", key: "parameterGroup" },
-          { label: "Parameter", key: "parameter" },
+          // { label: "Parameter", key: "parameter" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -200,8 +200,8 @@ export default function Dashboardholiday() {
           _id: item?._id,
           name: item?.test?.name || "Name not provided",
           parameterGroup:
-            item?.parameterGroup?.name || "Description not provided",
-          parameter: item?.parameter?.name || "Alternate name not provided",
+            item?.parameterGroup?.description || "Description not provided",
+          // parameter: item?.parameter?.name || "Alternate name not provided",
           action: "actions", // Placeholder for action buttons
           // Additional fields can be added here
         };
