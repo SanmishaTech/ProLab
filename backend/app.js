@@ -28,6 +28,9 @@ var AssociateMaster = require("./routes/associateRoutes");
 var TatMasterRoutes = require("./routes/tatMasterRoutes");
 var ReasonMaster = require("./routes/reasonRoutes");
 var BarcodeRoutes = require("./routes/barcodeRoutes");
+var MachineRoutes = require("./routes/machineRoutes");
+var MachineLinkMaster = require("./routes/machineLinkMaster");
+var ContainerLinkMaster = require("./routes/containerLinkMaster");
 
 var app = express();
 const corsOptions = {
@@ -67,6 +70,9 @@ app.use("/api/associatemaster", AssociateMaster);
 app.use("/api/tatmaster", TatMasterRoutes);
 app.use("/api/reason", ReasonMaster);
 app.use("/api/barcode", BarcodeRoutes);
+app.use("/api/machinemaster", MachineRoutes);
+app.use("/api/machinelinkmaster", MachineLinkMaster);
+app.use("/api/containerlinkmaster", ContainerLinkMaster);
 
 app.use(express.static(path.join(__dirname, "./dist")));
 

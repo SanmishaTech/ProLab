@@ -23,9 +23,13 @@ import Specimen from "@/Components/Specimen/Registertable";
 import DashboardTestcard from "@/Components/Testmaster/TestCard";
 import TestCard from "@/Components/AssociateMaster/TestCard";
 import EditCard from "@/Components/AssociateMaster/Edittestcard";
+import MachineMaster from "@/Components/MachineMaster/Registertable";
+import MachineLinkMaster from "@/Components/MachineLinkMaster/Registertable";
 import Formula from "../Components/Formula/Formula";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import ContainerLinkMaster from "@/Components/ContainerLinkMaster/Registertable";
+
 const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -69,8 +73,12 @@ const Dashboard = () => {
         {location.pathname === "/associatemaster/add" && <TestCard />}
         {/\/associatemaster\/edit\/\d+/.test(location.pathname) && <EditCard />}
         {location.pathname === "/tatmaster" && <DashboardTatMaster />}
-        {location.pathname === "/Formula" && <Formula />}
- 
+        {location.pathname === "/formula" && <Formula />}
+        {location.pathname === "/machinemaster" && <MachineMaster />}
+        {location.pathname === "/machinelinkmaster" && <MachineLinkMaster />}
+        {location.pathname === "/containerlinkmaster" && (
+          <ContainerLinkMaster />
+        )}
       </main>
     </div>
   );

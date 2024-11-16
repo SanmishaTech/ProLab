@@ -54,7 +54,6 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
   const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
   const arayofformids = [];
   useEffect(() => {
-    console.log("this is defaultValue", defaultValue);
     if (defaultValue?.profile) {
       const arayofformids = defaultValue?.profile.map(
         (item: any) => item.value
@@ -63,19 +62,10 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
     }
   }, [defaultValue]);
 
-  // useEffect(() => {
-  //   Object.entries(formData).map(([key, value]) => {
-  //     arayofformids.push(value.value);
-  //   });
-  //   console.log("This is asdasdsadasdsad asdsadasdsad", arayofformids);
-  //   setData(arayofformids);
-  // }, [formData]);
-
   useEffect(() => {
     const arayofformids = Object.values(formData).map(
       (item: any) => item.value
     );
-    console.log("This is arayofformids", arayofformids);
     settempvalue(arayofformids);
   }, [formData]);
 
@@ -128,13 +118,13 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Profile</Button>
+        <Button variant="outline">Test Master</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Parameter Group</DialogTitle>
+          <DialogTitle>Add New Test Master</DialogTitle>
           <DialogDescription>
-            Enter the details of the Parameter Group you want to add.
+            Enter the details of the Test Master you want to add.
           </DialogDescription>
         </DialogHeader>
         <div className="mt-4">
@@ -145,36 +135,8 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
           value={formData}
           onChange={setFormData}
           defaultValue={defaultValue?.profile}
+          placeholder="Select Tests"
         />
-        {/* <MultiSelect
-          options={value}
-          onValueChange={setFormData}
-          defaultValue={
-            Array.isArray(defaultValue)
-              ? [
-                  defaultValue.map((value) => ({
-                    value: value?._id,
-                    label: value?.name,
-                  })),
-                ]
-              : defaultValue?.length > 1
-              ? [
-                  defaultValue.map((value) => ({
-                    value: value?._id,
-                    label: value?.name,
-                  })),
-                ]
-              : [
-                  {
-                    label: defaultValue?.name,
-                    value: defaultValue?._id,
-                  },
-                ]
-          }
-          placeholder="Select frameworks"
-          variant="inverted"
-          maxCount={5}
-        /> */}
 
         <DialogFooter>
           <Button

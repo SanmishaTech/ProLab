@@ -3,34 +3,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Dashboard from "./Dashboardreuse";
-// import AddItem from "./Additem"; // Corrected import path
+import AddItem from "./Additem"; // Corrected import path
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
-
-const AddItem = () => {
-  const navigate = useNavigate();
-  const handleAdd = () => {
-    navigate("/associatemaster/add");
-  };
-  return (
-    <Button onClick={handleAdd} variant="outline">
-      Add Item
-    </Button>
-  );
-};
-const Edititem = (id: string) => {
-  const navigate = useNavigate();
-  const handleAdd = () => {
-    navigate(`/associatemaster/edit/${id?.id}`);
-  };
-  return (
-    <Button onClick={handleAdd} variant="ghost" className="w-full">
-      Edit Item
-    </Button>
-  );
-};
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -39,50 +15,13 @@ export default function Dashboardholiday() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
-  const [parameter, setParameter] = useState<any[]>([]);
-  const [parameterGroup, setParameterGroup] = useState<any[]>([]);
-  const [test, setTest] = useState<any[]>([]);
 
-  useEffect(() => {
-    // Fetch data from the API
-    const fetchparameter = async () => {
-      try {
-        const response = await axios.get(`/api/associatemaster/allassociates`);
-        console.log(response.data);
-        setParameter(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    const fetchparametergroup = async () => {
-      try {
-        const response = await axios.get(`/api/associatemaster/allassociates`);
-        console.log(response.data);
-        setParameterGroup(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    const fetchtest = async () => {
-      try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
-        console.log(response.data);
-        setTest(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchparameter();
-    fetchparametergroup();
-    fetchtest();
-  }, []);
   // Define the schema with various input types
-  useEffect(() => {
-    console.log("This is parameter", parameter);
-    console.log("This is parameterGroup", parameterGroup);
-    console.log("This is test", test);
-  }, [parameter, parameterGroup, test]);
   const typeofschema = {
+    name: { type: "String", label: "Machine Name" },
+    model: { type: "String", label: "Machine Model" },
+    companyName: { type: "String", label: "Company Name" },
+
     // sortBy: { type: "Number", label: "Sort By" },
     // date: { type: "Date", label: "Date" },
     // category: {
@@ -102,7 +41,7 @@ export default function Dashboardholiday() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/associatemaster/allassociates`)
+      .get(`/api/machinemaster/allmachinemaster`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -117,18 +56,17 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Associate Master" },
+        { label: "Machine Master" },
       ],
-      searchPlaceholder: "Search Associate Master...",
+      searchPlaceholder: "Search Machine Master...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Associate Master",
-        description: "Manage Associate Master and view their details.",
+        title: "Machine Master",
+        description: "Manage Machine Master and view their details.",
         headers: [
-          { label: "Associate Type", key: "associateType" },
-          { label: "First Name", key: "firstName" },
-          { label: "Last Name", key: "lastName" },
-          { label: "Mobile", key: "mobile" },
+          { label: "Machine Name", key: "name" },
+          { label: "Machine Model", key: "model" },
+          { label: "Company Name", key: "companyName" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -194,21 +132,18 @@ export default function Dashboardholiday() {
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data
-    ? data?.map((item) => {
-        console.log("This is item", item);
-        return {
-          _id: item?._id,
-          associateType: item?.associateType || "Associate Type not provided",
-          firstName: item?.firstName || "First Name not provided",
-          lastName: item?.lastName || "Last Name not provided",
-          mobile: item?.mobile || "Mobile not provided",
-          delete: `/associatemaster/delete/${item?._id}`,
-          action: "actions", // Placeholder for action buttons
-          // Additional fields can be added here
-        };
-      })
-    : [];
+  if (!data) return [];
+  const mappedTableData = data?.map((item) => {
+    return {
+      _id: item?._id,
+      name: item?.name || "Machine Name not provided",
+      model: item?.model || "Machine Model not provided",
+      companyName: item?.companyName || "Company Name not provided",
+      delete: `/machinemaster/delete/${item?._id}`,
+      action: "actions", // Placeholder for action buttons
+      // Additional fields can be added here
+    };
+  });
 
   return (
     <div className="p-4">
@@ -218,7 +153,6 @@ export default function Dashboardholiday() {
         userAvatar={config.userAvatar}
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
-        Edititem={Edititem}
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
