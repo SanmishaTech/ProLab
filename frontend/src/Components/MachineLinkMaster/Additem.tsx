@@ -229,13 +229,16 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Machine Master</Button>
+        <Button variant="outline">Add Test Machine Link
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Machine Master</DialogTitle>
+          <DialogTitle>Add New Test Machine Link
+</DialogTitle>
           <DialogDescription>
-            Enter the details of the Machine Master you want to add.
+            Enter the details of the Test Machine Link
+ you want to add.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

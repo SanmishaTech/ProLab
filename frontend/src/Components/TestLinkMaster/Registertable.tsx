@@ -117,13 +117,13 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Test Link Master" },
+        { label: "Test Parameter Link  Master" },
       ],
-      searchPlaceholder: "Search Test Link Master...",
+      searchPlaceholder: "Search Test Parameter Link  Master...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Test Link Master",
-        description: "Manage Test Link Master and view their details.",
+        title: "Test Parameter Link Master",
+        description: "Manage Test Parameter Link  Master and view their details.",
         headers: [
           { label: "name", key: "name" },
           { label: "Parameter Group", key: "parameterGroup" },
