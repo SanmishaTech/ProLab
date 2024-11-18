@@ -29,6 +29,7 @@ var TatMasterRoutes = require("./routes/tatMasterRoutes");
 var ReasonMaster = require("./routes/reasonRoutes");
 var BarcodeRoutes = require("./routes/barcodeRoutes");
 var HighlighterRoutes = require("./routes/highlighterRoutes");
+var PatientMasterRoutes = require("./routes/patientMasterRoutes");
 
 var app = express();
 const corsOptions = {
@@ -69,6 +70,8 @@ app.use("/api/tatmaster", TatMasterRoutes);
 app.use("/api/reason", ReasonMaster);
 app.use("/api/barcode", BarcodeRoutes);
 app.use("/api/highlighter", HighlighterRoutes);
+app.use("/api/patientmaster", PatientMasterRoutes);
+
 
 app.use(express.static(path.join(__dirname, "./dist")));
 
