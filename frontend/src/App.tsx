@@ -119,6 +119,10 @@ function App() {
         <Route path="/associatemaster" element={<Dashboard />} />
         <Route path="/associatemaster/add" element={<Dashboard />} />
         <Route path="/associatemaster/edit/:id" element={<Dashboard />} />
+
+        <Route path="/patientmaster" element={<Dashboard />} />
+        <Route path="/patientmaster/add" element={<Dashboard />} />
+        <Route path="/patientmaster/edit/:id" element={<Dashboard />} />
         <Route path="/tatmaster" element={<Dashboard />} />
         <Route path="/tatmaster/add" element={<Dashboard />} />
         <Route path="/tatmaster/edit/:id" element={<Dashboard />} />

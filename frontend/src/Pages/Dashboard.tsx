@@ -18,12 +18,15 @@ import DashboardTestMaster from "@/Components/Testmaster/Registertable";
 import Dashboardedittestcard from "@/Components/Testmaster/Edittestcard";
 import DashboardTestLinkMaster from "@/Components/TestLinkMaster/Registertable";
 import DashboardAssociateMaster from "@/Components/AssociateMaster/Registertable";
+import DashboardPatientMaster from "@/Components/PatientMaster/Registertable";
 import DashboardTatMaster from "@/Components/TatMaster/Registertable";
 import DashboardTatCard from "@/Components/TatMaster/";
 import Specimen from "@/Components/Specimen/Registertable";
 import DashboardTestcard from "@/Components/Testmaster/TestCard";
 import TestCard from "@/Components/AssociateMaster/TestCard";
 import EditCard from "@/Components/AssociateMaster/Edittestcard";
+import PatientTestCard from "@/Components/PatientMaster/TestCard";
+import PatientEditCard from "@/Components/PatientMaster/Edittestcard";
 import MachineMaster from "@/Components/MachineMaster/Registertable";
 import MachineLinkMaster from "@/Components/MachineLinkMaster/Registertable";
 import Formula from "../Components/Formula/Formula";
@@ -67,7 +70,6 @@ const Dashboard = () => {
         {/\/testmaster\/edit\/\d+/.test(location.pathname) && (
           <Dashboardedittestcard />
         )}
-
         {location.pathname === "/testlinkmaster" && <DashboardTestLinkMaster />}
         {location.pathname === "/associatemaster" && (
           <DashboardAssociateMaster />
@@ -75,6 +77,10 @@ const Dashboard = () => {
         {location.pathname === "/associatemaster/add" && <TestCard />}
         {/\/associatemaster\/edit\/\d+/.test(location.pathname) && <EditCard />}
         {location.pathname === "/tatmaster" && <DashboardTatMaster />}
+        {location.pathname === "/Formula" && <Formula />}
+        {location.pathname === "/patientmaster" && <DashboardPatientMaster />}
+        {location.pathname === "/patientmaster/add" && <PatientTestCard />}
+        {/\/patientmaster\/edit\/\d+/.test(location.pathname) && <PatientEditCard />}
         {location.pathname === "/formula" && <Formula />}
         {location.pathname === "/machinemaster" && <MachineMaster />}
         {location.pathname === "/machinelinkmaster" && <MachineLinkMaster />}

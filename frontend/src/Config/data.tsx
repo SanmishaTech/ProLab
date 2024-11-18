@@ -22,6 +22,11 @@ export const navItems: NavItem[] = [
         href: "/holiday",
         icon: "department",
       },
+      {
+        title: "Patient Master",
+        href: "/patientmaster",
+        icon: "test",
+      },
     ],
   },
   {
