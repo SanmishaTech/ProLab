@@ -12,25 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import axios from "axios";
 
@@ -59,11 +41,17 @@ const AddItem: React.FC<AddItemProps> = ({
 
   useEffect(() => {
     const fetcheditdetails = async () => {
-      const response = await axios.get(`/api/${editfetch}`).then((res) => {});
-      setFormData(response.data);
+      try {
+        const response = await axios.get(`/api/${editfetch}`);
+        setFormData(response.data);
+      } catch (error) {
+        console.error('Error fetching data', error);
+        setError("Failed to fetch data.");
+      }
     };
+  
     fetcheditdetails();
-  }, []);
+  }, [editfetch]); 
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
     await axios.put(`/api/${editid}`, formData).then(() => {
@@ -98,13 +86,14 @@ const AddItem: React.FC<AddItemProps> = ({
               {capitalizeText(key)}
             </Label>
             <Input
-              id="name"
-              name={key}
-              onChange={handleChange}
-              placeholder="Enter name"
-              value={formData[key]}
-              className="col-span-3"
-            />
+  id={key}   
+  name={key}   
+  onChange={handleChange}
+  placeholder={`Enter ${capitalizeText(key)}`}
+  value={formData[key] || ""}   
+  className="col-span-3"
+/>
+           
           </div>
         );
       }
@@ -129,57 +118,7 @@ const AddItem: React.FC<AddItemProps> = ({
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
           {addFields(typeofschema)}
-          {/* <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Namea
-            </Label>
-            <Input
-              id="name"
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter name"
-              value={name}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Unit
-            </Label>
-            <Input
-              id="name"
-              onChange={(e) => setdescription(e.target.value)}
-              placeholder="Enter description"
-              value={description}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Date
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[280px] justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div> */}
+          
         </div>
 
         <DialogFooter>
