@@ -76,14 +76,21 @@ const AddItem: React.FC<AddItemProps> = ({
   const handleAdd = async () => {
     setLoading(true);
     try {
+      const data = {
+        test: formData.test,
+        parameterGroup: formData.parameterGroup,
+        parameter: selectedParameters,
+      };
       await axios
-        .put(`/api/testmasterlink/update/${editid}`, formData)
+        .put(`/api/testmasterlink/update/${editid}`, data)
         .then((res) => {
           console.log("ppaapppppp", res.data);
           // onAdd(res.data.newService);
+
           setFormData(res.data.newService);
           setHandleopen(false);
           setError("");
+          window.location.reload();
         });
     } catch (err) {
       setError("Failed to add parameter group. Please try again.");
@@ -288,10 +295,9 @@ const AddItem: React.FC<AddItemProps> = ({
               className="col-span-3"
               options={selectedFrameworks}
               onValueChange={setSelectedParameters}
-              // defaultValue={formData.para}
+              // defaultValue={formData.parameter.name}
               placeholder="Select frameworks"
               variant="inverted"
-              animation={2}
               maxCount={2}
             />
           </div>

@@ -149,11 +149,11 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
               }}
               placeholder="Select Days"
               variant="inverted"
-              maxCount={4}
+              maxCount={7}
             />
           </div>
 
-          <div>
+          {/* <div>
             {selectedFrameworks.length > 0 && (
               <>
                 <h2 className="text-sm font-semibold">Selected Weekdays:</h2>
@@ -164,7 +164,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
                 </ul>
               </>
             )}
-          </div>
+          </div> */}
 
           {/* Start Time */}
           <div className="grid grid-cols-2 gap-4">

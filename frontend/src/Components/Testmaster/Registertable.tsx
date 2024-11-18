@@ -47,7 +47,7 @@ export default function Dashboardholiday() {
     // Fetch data from the API
     const fetchparameter = async () => {
       try {
-        const response = await axios.get(`/api/parameter/allparameter`);
+        const response = await axios.get(`/api/testmaster/alltestmaster`);
         console.log(response.data);
         setParameter(response.data);
       } catch (error) {
@@ -56,9 +56,7 @@ export default function Dashboardholiday() {
     };
     const fetchparametergroup = async () => {
       try {
-        const response = await axios.get(
-          `/api/parametergroup/allparametergroup`
-        );
+        const response = await axios.get(`/api/testmaster/alltestmaster`);
         console.log(response.data);
         setParameterGroup(response.data);
       } catch (error) {

@@ -1,6 +1,6 @@
 // components/AddItem.tsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -38,14 +38,9 @@ import axios from "axios";
 interface AddItemProps {
   onAdd: (item: any) => void;
   typeofschema: Record<string, any>;
-  editid: string;
 }
 
-const AddItem: React.FC<AddItemProps> = ({
-  onAdd,
-  typeofschema = {},
-  editid,
-}) => {
+const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
@@ -54,37 +49,17 @@ const AddItem: React.FC<AddItemProps> = ({
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (editid) {
-      axios
-        .get(`/api/tatmaster/reference/${editid}`)
-        .then((res) => {
-          setFormData(res.data);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    }
-    return () => {
-      setFormData({});
-      setHandleopen(false);
-    };
-  }, [editid]);
   const handleAdd = async () => {
     setLoading(true);
     try {
-      await axios
-        .put(`/api/tatmaster/update/${editid}`, formData)
-        .then((res) => {
-          
-          // onAdd(res.data.newService);
-          setFormData(res.data);
-          setHandleopen(false);
-          setError("");
-          window.location.reload();
-        });
+      await axios.post(`/api/containerlinkmaster`, formData);
+      onAdd(formData); // Notify parent component
+      setFormData({});
+      setHandleopen(false);
+      setError("");
+      window.location.reload();
     } catch (err) {
-      setError("Failed to add TaT Master. Please try again.");
+      setError("Failed to add Container Master. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -107,10 +82,6 @@ const AddItem: React.FC<AddItemProps> = ({
   // Dynamically render form fields based on the schema
   const addFields = (schema: Record<string, any>) => {
     const allFieldsToRender = [];
-
-    if (!schema || Object.keys(schema).length === 0) {
-      return <p>No fields available to display.</p>; // Or handle this case as you prefer
-    }
 
     Object.entries(schema).forEach(([key, value]) => {
       const fieldType = value.type;
@@ -192,48 +163,54 @@ const AddItem: React.FC<AddItemProps> = ({
           );
           break;
 
-          case "Select":
-            allFieldsToRender.push(
-              <div key={key} className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor={key} className="text-right">
-                  {label}
-                </Label>
-                <Select onValueChange={(value) => handleChange(key, value)}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue
-                      placeholder={`Select ${label.toLowerCase()}`}
-                      value={formData[key] || ""}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>{label}</SelectLabel>
-                      {value?.options?.map((option: any) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            );
-            break;
+        case "Select":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              <Select onValueChange={(value) => handleChange(key, value)}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue
+                    placeholder={`Select ${label.toLowerCase()}`}
+                    value={formData[key] || ""}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>{label}</SelectLabel>
+                    {value.options.map((option: any) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          );
+          break;
 
+        // Add this case in the addFields method
         // case "Checkbox":
         //   allFieldsToRender.push(
-        //     <div
-        //       style={{ justifyContent: "space-evenly" }}
-        //       key={key}
-        //       className="flex items-center space-x-4"
-        //     >
-        //       <Label htmlFor={key}>{label}</Label>
-
-        //       <Checkbox
-        //         id={key}
-        //         checked={formData[key] || false}
-        //         onCheckedChange={(checked) => handleChange(key, checked)}  
-        //       />
+        //     <div key={key} className="grid grid-cols-4 items-center gap-4">
+        //       <Label htmlFor={key} className="text-right">
+        //         {label}
+        //       </Label>
+        //       <div className="col-span-3 flex items-center space-x-2">
+        //         <Checkbox
+        //           id={key}
+        //           checked={formData[key] || false}
+        //           onCheckedChange={(checked) => handleChange(key, checked)}
+        //         />
+        //         <label
+        //           htmlFor={key}
+        //           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        //         >
+        //           {label}
+        //         </label>
+        //       </div>
         //     </div>
         //   );
         //   break;
@@ -252,21 +229,18 @@ const AddItem: React.FC<AddItemProps> = ({
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full">
-          Edit
-        </Button>
+        <Button variant="outline">Add Container Link Master</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Edit item</DialogTitle>
+          <DialogTitle>Add New Container Master</DialogTitle>
           <DialogDescription>
-            Enter the details of the item you want to edit.
+            Enter the details of the Container Master you want to add.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
           {addFields(typeofschema)}
-          
         </div>
 
         <DialogFooter>

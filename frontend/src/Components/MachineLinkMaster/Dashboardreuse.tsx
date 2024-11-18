@@ -72,6 +72,7 @@ export default function Dashboard({
   onFilterChange = () => {},
   onProductAction = () => {},
 }) {
+  console.log("This is inside the dashboard", tableData);
   const navigate = useNavigate();
   const [toggleedit, setToggleedit] = useState(false);
   const [editid, setEditid] = useState();
@@ -228,7 +229,11 @@ export default function Dashboard({
                     Add Product
                   </span>
                 </Button> */}
-                <AddItem typeofschema={typeofschema} />
+                {console.log(
+                  "This is tableData",
+                  tableData ? tableData.add : null
+                )}
+                <AddItem typeofschema={typeofschema} add={tableData?.add} />
               </div>
             </div>
             <TabsContent value="all">
@@ -280,7 +285,10 @@ export default function Dashboard({
                                         <MoreHorizontal className="h-4 w-4" />
                                       </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
+                                    <DropdownMenuContent
+                                      align="center"
+                                      className="w-full flex-col items-center flex justify-center"
+                                    >
                                       <DropdownMenuLabel>
                                         Actions
                                       </DropdownMenuLabel>
@@ -306,7 +314,7 @@ export default function Dashboard({
                                 ) : header.key === "five" ? (
                                   row.five
                                 ) : header.key === "six" ? (
-                                  `${row.six}`
+                                  `₹${row.six}`
                                 ) : (
                                   row[header.key]
                                 )}

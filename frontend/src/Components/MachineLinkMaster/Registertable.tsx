@@ -15,72 +15,48 @@ export default function Dashboardholiday() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
-  const [parameter, setParameter] = useState<any[]>([]);
-  const [parameterGroup, setParameterGroup] = useState<any[]>([]);
+  const [machine, setMachine] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
 
   useEffect(() => {
-    // Fetch data from the API
-    const fetchparameter = async () => {
+    const fetchMachine = async () => {
       try {
-        const response = await axios.get(`/api/parameter/allparameter`);
-        console.log(response.data);
-        setParameter(response.data);
+        const response = await axios.get(`/api/machinemaster/allmachinemaster`);
+        console.log("This is a mahcine", response.data);
+        setMachine(response.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching machines:", error);
       }
     };
-    const fetchparametergroup = async () => {
-      try {
-        const response = await axios.get(
-          `/api/parametergroup/allparametergroup`
-        );
-        console.log("Parameterlink", response.data);
-        setParameterGroup(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    const fetchtest = async () => {
+    const fetchTests = async () => {
       try {
         const response = await axios.get(`/api/testmaster/alltestmaster`);
         console.log(response.data);
         setTest(response.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching tests:", error);
       }
     };
-    fetchparameter();
-    fetchparametergroup();
-    fetchtest();
+    fetchMachine();
+    fetchTests();
   }, []);
+
   // Define the schema with various input types
-  useEffect(() => {
-    console.log("This is parameter", parameter);
-    console.log("This is parameterGroup", parameterGroup);
-    console.log("This is test", test);
-  }, [parameter, parameterGroup, test]);
   const typeofschema = {
+    name: {
+      type: "Select",
+      label: "Machine Name",
+      options: machine?.map((machine) => ({
+        value: machine?._id,
+        label: machine?.name,
+      })),
+    },
     test: {
       type: "Select",
-      label: "Test",
-      options: test?.map((item) => ({
-        value: item?._id,
-        label: item?.name,
-      })),
-
-      //[
-      //   { value: "parameterGroup1", label: "Parameter Group 1" },
-      //   { value: "parameterGroup2", label: "Parameter Group 2" },
-      //   // Add more options as needed
-      // ],
-    },
-    parameterGroup: {
-      type: "Select",
-      label: "Parameter Group",
-      options: parameterGroup?.map((item) => ({
-        value: item?._id,
-        label: item?.description,
+      label: "Test Name",
+      options: test?.map((test) => ({
+        value: test?._id,
+        label: test?.name,
       })),
     },
 
@@ -96,13 +72,14 @@ export default function Dashboardholiday() {
     //   ],
     // },
     // isActive: { type: "Checkbox", label: "Is Active" },
+    // isbol: { type: "Checkbox", label: "Is bol" },
     // Add more fields as needed
   };
 
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/testmasterlink/allLinkmaster`)
+      .get(`/api/machinelinkmaster/allmachinelinkmaster`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -117,17 +94,16 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Test Parameter Link  Master" },
+        { label: "Test Machine Link" },
       ],
-      searchPlaceholder: "Search Test Parameter Link  Master...",
+      searchPlaceholder: "Search Test Machine Link...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Test Parameter Link Master",
-        description: "Manage Test Parameter Link  Master and view their details.",
+        title: "Test Machine Link",
+        description: "Manage Test Machine Link and view their details.",
         headers: [
-          { label: "name", key: "name" },
-          { label: "Parameter Group", key: "parameterGroup" },
-          // { label: "Parameter", key: "parameter" },
+          { label: "Machine Name", key: "name" },
+          { label: "Test Name", key: "test" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -189,24 +165,21 @@ export default function Dashboardholiday() {
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error)
-    return <div className="p-4 text-red-500">Error loading parameters.</div>;
+    return <div className="p-4 text-red-500">Error loading machines.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data
-    ? data?.map((item) => {
-        console.log("This is item", item);
-        return {
-          _id: item?._id,
-          name: item?.test?.name || "Name not provided",
-          parameterGroup:
-            item?.parameterGroup?.description || "Description not provided",
-          // parameter: item?.parameter?.name || "Alternate name not provided",
-          action: "actions", // Placeholder for action buttons
-          // Additional fields can be added here
-        };
-      })
-    : [];
+  if (!data) return [];
+  const mappedTableData = data?.map((item) => {
+    return {
+      _id: item?._id,
+      name: item?.name?.name || "Machine Name not provided",
+      test: item?.test?.name || "Test Name not provided",
+      delete: `/machinelinkmaster/delete/${item?._id}`,
+      action: "actions", // Placeholder for action buttons
+      // Additional fields can be added here
+    };
+  });
 
   return (
     <div className="p-4">

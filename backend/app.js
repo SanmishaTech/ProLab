@@ -30,8 +30,11 @@ var ReasonMaster = require("./routes/reasonRoutes");
 var BarcodeRoutes = require("./routes/barcodeRoutes");
 var HighlighterRoutes = require("./routes/highlighterRoutes");
 var PatientMasterRoutes = require("./routes/patientMasterRoutes");
-
-var app = express();
+ var MachineRoutes = require("./routes/machineRoutes");
+var MachineLinkMaster = require("./routes/machineLinkMaster");
+var ContainerLinkMaster = require("./routes/containerLinkMaster");
+ var HighlighterRoutes = require("./routes/highlighterRoutes");
+ var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application
   credentials: true, // This allows cookies and credentials to be included in the requests
@@ -71,7 +74,9 @@ app.use("/api/reason", ReasonMaster);
 app.use("/api/barcode", BarcodeRoutes);
 app.use("/api/highlighter", HighlighterRoutes);
 app.use("/api/patientmaster", PatientMasterRoutes);
-
+ app.use("/api/machinemaster", MachineRoutes);
+app.use("/api/machinelinkmaster", MachineLinkMaster);
+app.use("/api/containerlinkmaster", ContainerLinkMaster);
 
 app.use(express.static(path.join(__dirname, "./dist")));
 

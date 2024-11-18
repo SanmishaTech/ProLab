@@ -33,7 +33,7 @@ const holidayController = {
   },
   getServicesbyId: async (req, res, next) => {
     try {
-      const patientId = req.params.patientId;
+      const patientId = req.params.referenceId;
       const services = await Holiday.findById(patientId);
       res.status(200).json(services);
     } catch (error) {
@@ -79,7 +79,6 @@ const holidayController = {
       const patientId = req.params.referenceId;
       const { name, description, date } = req.body;
 
-      
       const newService = await Holiday.findByIdAndUpdate(
         patientId,
         {
@@ -112,6 +111,5 @@ const holidayController = {
       res.status(500).json({ error: error.message });
     }
   },
-
 };
 module.exports = holidayController;

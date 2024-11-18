@@ -35,6 +35,32 @@ export const navItems: NavItem[] = [
     icon: "sad",
     children: [
       {
+        title: "Test Machine Link Master",
+        href: "/machinelinkmaster",
+      },
+      {
+        title: "Test parameter link Master",
+        href: "/testlinkmaster",
+      },
+      {
+        title: "Formula Master",
+        href: "/formula",
+        icon: "pipette",
+      },
+      {
+        title: "Barcode Setup",
+        href: "/barcode",
+      },
+      {
+        title: "Rejection Reason Master",
+        href: "/reason",
+      },
+      {
+        title: "Highlighter Master",
+        href: "/highlighter",
+      },
+
+      {
         title: "Test Master",
         href: "/testmaster",
         icon: "test",
@@ -59,21 +85,7 @@ export const navItems: NavItem[] = [
         href: "/tatmaster",
         icon: "Tat",
       },
-      {
-        title: "Reason Master",
-        href: "/reason",
-        icon: "test",
-      },
-      {
-        title: "Barcode Setup",
-        href: "/barcode",
-        icon: "pipette",
-      },
-      {
-        title: "High Lighter Setup",
-        href: "/highlighter",
-        icon: "Tat",
-      },
+ 
     ],
   },
 
@@ -83,10 +95,20 @@ export const navItems: NavItem[] = [
     icon: "Asdsad",
     children: [
       {
+        title: "Machine Master",
+        href: "/machinemaster",
+      },
+
+      // {
+      //   title: "Container Link Master",
+      //   href: "/containerlinkmaster",
+      // },
+      {
         title: "Associate Master",
         href: "/associatemaster",
         icon: "Associate",
       },
+
       {
         title: "Specimen",
         href: "/specimen",
@@ -94,7 +116,6 @@ export const navItems: NavItem[] = [
       },
     ],
   },
-
   // {
   //   title: "Parameter Link Master",
   //   href: "/testlinkmaster",

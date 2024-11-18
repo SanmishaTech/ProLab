@@ -35,12 +35,7 @@ import {
 import axios from "axios";
 
 interface AddItemProps {
-  onAdd: (item: {
-    id: string;
-    name: string;
-    unit: string;
-    fieldType: string;
-  }) => void;
+  onAdd: (item: { id: string; name: string }) => void;
 }
 
 const AddItem: React.FC<AddItemProps> = ({
@@ -64,13 +59,17 @@ const AddItem: React.FC<AddItemProps> = ({
 
   useEffect(() => {
     const fetcheditdetails = async () => {
-      const response = await axios.get(`/api/${editfetch}`).then((res) => {
-        console.log(res.data);
-      });
-      setFormData(response.data);
+      try {
+        const response = await axios.get(`/api/${editfetch}`);
+        setFormData(response.data);
+      } catch (error) {
+        console.error('Error fetching data', error);
+        setError("Failed to fetch data.");
+      }
     };
+  
     fetcheditdetails();
-  }, []);
+  }, [editfetch]); 
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
     await axios.put(`/api/${editid}`, formData).then(() => {
@@ -105,13 +104,14 @@ const AddItem: React.FC<AddItemProps> = ({
               {capitalizeText(key)}
             </Label>
             <Input
-              id="name"
-              name={key}
-              onChange={handleChange}
-              placeholder="Enter name"
-              value={formData[key]}
-              className="col-span-3"
-            />
+  id={key}   
+  name={key}   
+  onChange={handleChange}
+  placeholder={`Enter ${capitalizeText(key)}`}
+  value={formData[key] || ""}   
+  className="col-span-3"
+/>
+           
           </div>
         );
       }
@@ -130,7 +130,7 @@ const AddItem: React.FC<AddItemProps> = ({
         <DialogHeader>
           <DialogTitle>Edit</DialogTitle>
           <DialogDescription>
-            Enter the details of the Components you want to edit.
+            Enter the details of the Reason you want to edit.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

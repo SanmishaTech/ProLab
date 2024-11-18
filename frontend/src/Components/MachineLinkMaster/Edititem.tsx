@@ -57,9 +57,13 @@ const AddItem: React.FC<AddItemProps> = ({
   useEffect(() => {
     if (editid) {
       axios
-        .get(`/api/tatmaster/reference/${editid}`)
+        .get(`/api/machinelinkmaster/reference/${editid}`)
         .then((res) => {
-          setFormData(res.data);
+          setFormData({
+            ...res.data,
+            name: res.data.name?._id,
+            test: res.data.test?._id,
+          });
         })
         .catch((err) => {
           console.error("Error fetching data:", err);
@@ -74,17 +78,18 @@ const AddItem: React.FC<AddItemProps> = ({
     setLoading(true);
     try {
       await axios
-        .put(`/api/tatmaster/update/${editid}`, formData)
+        .put(`/api/machinelinkmaster/update/${editid}`, formData)
         .then((res) => {
-          
+          console.log("ppaapppppp", res.data);
           // onAdd(res.data.newService);
-          setFormData(res.data);
+          setFormData(res.data.newService);
           setHandleopen(false);
           setError("");
+
           window.location.reload();
         });
     } catch (err) {
-      setError("Failed to add TaT Master. Please try again.");
+      setError("Failed to add Machine Master. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -192,33 +197,38 @@ const AddItem: React.FC<AddItemProps> = ({
           );
           break;
 
-          case "Select":
-            allFieldsToRender.push(
-              <div key={key} className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor={key} className="text-right">
-                  {label}
-                </Label>
-                <Select onValueChange={(value) => handleChange(key, value)}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue
-                      placeholder={`Select ${label.toLowerCase()}`}
-                      value={formData[key] || ""}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>{label}</SelectLabel>
-                      {value?.options?.map((option: any) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            );
-            break;
+        case "Select":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              {console.log("ppappa", formData[key])}
+              <Select
+                // value={formData[key] || ""}
+                defaultValue={formData[key] || ""}
+                onValueChange={(value) => handleChange(key, value)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue
+                    placeholder={`Select ${label.toLowerCase()}`}
+                    // value={formData[key]}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>{label}</SelectLabel>
+                    {value.options.map((option: any) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          );
+          break;
 
         // case "Checkbox":
         //   allFieldsToRender.push(
@@ -232,7 +242,7 @@ const AddItem: React.FC<AddItemProps> = ({
         //       <Checkbox
         //         id={key}
         //         checked={formData[key] || false}
-        //         onCheckedChange={(checked) => handleChange(key, checked)}  
+        //         onCheckedChange={(checked) => handleChange(key, checked)}
         //       />
         //     </div>
         //   );
@@ -266,7 +276,6 @@ const AddItem: React.FC<AddItemProps> = ({
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
           {addFields(typeofschema)}
-          
         </div>
 
         <DialogFooter>
