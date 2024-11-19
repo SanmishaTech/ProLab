@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 import axios from "axios";
 
@@ -41,6 +42,31 @@ interface AddItemProps {
   editid: string;
 }
 
+const frameworksList = [
+  { value: "Sunday", label: "Sunday" },
+  { value: "Monday", label: "Monday" },
+  { value: "Tuesday", label: "Tuesday" },
+  { value: "Wednesday", label: "Wednesday" },
+  { value: "Thursday", label: "Thursday" },
+  { value: "Friday", label: "Friday" },
+  { value: "Saturday", label: "Saturday" },
+];
+
+const generateTimeOptions = () => {
+  const times = [];
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      const hour = String(h).padStart(2, "0");
+      const minute = String(m).padStart(2, "0");
+      const second = "00";
+      times.push(`${hour}:${minute}:${second}`);
+    }
+  }
+  return times;
+};
+
+const timeOptions = generateTimeOptions();
+
 const AddItem: React.FC<AddItemProps> = ({
   onAdd,
   typeofschema = {},
@@ -49,27 +75,37 @@ const AddItem: React.FC<AddItemProps> = ({
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<any>({
+    startTime: "",
+    endTime: "",
+    hoursNeeded: 0,
+    urgentHours: 0,
+    weekday: [],
+  });
   const [error, setError] = useState("");
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedFrameworks, setSelectedFrameworks] = useState<any[]>([]);
 
   useEffect(() => {
     if (editid) {
-      axios
-        .get(`/api/tatmaster/reference/${editid}`)
+      axios.get(`/api/tatmaster/reference/${editid}`)
         .then((res) => {
           setFormData(res.data);
+          
+          if (res.data.weekday && Array.isArray(res.data.weekday)) {
+            const selectedDays = frameworksList.filter(framework => 
+              res.data.weekday.includes(framework.value.toLowerCase())
+            );
+            setSelectedFrameworks(selectedDays);
+          }
         })
         .catch((err) => {
           console.error("Error fetching data:", err);
         });
     }
-    return () => {
-      setFormData({});
-      setHandleopen(false);
-    };
   }, [editid]);
+
   const handleAdd = async () => {
     setLoading(true);
     try {
@@ -256,7 +292,7 @@ const AddItem: React.FC<AddItemProps> = ({
           Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit item</DialogTitle>
           <DialogDescription>
@@ -265,13 +301,112 @@ const AddItem: React.FC<AddItemProps> = ({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
-          {addFields(typeofschema)}
-          
+
+          {/* Weekdays Selection */}
+          <div className="p-3 max-w-xl flex items-center space-x-4">
+            <h1 className="text-sm font-semibold">Selected Days</h1>
+            <MultiSelect
+              options={frameworksList}
+              value={selectedFrameworks.map(fw => fw.value)}
+              defaultValue={selectedFrameworks.map(fw => fw.value)}
+              onValueChange={(values) => {
+                const selectedOptions = frameworksList.filter(fw => 
+                  values.includes(fw.value)
+                );
+                setSelectedFrameworks(selectedOptions);
+                setFormData(prev => ({
+                  ...prev,
+                  weekday: values.map(v => v.toLowerCase())
+                }));
+              }}
+              placeholder="Select Days"
+              variant="inverted"
+              maxCount={7}
+            />
+          </div>
+
+          {/* Time and Hours Fields */}
+          {/* Start Time */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-4">
+              <Label htmlFor="startTime" className="text-right">
+                Start Time
+              </Label>
+              <Select
+                value={formData.startTime}
+                onValueChange={(value) => handleChange("startTime", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Start Time" />
+                </SelectTrigger>
+                <SelectContent>
+                  {timeOptions.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* End Time */}
+            <div className="flex items-center gap-4">
+              <Label htmlFor="endTime" className="text-right">
+                End Time
+              </Label>
+              <Select
+                value={formData.endTime}
+                onValueChange={(value) => handleChange("endTime", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select End Time" />
+                </SelectTrigger>
+                <SelectContent>
+                  {timeOptions.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Hours Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-4">
+              <Label htmlFor="hoursNeeded" className="text-right">
+                Hours Needed
+              </Label>
+              <Input
+                id="hoursNeeded"
+                name="hoursNeeded"
+                type="number"
+                value={formData.hoursNeeded}
+                onChange={(e) => handleChange("hoursNeeded", e.target.value)}
+                placeholder="Number of hours"
+              />
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Label htmlFor="urgentHours" className="text-right">
+                Urgent Hours
+              </Label>
+              <Input
+                id="urgentHours"
+                name="urgentHours"
+                type="number"
+                value={formData.urgentHours}
+                onChange={(e) => handleChange("urgentHours", e.target.value)}
+                placeholder="Urgent hours"
+              />
+            </div>
+          </div>
         </div>
 
         <DialogFooter>
           <Button onClick={handleAdd} type="button" disabled={loading}>
-            {loading ? "Submitting..." : "Submit"}
+            {loading ? "Updating..." : "Update"}
           </Button>
         </DialogFooter>
       </DialogContent>
