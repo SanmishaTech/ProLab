@@ -75,7 +75,9 @@ const AddItem: React.FC<AddItemProps> = ({
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
+  const [services, setServices] = useState<any[]>([]);
   const [formData, setFormData] = useState<any>({
+    selectTest: "",
     startTime: "",
     endTime: "",
     hoursNeeded: 0,
@@ -88,10 +90,25 @@ const AddItem: React.FC<AddItemProps> = ({
   const [selectedFrameworks, setSelectedFrameworks] = useState<any[]>([]);
 
   useEffect(() => {
+    // Fetch services for the dropdown
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get(`/api/tatmaster/alltatmaster`);
+        setServices(response.data);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      }
+    };
+    fetchServices();
+
+    // Fetch existing data
     if (editid) {
       axios.get(`/api/tatmaster/reference/${editid}`)
         .then((res) => {
-          setFormData(res.data);
+          setFormData({
+            ...res.data,
+            selectTest: res.data.selectTest?._id
+          });
           
           if (res.data.weekday && Array.isArray(res.data.weekday)) {
             const selectedDays = frameworksList.filter(framework => 
@@ -301,6 +318,33 @@ const AddItem: React.FC<AddItemProps> = ({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
+
+          {/* Test Selection Dropdown */}
+          <div className="flex items-center gap-4">
+            <Label htmlFor="selectTest" className="text-right">
+              Select Test
+            </Label>
+            <Select
+              value={formData.selectTest}
+              onValueChange={(value) => 
+                setFormData(prev => ({ ...prev, selectTest: value }))
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Test" />
+              </SelectTrigger>
+              <SelectContent>
+                {services.map((service) => (
+                  <SelectItem 
+                    key={service._id} 
+                    value={service._id}
+                  >
+                    {service.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Weekdays Selection */}
           <div className="p-3 max-w-xl flex items-center space-x-4">
