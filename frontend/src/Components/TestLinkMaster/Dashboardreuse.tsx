@@ -59,19 +59,40 @@ import Edititem from "./Edititem";
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 
-export default function Dashboard({
+interface DashboardProps {
+  breadcrumbs?: BreadcrumbItem[];
+  searchPlaceholder?: string;
+  userAvatar?: string;
+  tableColumns?: {
+    tabs?: { value: string; label: string }[];
+    filters?: { checked: boolean; value: string; label: string }[];
+    headers?: { label: string; key: string; hiddenOn?: string }[];
+    title?: string;
+    description?: string;
+    pagination?: { from: number; to: number; total: number };
+  };
+  AddItem: React.ComponentType<any>;
+  typeofschema: Record<string, any>;
+  tableData: any[];
+  onAddProduct?: () => void;
+  onExport?: () => void;
+  onFilterChange?: (value: string) => void;
+  onProductAction: (action: string, product: any) => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({
   breadcrumbs = [],
   searchPlaceholder = "Search...",
   userAvatar = "/placeholder-user.jpg",
   tableColumns = {},
   AddItem,
   typeofschema,
-  tableData = [],
+  tableData,
   onAddProduct = () => {},
   onExport = () => {},
   onFilterChange = () => {},
-  onProductAction = () => {},
-}) {
+  onProductAction,
+}) => {
   console.log("This is inside the dashboard", tableData);
   const navigate = useNavigate();
   const [toggleedit, setToggleedit] = useState(false);
@@ -233,7 +254,7 @@ export default function Dashboard({
                   "This is tableData",
                   tableData ? tableData.add : null
                 )}
-                <AddItem typeofschema={typeofschema} add={tableData?.add} />
+                <AddItem />
               </div>
             </div>
             <TabsContent value="all">
@@ -412,4 +433,6 @@ export default function Dashboard({
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;

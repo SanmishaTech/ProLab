@@ -18,6 +18,7 @@ export default function Dashboardholiday() {
   const [parameter, setParameter] = useState<any[]>([]);
   const [parameterGroup, setParameterGroup] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch data from the API
@@ -65,38 +66,18 @@ export default function Dashboardholiday() {
       type: "Select",
       label: "Test",
       options: test?.map((item) => ({
-        value: item?._id,
-        label: item?.name,
-      })),
-
-      //[
-      //   { value: "parameterGroup1", label: "Parameter Group 1" },
-      //   { value: "parameterGroup2", label: "Parameter Group 2" },
-      //   // Add more options as needed
-      // ],
+        value: item._id,
+        label: item.name,
+      })) || [],
     },
     parameterGroup: {
       type: "Select",
       label: "Parameter Group",
       options: parameterGroup?.map((item) => ({
-        value: item?._id,
-        label: item?.description,
-      })),
+        value: item._id,
+        label: item.description,
+      })) || [],
     },
-
-    // sortBy: { type: "Number", label: "Sort By" },
-    // date: { type: "Date", label: "Date" },
-    // category: {
-    //   type: "Select",
-    //   label: "Category",
-    //   options: [
-    //     { value: "category1", label: "Category 1" },
-    //     { value: "category2", label: "Category 2" },
-    //     // Add more options as needed
-    //   ],
-    // },
-    // isActive: { type: "Checkbox", label: "Is Active" },
-    // Add more fields as needed
   };
 
   useEffect(() => {
@@ -160,31 +141,40 @@ export default function Dashboardholiday() {
   };
 
   const handleProductAction = (action: string, product: any) => {
-    console.log(`Action: ${action} on product:`, product);
     if (action === "edit") {
-      // Navigate to edit page or open edit modal
-      // Example: window.location.href = `/parametergroup/update/${product._id}`;
+      // The edit functionality is now handled by the EditItem component
+      // You might want to store the selected item ID in state if needed
+      setSelectedItemId(product._id);
     } else if (action === "delete") {
-      // Implement delete functionality, possibly with confirmation
-      // Example:
-      /*
-      if (confirm("Are you sure you want to delete this parameter group?")) {
-        axios.delete(`/api/parametergroup/delete/${product._id}`)
+      if (confirm("Are you sure you want to delete this item?")) {
+        axios.delete(`/api/testmasterlink/delete/${product._id}`)
           .then(() => {
-            // Refresh data
             setData(prevData => prevData.filter(item => item._id !== product._id));
           })
-          .catch(err => console.error(err));
+          .catch(err => {
+            console.error("Error deleting item:", err);
+            setError("Failed to delete item");
+          });
       }
-      */
     }
   };
 
   // Handler for adding a new item (optional if parent needs to do something)
-  const handleAddItem = (newItem: any) => {
-    console.log("New item added:", newItem);
-    // Optionally, you can update the data state to include the new item without refetching
-    setData((prevData) => [...prevData, newItem]);
+  const handleAddItem = async (updatedItem: any) => {
+    try {
+      console.log("Updated item received:", updatedItem);
+      
+      // Fetch fresh data from the API
+      const response = await axios.get(`/api/testmasterlink/allLinkmaster`);
+      setData(response.data);
+      
+      // Clear the selected item
+      setSelectedItemId(null);
+      
+      console.log("Data refreshed successfully");
+    } catch (err) {
+      console.error("Error refreshing data:", err);
+    }
   };
 
   if (loading) return <div className="p-4">Loading...</div>;
@@ -222,7 +212,11 @@ export default function Dashboardholiday() {
         onProductAction={handleProductAction}
         typeofschema={typeofschema}
         AddItem={() => (
-          <AddItem typeofschema={typeofschema} onAdd={handleAddItem} />
+          <AddItem 
+            typeofschema={typeofschema} 
+            onAdd={() => {}} 
+            editid={selectedItemId} 
+          />
         )}
       />
     </div>

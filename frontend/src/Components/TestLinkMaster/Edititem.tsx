@@ -39,7 +39,7 @@ import axios from "axios";
 interface AddItemProps {
   onAdd: (item: any) => void;
   typeofschema: Record<string, any>;
-  editid: string;
+  editid?: string;
 }
 
 const AddItem: React.FC<AddItemProps> = ({
@@ -58,14 +58,35 @@ const AddItem: React.FC<AddItemProps> = ({
   const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
   useEffect(() => {
     if (editid) {
+      setLoading(true);
+      console.log('Fetching data for editid:', editid);
+      
       axios
         .get(`/api/testmasterlink/reference/${editid}`)
         .then((res) => {
-          setFormData(res.data);
-          setSelectedParameters(res.data.parameters || []); // Set default for multi-select
+          console.log('Fetched data:', res.data);
+          
+          const initialFormData = {
+            test: res.data.test?._id,
+            parameterGroup: res.data.parameterGroup?._id,
+            parameter: res.data.parameter?.map((p: any) => p._id) || []
+          };
+          
+          console.log('Setting initial form data:', initialFormData);
+          setFormData(initialFormData);
+          
+          if (res.data.parameter) {
+            const parameterIds = res.data.parameter.map((p: any) => p._id);
+            console.log('Setting selected parameters:', parameterIds);
+            setSelectedParameters(parameterIds);
+          }
         })
         .catch((err) => {
           console.error("Error fetching data:", err);
+          setError(err.response?.data?.message || "Error fetching data");
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
     return () => {
@@ -76,29 +97,51 @@ const AddItem: React.FC<AddItemProps> = ({
   const handleAdd = async () => {
     setLoading(true);
     try {
-      const data = {
+      if (!formData.test || !formData.parameterGroup || !selectedParameters.length) {
+        setError("Please fill in all required fields");
+        setLoading(false);
+        return;
+      }
+
+      const updateData = {
         test: formData.test,
         parameterGroup: formData.parameterGroup,
         parameter: selectedParameters,
       };
-      await axios
-        .put(`/api/testmasterlink/update/${editid}`, data)
-        .then((res) => {
-          console.log("ppaapppppp", res.data);
-          // onAdd(res.data.newService);
 
-          setFormData(res.data.newService);
-          setHandleopen(false);
-          setError("");
-          window.location.reload();
-        });
-    } catch (err) {
-      setError("Failed to add parameter group. Please try again.");
-      console.error(err);
+      if (!editid) {
+        setError("No item selected for editing");
+        return;
+      }
+
+      const response = await axios.put(
+        `/api/testmasterlink/update/${editid}`,
+        updateData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+
+      if (response.data) {
+        // Close dialog and refresh page immediately
+        setHandleopen(false);
+        window.location.reload();
+      }
+    } catch (err: any) {
+      console.error("Update error:", err);
+      const errorMessage = err.response?.data?.message || err.message || "Failed to update";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log('Current formData:', formData);
+    console.log('Current selectedParameters:', selectedParameters);
+  }, [formData, selectedParameters]);
 
   // Capitalize the first letter of each word for labels
   function capitalizeText(text: string) {
@@ -107,10 +150,15 @@ const AddItem: React.FC<AddItemProps> = ({
 
   // Handle input changes dynamically
   const handleChange = (name: string, value: any) => {
-    setFormData((prevData: any) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    console.log(`Handling change for ${name}:`, value);
+    setFormData((prevData: any) => {
+      const newData = {
+        ...prevData,
+        [name]: value,
+      };
+      console.log('Updated formData:', newData);
+      return newData;
+    });
   };
   useEffect(() => {
     const fetchparameter = async () => {
@@ -129,6 +177,12 @@ const AddItem: React.FC<AddItemProps> = ({
     };
     fetchparameter();
   }, []);
+
+  // Add this useEffect to monitor form data changes
+  useEffect(() => {
+    console.log('typeofschema:', typeofschema);
+    console.log('Current formData:', formData);
+  }, [formData, typeofschema]);
 
   // Dynamically render form fields based on the schema
   const addFields = (schema: Record<string, any>) => {
@@ -224,15 +278,24 @@ const AddItem: React.FC<AddItemProps> = ({
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
-              <Select onValueChange={(value) => handleChange(key, value)}>
+              <Select 
+                value={formData[key] || ''} 
+                onValueChange={(value) => {
+                  console.log(`Selecting ${key}:`, value);
+                  handleChange(key, value);
+                }}
+              >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>{label}</SelectLabel>
-                    {value.options.map((option: any) => (
-                      <SelectItem key={option.value} value={option.value}>
+                    {value.options?.map((option: any) => (
+                      <SelectItem 
+                        key={option.value} 
+                        value={option.value}
+                      >
                         {option.label}
                       </SelectItem>
                     ))}
@@ -283,29 +346,44 @@ const AddItem: React.FC<AddItemProps> = ({
         <DialogHeader>
           <DialogTitle>Edit item</DialogTitle>
           <DialogDescription>
-            Enter the details of the item you want to edit.
+            Make changes to your item here.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          {error && <p className="text-red-500">{error}</p>}
+          {error && (
+            <div className="text-red-500 text-sm px-4 py-2 bg-red-50 rounded">
+              {error}
+            </div>
+          )}
+          {loading && (
+            <div className="text-blue-500 text-sm px-4 py-2 bg-blue-50 rounded">
+              Loading...
+            </div>
+          )}
           {addFields(typeofschema)}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">Select Parameters</Label>
             <MultiSelect
               className="col-span-3"
               options={selectedFrameworks}
-              onValueChange={setSelectedParameters}
-              // defaultValue={formData.parameter.name}
-              placeholder="Select frameworks"
-              variant="inverted"
-              maxCount={2}
+              onValueChange={(values) => {
+                console.log('MultiSelect values changed:', values);
+                setSelectedParameters(values);
+              }}
+              value={selectedParameters}
+              defaultValue={selectedParameters}
+              placeholder="Select parameters"
             />
           </div>
         </div>
 
         <DialogFooter>
-          <Button onClick={handleAdd} type="button" disabled={loading}>
-            {loading ? "Submitting..." : "Submit"}
+          <Button 
+            onClick={handleAdd} 
+            disabled={loading}
+            className={loading ? 'opacity-50 cursor-not-allowed' : ''}
+          >
+            {loading ? 'Updating...' : 'Update'}
           </Button>
         </DialogFooter>
       </DialogContent>
