@@ -151,7 +151,7 @@ function ProfileForm({ formData }) {
     // Implement actual profile update logic here
     await axios.put(`/api/testmaster/update/${id}`, data).then((res) => {
       console.log("ppappappa", res.data);
-      toast.success("Profile updated successfully");
+      toast.success("Test Master Updated Successfully");
       navigate("/testmaster");
     });
   }

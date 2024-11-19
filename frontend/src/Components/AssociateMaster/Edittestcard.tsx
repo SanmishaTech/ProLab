@@ -143,7 +143,7 @@ function ProfileForm({ formData }) {
   async function onSubmit(data: ProfileFormValues) {
     // console.log("Sas", data);
     await axios.put(`/api/associatemaster/update/${id}`, data).then((res) => {
-      toast.success("Profile updated successfully");
+      toast.success("Associate Master Updated Successfully");
       navigate("/associatemaster");
     });
   }

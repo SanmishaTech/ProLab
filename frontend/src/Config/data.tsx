@@ -39,7 +39,7 @@ export const navItems: NavItem[] = [
         href: "/machinelinkmaster",
       },
       {
-        title: "Test parameter link Master",
+        title: "Test Parameter link Master",
         href: "/testlinkmaster",
       },
       {

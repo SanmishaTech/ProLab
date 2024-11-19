@@ -113,7 +113,7 @@ function ProfileForm() {
 
     await axios.post(`/api/testmaster`, data).then((res) => {
       console.log("ppappappa", res.data);
-      toast.success("Profile updated successfully");
+      toast.success("Test Master Created Successfully");
       navigate("/testmaster");
     });
   }

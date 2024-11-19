@@ -140,7 +140,7 @@ function ProfileForm() {
     // Implement actual profile update logic here
     await axios.post(`/api/associatemaster`, data).then((res) => {
       console.log("ppappappa", res.data);
-      toast.success("Profile updated successfully");
+      toast.success("Associate Master Created Successfully");
       navigate("/associatemaster");
     });
   }
