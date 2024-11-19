@@ -122,7 +122,7 @@ function ProfileForm({ formData }) {
   }, []);
 
   const getformdatafromnextcomponent = (data) => {
-    console.log("Received data:", data);
+    
     setFormData(data);
   };
 

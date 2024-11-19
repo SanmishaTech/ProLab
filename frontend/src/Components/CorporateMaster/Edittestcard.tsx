@@ -72,8 +72,8 @@ const profileFormSchema = z.object({
    .min(2, {
      message: "Address must be at least 2 characters.",
    })
-   .max(30, {
-     message: "Address must not be longer than 30 characters.",
+   .max(550, {
+     message: "Address must not be longer than 550 characters.",
    }),
 });
 
@@ -232,6 +232,7 @@ function ProfileForm({ formData }) {
                     <SelectItem value="mumbai">Mumbai</SelectItem>
                     <SelectItem value="chennai">Chennai</SelectItem>
                     <SelectItem value="delhi">Delhi</SelectItem>
+                    <SelectItem value="kharghar">Kharghar</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>What is your city?</FormDescription>
@@ -343,7 +344,7 @@ export default function SettingsProfilePage() {
       </Button>
 
       <CardHeader>
-        <CardTitle>Edit Corporate Master</CardTitle>
+        <CardTitle>Edit Corporate Master Master</CardTitle>
         <CardDescription>Corporate master</CardDescription>
       </CardHeader>
       <CardContent>

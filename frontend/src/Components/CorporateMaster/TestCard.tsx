@@ -38,11 +38,11 @@ import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 
 const profileFormSchema = z.object({
-   corporateCode: z.string().optional(),
-   corporateName: z.string().optional(),
-   discount: z.string().optional(),
-   value: z.any(),
-   country: z
+  corporateCode: z.string().optional(),
+  corporateName: z.string().optional(),
+  discount: z.string().optional(),
+  value: z.any(),
+  country: z
     .string()
     .min(2, {
       message: "Country must be at least 2 characters.",
@@ -71,18 +71,19 @@ const profileFormSchema = z.object({
     .min(2, {
       message: "Address must be at least 2 characters.",
     })
-    .max(30, {
-      message: "Address must not be longer than 30 characters.",
+    .max(550, {
+      message: "Address must not be longer than 550 characters.",
     }),
-   
-  
-  
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-// This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {};
+// Default values for the form
+const defaultValues: Partial<ProfileFormValues> = {
+  country: "india", // Default country
+  state: "maharashtra", // Default state
+  city: "kharghar", // Default city
+};
 
 function ProfileForm() {
   const form = useForm<ProfileFormValues>({
@@ -91,34 +92,21 @@ function ProfileForm() {
     mode: "onChange",
   });
 
-  //   const { fields, append } = useFieldArray({
-  //     name: "urls",
-  //     control: form.control,
-  //   });
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
-    // console.log("Sas", data);
     console.log("ppappappa");
-    // Implement actual profile update logic here
     await axios.post(`/api/corporatemaster`, data).then((res) => {
       console.log("ppappappa", res.data);
-      toast.success("Associate Master Created Successfully");
+      toast.success("Corporate Master Created Successfully");
       navigate("/corporate");
     });
   }
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 pb-[2rem]"
-      >
-        {" "}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pb-[2rem]">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-          
-          
-                  
           <FormField
             control={form.control}
             name="corporateCode"
@@ -147,8 +135,7 @@ function ProfileForm() {
               </FormItem>
             )}
           />
-       
-       <FormField
+          <FormField
             control={form.control}
             name="address"
             render={({ field }) => (
@@ -162,8 +149,8 @@ function ProfileForm() {
               </FormItem>
             )}
           />
-           </div>
-           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
             className="flex-1"
             control={form.control}
@@ -171,11 +158,7 @@ function ProfileForm() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Select Country</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  className="w-full"
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} className="w-full" defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a Country" />
@@ -201,11 +184,7 @@ function ProfileForm() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Select State</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  className="w-full"
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} className="w-full" defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a State" />
@@ -231,11 +210,7 @@ function ProfileForm() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Select City</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  className="w-full"
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} className="w-full" defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select City" />
@@ -247,6 +222,7 @@ function ProfileForm() {
                     <SelectItem value="mumbai">Mumbai</SelectItem>
                     <SelectItem value="chennai">Chennai</SelectItem>
                     <SelectItem value="delhi">Delhi</SelectItem>
+                    <SelectItem value="kharghar">Kharghar</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>What is your City?</FormDescription>
@@ -256,25 +232,21 @@ function ProfileForm() {
           />
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-        <FormField
+          <FormField
             className="flex-1"
             control={form.control}
             name="discount"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Select Discount Type </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  className="w-full"
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} className="w-full" defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a Discount Type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                     <SelectItem value="value">Value</SelectItem>
+                    <SelectItem value="value">Value</SelectItem>
                     <SelectItem value="percentage">Percentage</SelectItem>
                   </SelectContent>
                 </Select>
@@ -283,7 +255,6 @@ function ProfileForm() {
               </FormItem>
             )}
           />
-        
           <FormField
             control={form.control}
             name="value"
@@ -298,8 +269,8 @@ function ProfileForm() {
               </FormItem>
             )}
           />
-          </div>
-        
+        </div>
+
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
             Save
@@ -314,10 +285,7 @@ export default function SettingsProfilePage() {
   const navigate = useNavigate();
   return (
     <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
-      <Button
-        onClick={() => navigate("/corporate")}
-        className="ml-4 flex gap-2 m-8 mb-4"
-      >
+      <Button onClick={() => navigate("/corporate")} className="ml-4 flex gap-2 m-8 mb-4">
         <MoveLeft className="w-5 text-white" />
         Back
       </Button>
@@ -332,10 +300,6 @@ export default function SettingsProfilePage() {
           <ProfileForm />
         </div>
       </CardContent>
-      {/* <CardFooter className="flex justify-between">
-        <Button variant="outline">Cancel</Button>
-        <Button>Deploy</Button>
-      </CardFooter> */}
     </Card>
   );
 }
