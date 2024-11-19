@@ -114,6 +114,11 @@ export const navItems: NavItem[] = [
         href: "/specimen",
         icon: "specimen",
       },
+      {
+        title: "Corporate Master",
+        href: "/corporate",
+        
+      },
     ],
   },
   // {
