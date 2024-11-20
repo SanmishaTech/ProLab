@@ -52,6 +52,7 @@ export const navItems: NavItem[] = [
       {
         title: "Barcode Setup",
         href: "/barcode",
+        icon:"barcode"
       },
       {
         title: "Rejection Reason Master",
