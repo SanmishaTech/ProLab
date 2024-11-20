@@ -45,37 +45,52 @@ export default function Dashboard({
     prefix: "",   
     suffix: "",   
     separator: "",   
-    numberOfDigits: 1,  
+    digits: "1", 
     startNumber: "",  
-    prefixFor: "patient",  
+    prefixFor: "patient",
+    resetToStart: false,
   });
 
   const fetchRecord = async (prefixFor) => {
-    if (prefixFor !== "patient" && prefixFor !== "sid" && prefixFor !== "invoice") {
+    if (!["sid", "patient", "invoice"].includes(prefixFor)) {
       console.error("Invalid prefixFor value", prefixFor);
-      return; // Return early if the prefixFor is invalid
+      return;
     }
-  
+
     try {
-      // Make GET request to fetch data from the backend based on the prefixFor value
-      const response = await axios.get(`/api/prefix/${prefixFor}/${barcodeId}`);
-  
-      if (response.data && Object.keys(response.data).length > 0) {
-        // Only update state if the data received is valid and not empty
-        setFormData(response.data); // Populate the formData with the response data
+      const response = await axios.get(`/api/prefix/${prefixFor}`);
+      
+      if (response.data && response.data.length > 0) {
+        const prefixData = response.data[0];
+        setFormData({
+          prefix: prefixData.prefix || "",
+          suffix: prefixData.suffix || "",
+          separator: prefixData.separator || "",
+          digits: prefixData.digits || "1",
+          startNumber: prefixData.startNumber || "",
+          prefixFor: prefixData.prefixFor,
+          resetToStart: prefixData.resetToStart || false,
+        });
       } else {
-        console.log("No data found for", prefixFor);
+        setFormData({
+          prefix: "",
+          suffix: "",
+          separator: "",
+          digits: "1",
+          startNumber: "",
+          prefixFor: prefixFor,
+          resetToStart: false,
+        });
       }
     } catch (error) {
-      // Handle error if request fails
-      console.log("Error fetching data", error);
-      toast.error("Failed to fetch data");
+      console.error("Error fetching data", error);
+      toast.error("Failed to fetch prefix configuration");
     }
   };
 
   useEffect(() => {
-    fetchRecord(formData.prefixFor); // Fetch data for the selected prefix type (e.g., 'patient', 'sid', 'invoice')
-  }, [formData.prefixFor]); // Re-run fetch whenever prefixFor changes
+    fetchRecord(formData.prefixFor);
+  }, [formData.prefixFor]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -95,7 +110,7 @@ export default function Dashboard({
   const handleNumberOfDigitsChange = (value) => {
     setFormData((prevData) => ({
       ...prevData,
-      numberOfDigits: value,  
+      digits: value,  
     }));
   };
 
@@ -115,27 +130,30 @@ export default function Dashboard({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.prefixFor !== "patient" && formData.prefixFor !== "sid" && formData.prefixFor !== "invoice") {
-      console.error("Invalid prefixFor value:", formData.prefixFor);
-      toast.error("Invalid prefixFor value");
-      return;   
+    if (!["patient", "sid", "invoice"].includes(formData.prefixFor)) {
+      toast.error("Invalid prefix type");
+      return;
     }
 
     try {
-      // Check if the prefix already exists for the given prefixFor
-      const response = await axios.get(`/api/prefix/${formData.prefixFor}/${barcodeId}`);
-      if (response.data && Object.keys(response.data).length > 0) {
-        // If it exists, update the existing record
-        await axios.put(`/api/prefix/${formData.prefixFor}/${barcodeId}`, formData);
-        toast.success("Data updated successfully");
+      const response = await axios.get(`/api/prefix/${formData.prefixFor}`);
+      
+      const payload = {
+        ...formData,
+        digits: formData.digits.toString(),
+      };
+
+      if (response.data && response.data.length > 0) {
+        const existingPrefix = response.data[0];
+        await axios.put(`/api/prefix/${formData.prefixFor}/${existingPrefix._id}`, payload);
+        toast.success("Configuration updated successfully");
       } else {
-        // If it doesn't exist, create a new record
-        await axios.post(`/api/prefix/${formData.prefixFor}/${barcodeId}`, formData);
-        toast.success("Data saved successfully");
+        await axios.post('/api/prefix', payload);
+        toast.success("Configuration saved successfully");
       }
     } catch (error) {
-      console.error("Error saving data", error);
-      toast.error("Failed to save data");
+      console.error("Error saving configuration", error);
+      toast.error(error.response?.data?.message || "Failed to save configuration");
     }
   };
 
@@ -259,14 +277,14 @@ export default function Dashboard({
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
-                              {formData.numberOfDigits || "1"}
+                              {formData.digits || "1"}
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {[1, 2, 3, 4, 5, 6, 7].map((digit) => (
                               <DropdownMenuItem
                                 key={digit}
-                                onClick={() => handleNumberOfDigitsChange(digit)}
+                                onClick={() => setFormData(prev => ({...prev, digits: digit.toString()}))}
                               >
                                 {digit}
                               </DropdownMenuItem>

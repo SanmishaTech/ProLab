@@ -19,6 +19,14 @@ exports.createPrefix = async (req, res) => {
       return res.status(400).json({ message: "Invalid prefixFor value" });
     }
 
+    // Check if a prefix configuration already exists for this type
+    const existingPrefix = await Prefix.findOne({ prefixFor });
+    if (existingPrefix) {
+      return res.status(400).json({ 
+        message: `A prefix configuration for ${prefixFor} already exists. Please use update instead.` 
+      });
+    }
+
     // Create a new Prefix document
     const newPrefix = new Prefix({
       prefixFor,
@@ -32,7 +40,7 @@ exports.createPrefix = async (req, res) => {
 
     // Save the document to the database
     const savedPrefix = await newPrefix.save();
-    res.status(201).json(savedPrefix); // Respond with the newly created prefix
+    res.status(201).json(savedPrefix);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to create prefix", error });
