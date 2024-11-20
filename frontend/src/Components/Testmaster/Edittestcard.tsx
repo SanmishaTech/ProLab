@@ -50,7 +50,7 @@ const profileFormSchema = z.object({
   specimen: z.string().optional(),
   price: z.any().optional(),
   department: z.string().optional(),
-  profile: z.boolean().optional(),
+  // profile: z.boolean().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -143,12 +143,12 @@ function ProfileForm({ formData }) {
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
-    // console.log("Sas", data);
+    console.log("Sas", data);
     console.log("ppappappa");
     data.prerequisite = content;
     data.consentForm = consent;
     data.interpretedText = interpretation;
-    // Implement actual profile update logic here
+
     await axios.put(`/api/testmaster/update/${id}`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Test Master Updated Successfully");

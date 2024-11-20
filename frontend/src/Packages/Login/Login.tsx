@@ -16,14 +16,21 @@ const Login = () => {
   };
   const onSubmit = async (data: Record<string, any>) => {
     console.log(data);
-    const user = await axios.post("/api/users/user/login", data);
-    console.log(user);
-    if (user.data.token) {
-      localStorage.setItem("token", user.data.token);
-      localStorage.setItem("user", JSON.stringify(user.data.user));
-      navigate("/dashboard");
-    }
-    toast.success("Successfully Logged In");
+    const user = await axios
+      .post("/api/users/user/login", data)
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+          navigate("/dashboard");
+        }
+        toast.success("Successfully Logged In");
+      })
+      .catch((err) => {
+        console.error("Error logging in:", err);
+        toast.error("Failed to log in. Check your credentials.");
+      });
   };
 
   const typeofschema = {
