@@ -37,10 +37,12 @@ export const navItems: NavItem[] = [
       {
         title: "Test Machine Link Master",
         href: "/machinelinkmaster",
+        icon:"link2"
       },
       {
         title: "Test Parameter link Master",
         href: "/testlinkmaster",
+        icon:"link"
       },
       {
         title: "Formula Master",

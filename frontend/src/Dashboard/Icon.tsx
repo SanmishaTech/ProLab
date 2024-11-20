@@ -42,6 +42,8 @@ import {
   Cog,
   Highlighter,
   MessageSquareX,
+  Link,
+  Link2,
  } from "lucide-react";
 import specimen from "@/images/icons8-specimen-container.svg";
 
@@ -86,6 +88,9 @@ export const Icons: Record<string, Icon> = {
    Machine:Cog,
    Highlighter:Highlighter,
    Rejection:MessageSquareX,
+   link:Link,
+   link2:Link2,
+
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"
