@@ -45,7 +45,7 @@ export const navItems: NavItem[] = [
       {
         title: "Formula Master",
         href: "/formula",
-        icon: "pipette",
+        icon: "Formula",
       },
       {
         title: "Barcode Setup",
@@ -54,10 +54,12 @@ export const navItems: NavItem[] = [
       {
         title: "Rejection Reason Master",
         href: "/reason",
+        icon: "Rejection",
       },
       {
         title: "Highlighter Master",
         href: "/highlighter",
+        icon: "Highlighter",
       },
 
       {
@@ -97,6 +99,7 @@ export const navItems: NavItem[] = [
       {
         title: "Machine Master",
         href: "/machinemaster",
+        icon: "Machine",
       },
 
       // {
@@ -117,6 +120,7 @@ export const navItems: NavItem[] = [
       {
         title: "Corporate Master",
         href: "/corporate",
+        icon: "department",
         
       },
     ],
