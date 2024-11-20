@@ -37,12 +37,12 @@ export const navItems: NavItem[] = [
       {
         title: "Test Machine Link Master",
         href: "/machinelinkmaster",
-        icon:"link2"
+        icon: "link2",
       },
       {
         title: "Test Parameter link Master",
         href: "/testlinkmaster",
-        icon:"link"
+        icon: "link",
       },
       {
         title: "Formula Master",
@@ -52,7 +52,7 @@ export const navItems: NavItem[] = [
       {
         title: "Barcode Setup",
         href: "/barcode",
-        icon:"barcode"
+        icon: "barcode",
       },
       {
         title: "Rejection Reason Master",
@@ -90,7 +90,6 @@ export const navItems: NavItem[] = [
         href: "/tatmaster",
         icon: "Tat",
       },
- 
     ],
   },
 
@@ -121,23 +120,19 @@ export const navItems: NavItem[] = [
         icon: "specimen",
       },
       {
- 
-        ganesh
         title: "Promo Code",
         href: "/promocodemaster",
         icon: "Associate",
-    },
-        {  
+      },
+      {
         title: "Corporate Master",
         href: "/corporate",
         icon: "department",
-        
       },
       {
         title: "Prefix Setup",
         href: "#",
         icon: "Pencil",
-  
       },
     ],
   },
