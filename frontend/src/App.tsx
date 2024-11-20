@@ -116,10 +116,10 @@ function App() {
         <Route path="/testmaster/add" element={<Dashboard />} />
         <Route path="/testmaster/edit/:id" element={<Dashboard />} />
         <Route path="/testlinkmaster" element={<Dashboard />} />
+        <Route path="/promocodemaster" element={<Dashboard />} />
         <Route path="/associatemaster" element={<Dashboard />} />
         <Route path="/associatemaster/add" element={<Dashboard />} />
         <Route path="/associatemaster/edit/:id" element={<Dashboard />} />
-
         <Route path="/patientmaster" element={<Dashboard />} />
         <Route path="/patientmaster/add" element={<Dashboard />} />
         <Route path="/patientmaster/edit/:id" element={<Dashboard />} />

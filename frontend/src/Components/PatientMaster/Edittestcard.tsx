@@ -207,7 +207,7 @@ function ProfileForm({ formData }) {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
+                      <SelectValue placeholder="Select Salutation" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -342,7 +342,7 @@ function ProfileForm({ formData }) {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
+                      <SelectValue placeholder="Select City" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -457,7 +457,7 @@ function ProfileForm({ formData }) {
             name="gender"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>select Gender</FormLabel>
+                <FormLabel>Select Gender</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
