@@ -45,6 +45,7 @@ import {
   Link,
   Link2,
   Barcode,
+  Pencil,
  } from "lucide-react";
 import specimen from "@/images/icons8-specimen-container.svg";
 
@@ -92,7 +93,7 @@ export const Icons: Record<string, Icon> = {
    link:Link,
    link2:Link2,
    barcode:Barcode,
-
+   Pencil:Pencil,
 
   gitHub: ({ ...props }: LucideProps) => (
     <svg

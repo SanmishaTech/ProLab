@@ -126,6 +126,12 @@ export const navItems: NavItem[] = [
         icon: "department",
         
       },
+      {
+        title: "Prefix Setup",
+        href: "#",
+        icon: "Pencil",
+        
+      },
     ],
   },
   // {
