@@ -59,19 +59,40 @@ import Edititem from "./Edititem";
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 
-export default function Dashboard({
+interface DashboardProps {
+  breadcrumbs?: BreadcrumbItem[];
+  searchPlaceholder?: string;
+  userAvatar?: string;
+  tableColumns?: {
+    tabs?: { value: string; label: string }[];
+    filters?: { checked: boolean; value: string; label: string }[];
+    headers?: { label: string; key: string; hiddenOn?: string }[];
+    title?: string;
+    description?: string;
+    pagination?: { from: number; to: number; total: number };
+  };
+  AddItem: React.ComponentType<any>;
+  typeofschema: Record<string, any>;
+  tableData: any[];
+  onAddProduct?: () => void;
+  onExport?: () => void;
+  onFilterChange?: (value: string) => void;
+  onProductAction: (action: string, product: any) => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({
   breadcrumbs = [],
   searchPlaceholder = "Search...",
   userAvatar = "/placeholder-user.jpg",
   tableColumns = {},
   AddItem,
   typeofschema,
-  tableData = [],
+  tableData,
   onAddProduct = () => {},
   onExport = () => {},
   onFilterChange = () => {},
-  onProductAction = () => {},
-}) {
+  onProductAction,
+}) => {
   console.log("This is inside the dashboard", tableData);
   const navigate = useNavigate();
   const [toggleedit, setToggleedit] = useState(false);
@@ -212,17 +233,7 @@ export default function Dashboard({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 gap-1"
-                  onClick={onExport}
-                >
-                  <File className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Export
-                  </span>
-                </Button>
+               
                 {/* <Button size="sm" className="h-8 gap-1" onClick={onAddProduct}>
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -233,7 +244,7 @@ export default function Dashboard({
                   "This is tableData",
                   tableData ? tableData.add : null
                 )}
-                <AddItem typeofschema={typeofschema} add={tableData?.add} />
+                <AddItem />
               </div>
             </div>
             <TabsContent value="all">
@@ -412,4 +423,6 @@ export default function Dashboard({
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;

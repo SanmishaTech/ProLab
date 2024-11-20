@@ -3,10 +3,33 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Dashboard from "./Dashboardreuse";
-import AddItem from "./Additem"; // Corrected import path
+// import AddItem from "./Additem"; // Corrected import path
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
+
+const AddItem = () => {
+  const navigate = useNavigate();
+  const handleAdd = () => {
+    navigate("/corporate/add");
+  };
+  return (
+    <Button onClick={handleAdd} variant="outline">
+      Add Item
+    </Button>
+  );
+};
+const Edititem = (id: string) => {
+  const navigate = useNavigate();
+  const handleAdd = () => {
+    navigate(`/corporate/edit/${id?.id}`);
+  };
+  return (
+    <Button onClick={handleAdd} variant="ghost" className="w-full">
+      Edit Item
+    </Button>
+  );
+};
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -18,13 +41,12 @@ export default function Dashboardholiday() {
   const [parameter, setParameter] = useState<any[]>([]);
   const [parameterGroup, setParameterGroup] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch data from the API
     const fetchparameter = async () => {
       try {
-        const response = await axios.get(`/api/parameter/allparameter`);
+        const response = await axios.get(`/api/corporate/allcorporates`);
         console.log(response.data);
         setParameter(response.data);
       } catch (error) {
@@ -33,10 +55,8 @@ export default function Dashboardholiday() {
     };
     const fetchparametergroup = async () => {
       try {
-        const response = await axios.get(
-          `/api/parametergroup/allparametergroup`
-        );
-        console.log("Parameterlink", response.data);
+        const response = await axios.get(`/api/corporate/allcorporates`);
+        console.log(response.data);
         setParameterGroup(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -44,7 +64,7 @@ export default function Dashboardholiday() {
     };
     const fetchtest = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(`/api/corporate/allcorporates`);
         console.log(response.data);
         setTest(response.data);
       } catch (error) {
@@ -62,28 +82,25 @@ export default function Dashboardholiday() {
     console.log("This is test", test);
   }, [parameter, parameterGroup, test]);
   const typeofschema = {
-    test: {
-      type: "Select",
-      label: "Test",
-      options: test?.map((item) => ({
-        value: item._id,
-        label: item.name,
-      })) || [],
-    },
-    parameterGroup: {
-      type: "Select",
-      label: "Parameter Group",
-      options: parameterGroup?.map((item) => ({
-        value: item._id,
-        label: item.description,
-      })) || [],
-    },
+    // sortBy: { type: "Number", label: "Sort By" },
+    // date: { type: "Date", label: "Date" },
+    // category: {
+    //   type: "Select",
+    //   label: "Category",
+    //   options: [
+    //     { value: "category1", label: "Category 1" },
+    //     { value: "category2", label: "Category 2" },
+    //     // Add more options as needed
+    //   ],
+    // },
+    // isActive: { type: "Checkbox", label: "Is Active" },
+     // Add more fields as needed
   };
 
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/testmasterlink/allLinkmaster`)
+      .get(`/api/corporatemaster/allcorporates`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -98,17 +115,18 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Test Parameter Link  Master" },
+        { label: "Corporate Master" },
       ],
-      searchPlaceholder: "Search Test Parameter Link  Master...",
+      searchPlaceholder: "Search Corporate Master...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Test Parameter Link Master",
-        description: "Manage Test Parameter Link  Master and view their details.",
+        title: "Corporate Master",
+        description: "Manage Corporate Master and view their details.",
         headers: [
-          { label: "name", key: "name" },
-          { label: "Parameter Group", key: "parameterGroup" },
-          // { label: "Parameter", key: "parameter" },
+          { label: "Corporate Code", key: "corporateCode" },
+          { label: "Corporate Name", key: "corporateName" },
+          {label : "Discount", key : "discount"},
+          { label: "Value", key: "value" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -141,40 +159,31 @@ export default function Dashboardholiday() {
   };
 
   const handleProductAction = (action: string, product: any) => {
+    console.log(`Action: ${action} on product:`, product);
     if (action === "edit") {
-      // The edit functionality is now handled by the EditItem component
-      // You might want to store the selected item ID in state if needed
-      setSelectedItemId(product._id);
+      // Navigate to edit page or open edit modal
+      // Example: window.location.href = `/parametergroup/update/${product._id}`;
     } else if (action === "delete") {
-      if (confirm("Are you sure you want to delete this item?")) {
-        axios.delete(`/api/testmasterlink/delete/${product._id}`)
+      // Implement delete functionality, possibly with confirmation
+      // Example:
+      /*
+      if (confirm("Are you sure you want to delete this parameter group?")) {
+        axios.delete(`/api/parametergroup/delete/${product._id}`)
           .then(() => {
+            // Refresh data
             setData(prevData => prevData.filter(item => item._id !== product._id));
           })
-          .catch(err => {
-            console.error("Error deleting item:", err);
-            setError("Failed to delete item");
-          });
+          .catch(err => console.error(err));
       }
+      */
     }
   };
 
   // Handler for adding a new item (optional if parent needs to do something)
-  const handleAddItem = async (updatedItem: any) => {
-    try {
-      console.log("Updated item received:", updatedItem);
-      
-      // Fetch fresh data from the API
-      const response = await axios.get(`/api/testmasterlink/allLinkmaster`);
-      setData(response.data);
-      
-      // Clear the selected item
-      setSelectedItemId(null);
-      
-      console.log("Data refreshed successfully");
-    } catch (err) {
-      console.error("Error refreshing data:", err);
-    }
+  const handleAddItem = (newItem: any) => {
+    console.log("New item added:", newItem);
+    // Optionally, you can update the data state to include the new item without refetching
+    setData((prevData) => [...prevData, newItem]);
   };
 
   if (loading) return <div className="p-4">Loading...</div>;
@@ -183,20 +192,27 @@ export default function Dashboardholiday() {
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data
-    ? data?.map((item) => {
-        console.log("This is item", item);
-        return {
-          _id: item?._id,
-          name: item?.test?.name || "Name not provided",
-          parameterGroup:
-            item?.parameterGroup?.description || "Description not provided",
-          // parameter: item?.parameter?.name || "Alternate name not provided",
-          action: "actions", // Placeholder for action buttons
-          // Additional fields can be added here
-        };
-      })
-    : [];
+  const mappedTableData = Array.isArray(data)
+  ? data.map((item) => {
+      console.log("This is item", item);
+      // Capitalize the first letter of the discount
+      const formattedDiscount = item?.discount
+        ? item.discount.charAt(0).toUpperCase() + item.discount.slice(1)
+        : "Discount not provided"; // Default value if discount is not available
+      
+      return {
+        _id: item?._id,
+        corporateCode: item?.corporateCode || "Corporate Code not provided",
+        corporateName: item?.corporateName || "Corporate Name not provided",
+        discount: formattedDiscount, // Use the formatted discount value
+        value: item?.value || "Value not provided",
+        delete: `/corporatemaster/delete/${item?._id}`,
+        action: "actions", 
+      };
+    })
+  : []; // fallback to empty array if data is not an array
+
+
 
   return (
     <div className="p-4">
@@ -206,17 +222,14 @@ export default function Dashboardholiday() {
         userAvatar={config.userAvatar}
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
+        Edititem={Edititem}
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
         typeofschema={typeofschema}
         AddItem={() => (
-          <AddItem 
-            typeofschema={typeofschema} 
-            onAdd={() => {}} 
-            editid={selectedItemId} 
-          />
+          <AddItem typeofschema={typeofschema} onAdd={handleAddItem} />
         )}
       />
     </div>

@@ -31,6 +31,9 @@ import MachineMaster from "@/Components/MachineMaster/Registertable";
 import MachineLinkMaster from "@/Components/MachineLinkMaster/Registertable";
 import PromoCodeMaster from "@/Components/PromoCodeMaster/Registertable";
 import Formula from "../Components/Formula/Formula";
+import DashboardCorporateMaster from "@/Components/CorporateMaster/Registertable";
+import CorporateTestCard from "@/Components/CorporateMaster/TestCard";
+import CorporateEditCard from "@/Components/CorporateMaster/Edittestcard";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import ContainerLinkMaster from "@/Components/ContainerLinkMaster/Registertable";
@@ -77,6 +80,9 @@ const Dashboard = () => {
         )}
         {location.pathname === "/associatemaster/add" && <TestCard />}
         {/\/associatemaster\/edit\/\d+/.test(location.pathname) && <EditCard />}
+        {location.pathname === "/corporate" && <DashboardCorporateMaster />}
+        {location.pathname === "/corporate/add" && <CorporateTestCard />}
+        {/\/corporate\/edit\/\d+/.test(location.pathname) && <CorporateEditCard />}
         {location.pathname === "/tatmaster" && <DashboardTatMaster />}
         {location.pathname === "/Formula" && <Formula />}
         {location.pathname === "/patientmaster" && <DashboardPatientMaster />}
