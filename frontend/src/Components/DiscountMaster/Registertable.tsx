@@ -17,17 +17,19 @@ export default function Dashboardholiday() {
   const [error, setError] = useState<any>(null);
   const [machine, setMachine] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]); // State for filtered data
+  const [filterValue, setFilterValue] = useState<string>(""); // Store selected filter value
 
   useEffect(() => {
-    const fetchMachine = async () => {
-      try {
-        const response = await axios.get(`/api/promocodemaster/allpromocode`);
-        console.log("This is a mahcine", response.data);
-        setMachine(response.data);
-      } catch (error) {
-        console.error("Error fetching machines:", error);
-      }
-    };
+    // const fetchMachine = async () => {
+    //   try {
+    //     const response = await axios.get(`/api/discountmaster/alldiscount`);
+    //     console.log("This is a mahcine", response.data);
+    //     setMachine(response.data);
+    //   } catch (error) {
+    //     console.error("Error fetching machines:", error);
+    //   }
+    // };
     // const fetchTests = async () => {
     //   try {
     //     const response = await axios.get(`/api/promocodemaster/allpromocode`);
@@ -37,35 +39,27 @@ export default function Dashboardholiday() {
     //     console.error("Error fetching tests:", error);
     //   }
     // };
-    fetchMachine();
+    // fetchMachine();
     // fetchTests();
   }, []);
 
   // Define the schema with various input types
   const typeofschema = {
-    promoCode: {
-      type: "String",
-      label: "Promo Code",
-    },
-    description: {
-      type: "String",
-      label: "Description",
-    },
-    promoType: {
+    discountType: {
       type: "Select",
-      label: "Promo Type",
+      label: "Discount Type",
       options: [
         { value: "value", label: "Value" },
         { value: "percentage", label: "Percentage" },
       ],
     },
     value: {
-      type: "Number",
+      type: "String",
       label: "Value",
     },
-    validityDate: {
-      type: "Date",
-      label: "Validity Date",
+    description: {
+      type: "String",
+      label: "Description",
     },
 
     // sortBy: { type: "Number", label: "Sort By" },
@@ -83,13 +77,15 @@ export default function Dashboardholiday() {
     // isbol: { type: "Checkbox", label: "Is bol" },
     // Add more fields as needed
   };
-
+  
+  
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/promocodemaster/allpromocode`)
+      .get(`/api/discountmaster/alldiscount`)
       .then((response) => {
         setData(response.data);
+        setFilteredData(response.data); 
         setLoading(false);
       })
       .catch((err) => {
@@ -102,19 +98,17 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Promo Code" },
+        { label: "Discount Master" },
       ],
-      searchPlaceholder: "Search Promo Code...",
+      searchPlaceholder: "Search Discount...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Promo Code",
-        description: "Manage Promo Code and view their details.",
+        title: "Discount",
+        description: "Manage Discount and view their details.",
         headers: [
-          { label: "Promo Code", key: "promoCode" },
-          { label: "Description", key: "description" },
-          { label: "PromoType", key: "promoType" },
+          { label: "discount Type", key: "discountType" },
           { label: "Value", key: "value" },
-          { label: "Validity Date", key: "validityDate" },
+          { label: "Description", key: "description" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -130,6 +124,7 @@ export default function Dashboardholiday() {
     });
   }, [User?._id]);
 
+
   // Handlers for actions
   const handleAddProduct = () => {
     console.log("Add Parameter Group clicked");
@@ -143,6 +138,13 @@ export default function Dashboardholiday() {
 
   const handleFilterChange = (filterValue: string) => {
     console.log(`Filter changed: ${filterValue}`);
+    setFilterValue(filterValue); // Store the selected filter value
+    if (filterValue === "") {
+      setFilteredData(data); // If no filter, show all data
+    } else {
+      const filtered = data.filter((item) => item.discountType === filterValue);
+      setFilteredData(filtered); // Filter data based on the selected discountType
+    }
     // Implement filtering logic here, possibly refetching data with filters applied
   };
 
@@ -181,17 +183,13 @@ export default function Dashboardholiday() {
 
   // Map the API data to match the Dashboard component's expected tableData format
   if (!data) return [];
-  const mappedTableData = data?.map((item) => {
+  const mappedTableData = filteredData?.map((item) => {
     return {
       _id: item?._id,
-      promoCode: item?.promoCode || "Promo Code not provided",
+      discountType: item?.discountType || "Discount Type not provided",
       description: item?.description || "Description not provided",
-      promoType: item?.promoType || "Promo Type not provided",
       value: item?.value || "Value not provided",
-      validityDate:
-        new Date(item?.validityDate).toLocaleDateString() ||
-        "Validity Date not provided",
-      delete: `/promocodemaster/delete/${item?._id}`,
+      delete: `/discountmaster/delete/${item?._id}`,
       action: "actions", // Placeholder for action buttons
       // Additional fields can be added here
     };
@@ -210,6 +208,7 @@ export default function Dashboardholiday() {
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
         typeofschema={typeofschema}
+        filterValue={filterValue}
         AddItem={() => (
           <AddItem typeofschema={typeofschema} onAdd={handleAddItem} />
         )}
