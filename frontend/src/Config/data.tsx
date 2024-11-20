@@ -131,7 +131,7 @@ export const navItems: NavItem[] = [
       },
       {
         title: "Prefix Setup",
-        href: "#",
+        href: "/prefix",
         icon: "Pencil",
       },
     ],
