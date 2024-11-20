@@ -110,6 +110,7 @@ function App() {
         <Route path="/barcode" element={<Dashboard />} />
         <Route path="/highlighter" element={<Dashboard />} />
         <Route path="/parametergroup" element={<Dashboard />} />
+
         <Route path="/specimen" element={<Dashboard />} />
         <Route path="/container" element={<Dashboard />} />
         <Route path="/testmaster" element={<Dashboard />} />
@@ -119,7 +120,10 @@ function App() {
         <Route path="/associatemaster" element={<Dashboard />} />
         <Route path="/associatemaster/add" element={<Dashboard />} />
         <Route path="/associatemaster/edit/:id" element={<Dashboard />} />
-
+        
+        <Route path="/corporate" element={<Dashboard />} />
+        <Route path="/corporate/add" element={<Dashboard />} />
+        <Route path="/corporate/edit/:id" element={<Dashboard />} />
         <Route path="/patientmaster" element={<Dashboard />} />
         <Route path="/patientmaster/add" element={<Dashboard />} />
         <Route path="/patientmaster/edit/:id" element={<Dashboard />} />

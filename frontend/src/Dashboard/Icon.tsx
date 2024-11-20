@@ -38,7 +38,14 @@ import {
   X,
   Building2,
   Clock,
-} from "lucide-react";
+  Parentheses,
+  Cog,
+  Highlighter,
+  MessageSquareX,
+  Link,
+  Link2,
+  Barcode,
+ } from "lucide-react";
 import specimen from "@/images/icons8-specimen-container.svg";
 
 export type Icon = LucideIcon;
@@ -78,6 +85,15 @@ export const Icons: Record<string, Icon> = {
   specimen: FlaskConicalOff,
   department: Building2,
   Tat: Clock,
+  Formula: Parentheses,
+   Machine:Cog,
+   Highlighter:Highlighter,
+   Rejection:MessageSquareX,
+   link:Link,
+   link2:Link2,
+   barcode:Barcode,
+
+
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"
