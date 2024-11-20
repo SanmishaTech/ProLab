@@ -121,6 +121,13 @@ export const navItems: NavItem[] = [
         icon: "specimen",
       },
       {
+ 
+        ganesh
+        title: "Promo Code",
+        href: "/promocodemaster",
+        icon: "Associate",
+    },
+        {  
         title: "Corporate Master",
         href: "/corporate",
         icon: "department",
@@ -130,7 +137,7 @@ export const navItems: NavItem[] = [
         title: "Prefix Setup",
         href: "#",
         icon: "Pencil",
-        
+  
       },
     ],
   },

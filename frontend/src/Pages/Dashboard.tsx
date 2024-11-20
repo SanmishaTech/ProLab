@@ -29,6 +29,7 @@ import PatientTestCard from "@/Components/PatientMaster/TestCard";
 import PatientEditCard from "@/Components/PatientMaster/Edittestcard";
 import MachineMaster from "@/Components/MachineMaster/Registertable";
 import MachineLinkMaster from "@/Components/MachineLinkMaster/Registertable";
+import PromoCodeMaster from "@/Components/PromoCodeMaster/Registertable";
 import Formula from "../Components/Formula/Formula";
 import DashboardCorporateMaster from "@/Components/CorporateMaster/Registertable";
 import CorporateTestCard from "@/Components/CorporateMaster/TestCard";
@@ -86,10 +87,13 @@ const Dashboard = () => {
         {location.pathname === "/Formula" && <Formula />}
         {location.pathname === "/patientmaster" && <DashboardPatientMaster />}
         {location.pathname === "/patientmaster/add" && <PatientTestCard />}
-        {/\/patientmaster\/edit\/\d+/.test(location.pathname) && <PatientEditCard />}
+        {/\/patientmaster\/edit\/\d+/.test(location.pathname) && (
+          <PatientEditCard />
+        )}
         {location.pathname === "/formula" && <Formula />}
         {location.pathname === "/machinemaster" && <MachineMaster />}
         {location.pathname === "/machinelinkmaster" && <MachineLinkMaster />}
+        {location.pathname === "/promocodemaster" && <PromoCodeMaster />}
         {location.pathname === "/containerlinkmaster" && (
           <ContainerLinkMaster />
         )}

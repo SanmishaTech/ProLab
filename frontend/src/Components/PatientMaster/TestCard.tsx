@@ -263,7 +263,7 @@ function ProfileForm() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
+                      <SelectValue placeholder="Select Salutation" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -338,7 +338,7 @@ function ProfileForm() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
+                      <SelectValue placeholder="Select Country" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -398,7 +398,7 @@ function ProfileForm() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
+                      <SelectValue placeholder="Select City" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -514,7 +514,7 @@ function ProfileForm() {
             name="gender"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>select gender</FormLabel>
+                <FormLabel>Select gender</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
@@ -675,7 +675,7 @@ export default function SettingsProfilePage() {
   return (
     <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
       <Button
-        onClick={() => navigate("/associatemaster")}
+        onClick={() => navigate("/patientmaster")}
         className="ml-4 flex gap-2 m-8 mb-4"
       >
         <MoveLeft className="w-5 text-white" />
