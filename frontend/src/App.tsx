@@ -134,6 +134,7 @@ function App() {
         <Route path="/machinemaster" element={<Dashboard />} />
         <Route path="/machinelinkmaster" element={<Dashboard />} />
         <Route path="/containerLinkMaster" element={<Dashboard />} />
+        <Route path="/discountmaster" element={<Dashboard />} />
       </Routes>
     </>
   );

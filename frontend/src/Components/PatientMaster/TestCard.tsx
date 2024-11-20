@@ -117,7 +117,10 @@ const patientFormSchema = z.object({
 type PatientFormValues = z.infer<typeof patientFormSchema>;
 
 // This can come from your database or API.
-const defaultValues: Partial<PatientFormValues> = {};
+const defaultValues: Partial<PatientFormValues> = {
+  country: "india",
+  state: "maharashtra",
+};
 
 function ProfileForm() {
   const form = useForm<PatientFormValues>({
@@ -149,7 +152,7 @@ function ProfileForm() {
       toast.success("Patient details updated successfully");
       navigate("/patientmaster");
     });
-  };
+  }
 
   // async function onSubmit(data: PatientFormValues) {
   //   // Create FormData to send the image and other form data
@@ -185,8 +188,6 @@ function ProfileForm() {
   //   }
   // }
 
-  
-
   // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   const file = e.target.files?.[0];
   //   if (file) {
@@ -194,7 +195,6 @@ function ProfileForm() {
   //     setImagePreview(URL.createObjectURL(file));
   //   }
   // };
-  
 
   return (
     <Form {...form}>
@@ -334,7 +334,7 @@ function ProfileForm() {
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
-                  defaultValue={field.value}
+                  defaultValue={field.value || "india"}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -364,7 +364,7 @@ function ProfileForm() {
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
-                  defaultValue={field.value}
+                  defaultValue={field.value || "maharashtra"}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -414,10 +414,9 @@ function ProfileForm() {
               </FormItem>
             )}
           />
-         
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-        <FormField
+          <FormField
             control={form.control}
             name="address"
             render={({ field }) => (
@@ -489,12 +488,13 @@ function ProfileForm() {
                 />
               </PopoverContent>
             </Popover>
-            <FormDescription className="mt-2">What is your Date of birth.</FormDescription>
+            <FormDescription className="mt-2">
+              What is your Date of birth.
+            </FormDescription>
           </div>
-         
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-        <FormField
+          <FormField
             control={form.control}
             name="age"
             render={({ field }) => (
@@ -596,10 +596,9 @@ function ProfileForm() {
               </FormItem>
             )}
           />
-         
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-        <FormField
+          <FormField
             control={form.control}
             name="maritalStatus"
             render={({ field }) => (
@@ -620,7 +619,7 @@ function ProfileForm() {
                             checked={controllerField.value === "married"} // Check if "married" is selected
                             onChange={() => controllerField.onChange("married")} // Update form state on change
                           />
-                           Married
+                          Married
                         </label>
                         <label htmlFor="unmarried">
                           <input
@@ -649,7 +648,6 @@ function ProfileForm() {
             name="priorityCard"
             render={({ field }) => (
               <FormItem>
-             
                 <FormControl>
                   <input type="checkbox" {...field} />
                 </FormControl>

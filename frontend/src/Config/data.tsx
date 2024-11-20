@@ -134,6 +134,11 @@ export const navItems: NavItem[] = [
         href: "#",
         icon: "Pencil",
       },
+      {
+        title: "Discount Master",
+        href: "/discountmaster",
+        icon: "Associate",
+      },
     ],
   },
   // {
