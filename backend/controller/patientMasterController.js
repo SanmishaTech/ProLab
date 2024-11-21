@@ -24,6 +24,8 @@ const patientMasterController = {
         bloodGroup,
         maritalStatus,
         priorityCard,
+        value,
+        percentage,
       } = req.body;
       const newService = new PatientMaster({
         hfaId,
@@ -45,6 +47,8 @@ const patientMasterController = {
         bloodGroup,
         maritalStatus,
         priorityCard,
+        value,
+        percentage,
       });
       const newServics = await newService.save();
       res.json({
@@ -102,30 +106,34 @@ const patientMasterController = {
         bloodGroup,
         maritalStatus,
         priorityCard,
+        value,
+        percentage,
       } = req.body;
 
       const newService = await PatientMaster.findByIdAndUpdate(
         patientID,
         {
           hfaId,
-        salutation,
-        firstName,
-        middleName,
-        lastName,
-        country,
-        state,
-        city,
-        address,
-        mobile,
-        email,
-        dateOfBirth,
-        age,
-        gender,
-        ageType,
-        patientType,
-        bloodGroup,
-        maritalStatus,
-        priorityCard,
+          salutation,
+          firstName,
+          middleName,
+          lastName,
+          country,
+          state,
+          city,
+          address,
+          mobile,
+          email,
+          dateOfBirth,
+          age,
+          gender,
+          ageType,
+          patientType,
+          bloodGroup,
+          maritalStatus,
+          priorityCard,
+          value,
+          percentage,
         },
         { new: true }
       );
@@ -147,6 +155,26 @@ const patientMasterController = {
       }
 
       res.json({ message: "Patient deleted successfully.", newService });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  getPatientByPriorityCard: async (req, res, next) => {
+    try {
+
+      const { query } = req.query;
+      const patients = await PatientMaster.find({ priorityCard: true });
+  
+      // If no patients are found, return a message
+      if (patients.length === 0) {
+        return res.status(404).json({
+          message: `No patients found with priorityCard: ${priorityCardBool}`,
+        });
+      }
+  
+      // Return the matching patients
+      res.status(200).json(patients);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

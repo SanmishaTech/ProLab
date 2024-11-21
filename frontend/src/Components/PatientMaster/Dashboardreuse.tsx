@@ -66,6 +66,7 @@ export default function Dashboard({
   tableColumns = {},
   AddItem,
   Edititem,
+  filterValue,
   typeofschema,
   tableData = [],
   onAddProduct = () => {},
@@ -202,18 +203,24 @@ export default function Dashboard({
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {tableColumns?.filters?.map((filter, index) => (
+                    {[
+                      {
+                        label: "Priority Card",
+                        value: true,
+                        checked: filterValue === true,
+                      },
+                    ].map((filter, index) => (
                       <DropdownMenuCheckboxItem
                         key={index}
                         checked={filter.checked}
-                        onCheckedChange={() => onFilterChange(filter.value)}
+                        onCheckedChange={() => onFilterChange(filter.value)} // Apply the filter when selected
                       >
                         {filter.label}
                       </DropdownMenuCheckboxItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-               
+
                 {/* <Button size="sm" className="h-8 gap-1" onClick={onAddProduct}>
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">

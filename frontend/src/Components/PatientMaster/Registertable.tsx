@@ -42,6 +42,8 @@ export default function Dashboardholiday() {
   const [parameter, setParameter] = useState<any[]>([]);
   const [parameterGroup, setParameterGroup] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>(data); // State for filtered data
+  const [filterValue, setFilterValue] = useState<string>(""); // Store selected filter value
 
   useEffect(() => {
     // Fetch data from the API
@@ -107,6 +109,7 @@ export default function Dashboardholiday() {
       .get(`/api/patientmaster/allpatients`)
       .then((response) => {
         setData(response.data);
+        setFilteredData(response.data);
         setLoading(false);
       })
       .catch((err) => {
@@ -157,8 +160,25 @@ export default function Dashboardholiday() {
     // Implement export functionality such as exporting data as CSV or PDF
   };
 
-  const handleFilterChange = (filterValue: string) => {
+  const handleFilterChange = async (filterValue: string) => {
     console.log(`Filter changed: ${filterValue}`);
+    setFilterValue(filterValue);
+    if (filterValue === "") {
+      setFilteredData(data); // If no filter, show all data
+    } else {
+      try {
+        // Make an API request to fetch data by ID
+        const response = await axios.get(
+          `/api/patientmaster/filter?query=${filterValue}`
+        );
+        console.log("Data fetched:", response.data);
+        setFilteredData(response.data); // Assuming the response is a single item, wrap it in an array
+      } catch (error) {
+        console.error("Error fetching data by ID:", error);
+        // Optionally, handle errors by setting a state for error messages
+        setFilteredData(data); // or show an error message or fallback data
+      }
+    }
     // Implement filtering logic here, possibly refetching data with filters applied
   };
 
@@ -196,8 +216,8 @@ export default function Dashboardholiday() {
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data
-    ? data?.map((item) => {
+  const mappedTableData = filteredData
+    ? filteredData?.map((item) => {
         console.log("This is item", item);
         return {
           _id: item?._id,
@@ -224,6 +244,7 @@ export default function Dashboardholiday() {
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
+        filterValue={filterValue}
         onProductAction={handleProductAction}
         typeofschema={typeofschema}
         AddItem={() => (
