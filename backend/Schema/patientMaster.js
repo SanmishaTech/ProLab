@@ -22,6 +22,8 @@ const patientMasterSchema = new mongoose.Schema({
   bloodGroup: { type: String },
   maritalStatus: { type: String },
   priorityCard: { type: Boolean },
+  value: { type: Number },
+  percentage: { type: Number },
 });
 
 const PatientMaster = mongoose.model("PatientMaster", patientMasterSchema);

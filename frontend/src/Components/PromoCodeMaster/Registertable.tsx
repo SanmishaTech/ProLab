@@ -179,18 +179,31 @@ export default function Dashboardholiday() {
     return <div className="p-4 text-red-500">Error loading machines.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
+  const checkIfExpired = (validityDate: string) => {
+    const today = new Date();
+    const date = new Date(validityDate);
+    return date < today;
+  };
+
   // Map the API data to match the Dashboard component's expected tableData format
   if (!data) return [];
   const mappedTableData = data?.map((item) => {
+    const isExpired = checkIfExpired(item?.validityDate);
+
     return {
       _id: item?._id,
       promoCode: item?.promoCode || "Promo Code not provided",
       description: item?.description || "Description not provided",
       promoType: item?.promoType || "Promo Type not provided",
       value: item?.value || "Value not provided",
-      validityDate:
-        new Date(item?.validityDate).toLocaleDateString() ||
-        "Validity Date not provided",
+      validityDate: isExpired
+        ? (
+            <>
+              <span>{new Date(item?.validityDate).toLocaleDateString()}</span>
+              <span className="text-red-500 ml-2">Expired</span>
+            </>
+          )
+        : new Date(item?.validityDate).toLocaleDateString(),
       delete: `/promocodemaster/delete/${item?._id}`,
       action: "actions", // Placeholder for action buttons
       // Additional fields can be added here
