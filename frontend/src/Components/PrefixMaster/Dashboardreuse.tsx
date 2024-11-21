@@ -186,8 +186,8 @@ export default function Dashboard({
               <Card className="bg-accent/40">
                 <form onSubmit={handleSubmit}>
                   <CardHeader>
-                    <CardTitle>Barcode Setup</CardTitle>
-                    <CardDescription>Barcode Fields</CardDescription>
+                    <CardTitle>Prefix Setup</CardTitle>
+                    <CardDescription>Add/Update the Prefix Configuration</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {/* Prefix For Dropdown */}
@@ -297,7 +297,7 @@ export default function Dashboard({
                     {/* Input for Start Number */}
                     <div className="mb-4">
                       <label htmlFor="startNumber" className="block text-sm font-medium">
-                        Start Number (Up to 5 digits)
+                        Start Number
                       </label>
                       <Input
                         type="number"
