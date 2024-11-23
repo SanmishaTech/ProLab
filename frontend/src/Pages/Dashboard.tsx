@@ -29,6 +29,7 @@ import EditCard from "@/Components/AssociateMaster/Edittestcard";
 import PatientTestCard from "@/Components/PatientMaster/TestCard";
 import PatientEditCard from "@/Components/PatientMaster/Edittestcard";
 import MachineMaster from "@/Components/MachineMaster/Registertable";
+import RoleMaster from "@/Components/RoleMaster/Registertable";
 import DiscountMaster from "@/Components/DiscountMaster/Registertable";
 import MachineLinkMaster from "@/Components/MachineLinkMaster/Registertable";
 import PromoCodeMaster from "@/Components/PromoCodeMaster/Registertable";
@@ -72,6 +73,7 @@ const Dashboard = () => {
         {location.pathname === "/parametergroup" && <DashboardparameterGroup />}
         {location.pathname === "/specimen" && <Specimen />}
         {location.pathname === "/container" && <DashboardContainer />}
+        {location.pathname === "/rolemaster" && <RoleMaster />}
         {location.pathname === "/testmaster" && <DashboardTestMaster />}
         {location.pathname === "/testmaster/add" && <DashboardTestcard />}
         {/\/testmaster\/edit\/\d+/.test(location.pathname) && (
