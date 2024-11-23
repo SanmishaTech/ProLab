@@ -11,6 +11,7 @@ import DashboardServices from "@/Components/Services/Registertable";
 import Dashboardparameter from "@/Components/Parameter/Registertable";
 import Dashboardreason from "@/Components/Reason/Registertable";
 import DashboardBarcode from "@/Components/Barcode/Registertable";
+import AssignAccess from "@/Components/AssignAccess/Dashboardreuse";
 import DashboardHighlighter from "@/Components/Highlighter/Registertable";
 import DashboardparameterGroup from "@/Components/ParameterGroup/Registertable";
 import DashboardContainer from "@/Components/Container/Registertable";
@@ -67,6 +68,7 @@ const Dashboard = () => {
         {location.pathname === "/department" && <Dashboarddepartment />}
         {location.pathname === "/parameter" && <Dashboardparameter />}
         {location.pathname === "/reason" && <Dashboardreason />}
+        {location.pathname === "/assignaccess" && <AssignAccess />}
         {location.pathname === "/barcode" && <DashboardBarcode />}
         {location.pathname === "/highlighter" && <DashboardHighlighter />}
         {location.pathname === "/prefix" && <Dashboardprefix />}
