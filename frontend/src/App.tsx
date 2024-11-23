@@ -111,7 +111,6 @@ function App() {
         <Route path="/prefix" element={<Dashboard />} />
         <Route path="/highlighter" element={<Dashboard />} />
         <Route path="/parametergroup" element={<Dashboard />} />
-
         <Route path="/specimen" element={<Dashboard />} />
         <Route path="/container" element={<Dashboard />} />
         <Route path="/testmaster" element={<Dashboard />} />
@@ -137,6 +136,7 @@ function App() {
         <Route path="/containerLinkMaster" element={<Dashboard />} />
         <Route path="/discountmaster" element={<Dashboard />} />
         <Route path="/rolemaster" element={<Dashboard />} />
+        <Route path="/assignaccess" element={<Dashboard />} />
       </Routes>
     </>
   );
