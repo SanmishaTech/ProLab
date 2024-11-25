@@ -111,6 +111,8 @@ const patientFormSchema = z.object({
   bloodGroup: z.string().optional(),
   maritalStatus: z.string().optional(),
   priorityCard: z.boolean().optional(),
+  value: z.union([z.number(), z.string()]).nullable().optional(),
+  percentage: z.union([z.number(), z.string()]).nullable().optional(),
 });
 
 type PatientFormValues = z.infer<typeof patientFormSchema>;
@@ -120,6 +122,7 @@ type PatientFormValues = z.infer<typeof patientFormSchema>;
 function ProfileForm({ formData }) {
   console.log("This is formData", formData);
   const defaultValues: Partial<PatientFormValues> = formData;
+
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientFormSchema),
     defaultValues,
@@ -128,14 +131,35 @@ function ProfileForm({ formData }) {
   const { id } = useParams();
 
   const { reset } = form;
+  // const [showFields, setShowFields] = useState<Boolean>(false);
+  const [showFields, setShowFields] = useState<boolean>(
+    formData?.priorityCard ?? false
+  ); // Initialize showFields based on priorityCard
 
-  // Reset form values when formData changes
+  const handleSalutationChange = (e: string) => {
+    if (e === "mr") {
+      form.setValue("gender", "male"); // Set gender to male if "Mr" is selected
+    } else if (e === "mrs") {
+      form.setValue("gender", "female"); // Set gender to female if "Mrs" is selected
+    } else if (e === "ms") {
+      form.setValue("gender", "female"); // Set gender to female if "Mrs" is selected
+    } else {
+      form.setValue("gender", ""); // Reset gender if salutation is something else
+    }
+  };
+  const salutation = form.watch("salutation");
+
   useEffect(() => {
-    reset(formData);
+    reset(formData); // Reset form with the new formData
+    setShowFields(formData?.priorityCard ?? false); // Update showFields based on formData's priorityCard value
   }, [formData, reset]);
 
   const navigate = useNavigate();
-
+  useEffect(() => {
+    reset(formData);
+  }, [formData, reset]);
+  console.log(formData.priorityCard);
+  console.log("hellow", showFields);
   const dateOfBirth = form.watch("dateOfBirth");
 
   const handleDateChange = (date: Date | null) => {
@@ -145,6 +169,11 @@ function ProfileForm({ formData }) {
 
   async function onSubmit(data: PatientFormValues) {
     // console.log("Sas", data);
+
+    if (!data.priorityCard) {
+      data.value = "";
+      data.percentage = "";
+    }
     await axios.put(`/api/patientmaster/update/${id}`, data).then((res) => {
       toast.success("Patient updated successfully");
       navigate("/patientmaster");
@@ -201,7 +230,11 @@ function ProfileForm({ formData }) {
               <FormItem className="w-full">
                 <FormLabel>select Salutation</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
+                  // onValueChange={field.onChange}
+                  onValueChange={(e) => {
+                    form.setValue("salutation", e);
+                    handleSalutationChange(e);
+                  }}
                   className="w-full"
                   value={field.value}
                 >
@@ -461,7 +494,8 @@ function ProfileForm({ formData }) {
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
-                  value={field.value}
+                  // value={field.value}
+                  value={form.watch("gender")}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -591,13 +625,53 @@ function ProfileForm({ formData }) {
               <FormItem>
                 <FormLabel>Priority Card</FormLabel>
                 <FormControl>
-                  <input type="checkbox" checked={field.value} {...field} />
+                  <input
+                    type="checkbox"
+                    checked={field.value}
+                    {...field}
+                    onChange={(e) => {
+                      setShowFields(e.target.checked);
+                      field.onChange(e); // Ensure that React Hook Form state updates
+                    }}
+                  />
                 </FormControl>
                 <FormDescription>Do you have a priority card?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+          {showFields && (
+            <>
+              <FormField
+                control={form.control}
+                name="value"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Value</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Value..." {...field} />
+                    </FormControl>
+                    <FormDescription>Enter the Value</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="percentage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Percentage</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Percentage..." {...field} />
+                    </FormControl>
+                    <FormDescription>Enter Percentage</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
         </div>
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
@@ -613,6 +687,8 @@ export default function SettingsProfilePage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [formData, setFormData] = useState<any>({});
+  const [showFields, setShowFields] = useState<Boolean>(false);
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await axios.get(`/api/patientmaster/reference/${id}`);

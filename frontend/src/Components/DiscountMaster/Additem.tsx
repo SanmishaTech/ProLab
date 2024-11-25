@@ -1,6 +1,6 @@
 // components/AddItem.tsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,20 +32,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useParams } from "react-router-dom";
+
 import axios from "axios";
 
 interface AddItemProps {
   onAdd: (item: any) => void;
   typeofschema: Record<string, any>;
-  editid: string;
 }
 
-const AddItem: React.FC<AddItemProps> = ({
-  onAdd,
-  typeofschema = {},
-  editid,
-}) => {
+const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
@@ -54,39 +49,22 @@ const AddItem: React.FC<AddItemProps> = ({
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-
-  
-
-  useEffect(() => {
-    if (editid) {
-      axios
-        .get(`/api/usermaster/reference/${editid}`)
-        .then((res) => {
-          setFormData(res.data);
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-        });
-    }
-    return () => {
-      setFormData({});
-      setHandleopen(false);
-    };
-  }, [editid]);
   const handleAdd = async () => {
     setLoading(true);
+    if (!formData.discountType) {
+      setError("Discount Type field is required.");
+      setLoading(false);
+      return; // Prevent submission
+    }
     try {
-      await axios
-        .put(`/api/usermaster/update/${editid}`, formData)
-        .then((res) => {
-          console.log("ppaapppppp", res.data);
-          // onAdd(res.data.newService);
-          setFormData(res.data.newService);
-          setHandleopen(false);
-          setError("");
-        });
+      await axios.post(`/api/discountmaster`, formData);
+      onAdd(formData); // Notify parent component
+      setFormData({});
+      setHandleopen(false);
+      setError("");
+      window.location.reload();
     } catch (err) {
-      setError("Failed to add parameter group. Please try again.");
+      setError("Failed to add Discount. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -109,10 +87,6 @@ const AddItem: React.FC<AddItemProps> = ({
   // Dynamically render form fields based on the schema
   const addFields = (schema: Record<string, any>) => {
     const allFieldsToRender = [];
-
-    if (!schema || Object.keys(schema).length === 0) {
-      return <p>No fields available to display.</p>; // Or handle this case as you prefer
-    }
 
     Object.entries(schema).forEach(([key, value]) => {
       const fieldType = value.type;
@@ -158,7 +132,10 @@ const AddItem: React.FC<AddItemProps> = ({
 
         case "Date":
           allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
+            <div
+              key={key}
+              className="flex items-center justify-center mr-44  gap-4"
+            >
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
@@ -167,7 +144,7 @@ const AddItem: React.FC<AddItemProps> = ({
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-full justify-start text-left font-normal",
+                      "w-[50%] justify-start text-left font-normal",
                       !formData[key] && "text-muted-foreground"
                     )}
                   >
@@ -202,7 +179,10 @@ const AddItem: React.FC<AddItemProps> = ({
               </Label>
               <Select onValueChange={(value) => handleChange(key, value)}>
                 <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
+                  <SelectValue
+                    placeholder={`Select ${label.toLowerCase()}`}
+                    value={formData[key] || ""}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -215,24 +195,34 @@ const AddItem: React.FC<AddItemProps> = ({
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              {/* Add error message for validation */}
+              {/* {key === "discountType" && !formData[key] && (
+                <p className="text-red-500">Discount Type is required.</p>
+              )} */}
             </div>
           );
           break;
 
+        // Add this case in the addFields method
         // case "Checkbox":
         //   allFieldsToRender.push(
-        //     <div
-        //       style={{ justifyContent: "space-evenly" }}
-        //       key={key}
-        //       className="flex items-center space-x-4"
-        //     >
-        //       <Label htmlFor={key}>{label}</Label>
-
-        //       <Checkbox
-        //         id={key}
-        //         checked={formData[key] || false}
-        //         onCheckedChange={(checked) => handleChange(key, checked)}
-        //       />
+        //     <div key={key} className="grid grid-cols-4 items-center gap-4">
+        //       <Label htmlFor={key} className="text-right">
+        //         {label}
+        //       </Label>
+        //       <div className="col-span-3 flex items-center space-x-2">
+        //         <Checkbox
+        //           id={key}
+        //           checked={formData[key] || false}
+        //           onCheckedChange={(checked) => handleChange(key, checked)}
+        //         />
+        //         <label
+        //           htmlFor={key}
+        //           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        //         >
+        //           {label}
+        //         </label>
+        //       </div>
         //     </div>
         //   );
         //   break;
@@ -251,15 +241,13 @@ const AddItem: React.FC<AddItemProps> = ({
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full">
-          Edit
-        </Button>
+        <Button variant="outline">Add Discount</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Edit item</DialogTitle>
+          <DialogTitle>Add New Discount</DialogTitle>
           <DialogDescription>
-            Enter the details of the item you want to edit.
+            Enter the details of the Discount you want to add.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

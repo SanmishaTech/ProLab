@@ -36,8 +36,11 @@ var MachineLinkMaster = require("./routes/machineLinkMaster");
 var ContainerLinkMaster = require("./routes/containerLinkMaster");
 var HighlighterRoutes = require("./routes/highlighterRoutes");
 var CorporateMaster = require("./routes/corporateRoutes");
-var UserMaster = require("./routes/userMasterRoutes");
-var app = express();
+ var UserMaster = require("./routes/userMasterRoutes");
+ var DiscountMaster = require("./routes/discountRoutes");
+var RoleMaster = require("./routes/roleMasterRoutes");
+var PrefixRoutes = require("./routes/prefixRoutes");
+ var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application
   credentials: true, // This allows cookies and credentials to be included in the requests
@@ -82,8 +85,11 @@ app.use("/api/machinemaster", MachineRoutes);
 app.use("/api/machinelinkmaster", MachineLinkMaster);
 app.use("/api/containerlinkmaster", ContainerLinkMaster);
 app.use("/api/corporatemaster", CorporateMaster);
-app.use("/api/usermaster", UserMaster);
-
+ app.use("/api/usermaster", UserMaster);
+ app.use("/api/discountmaster", DiscountMaster);
+app.use("/api/rolemaster", RoleMaster);
+app.use("/api/prefix", PrefixRoutes);
+ 
 app.use(express.static(path.join(__dirname, "./dist")));
 
 app.get("*", (req, res) => {

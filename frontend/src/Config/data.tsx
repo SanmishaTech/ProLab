@@ -131,9 +131,35 @@ export const navItems: NavItem[] = [
       },
       {
         title: "Prefix Setup",
-        href: "#",
+        href: "/prefix",
         icon: "Pencil",
       },
+      {
+        title: "Discount Master",
+        href: "/discountmaster",
+        icon: "Associate",
+      },
+    ],
+  },
+  {
+    title: "Access Control",
+    href: "/lab",
+    icon: "Asdsad",
+    children: [
+      {
+        title: "Role Master",
+        href: "/rolemaster",
+        icon: "department",
+      },
+      {
+        title: "Assign Access",
+        href: "/assignaccess",
+        icon: "Associate",
+      },
+      // {
+      //   title: "Container Link Master",
+      //   href: "/containerlinkmaster",
+      // },
     ],
   },
   // {

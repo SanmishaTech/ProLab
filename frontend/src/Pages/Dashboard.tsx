@@ -11,6 +11,7 @@ import DashboardServices from "@/Components/Services/Registertable";
 import Dashboardparameter from "@/Components/Parameter/Registertable";
 import Dashboardreason from "@/Components/Reason/Registertable";
 import DashboardBarcode from "@/Components/Barcode/Registertable";
+import AssignAccess from "@/Components/AssignAccess/Dashboardreuse";
 import DashboardHighlighter from "@/Components/Highlighter/Registertable";
 import DashboardparameterGroup from "@/Components/ParameterGroup/Registertable";
 import DashboardContainer from "@/Components/Container/Registertable";
@@ -21,6 +22,7 @@ import DashboardAssociateMaster from "@/Components/AssociateMaster/Registertable
 import DashboardPatientMaster from "@/Components/PatientMaster/Registertable";
 import DashboardTatMaster from "@/Components/TatMaster/Registertable";
 import DashboardTatCard from "@/Components/TatMaster/";
+import Dashboardprefix from "@/Components/PrefixMaster/Registertable";
 import Specimen from "@/Components/Specimen/Registertable";
 import DashboardTestcard from "@/Components/Testmaster/TestCard";
 import TestCard from "@/Components/AssociateMaster/TestCard";
@@ -28,6 +30,8 @@ import EditCard from "@/Components/AssociateMaster/Edittestcard";
 import PatientTestCard from "@/Components/PatientMaster/TestCard";
 import PatientEditCard from "@/Components/PatientMaster/Edittestcard";
 import MachineMaster from "@/Components/MachineMaster/Registertable";
+import RoleMaster from "@/Components/RoleMaster/Registertable";
+import DiscountMaster from "@/Components/DiscountMaster/Registertable";
 import MachineLinkMaster from "@/Components/MachineLinkMaster/Registertable";
 import PromoCodeMaster from "@/Components/PromoCodeMaster/Registertable";
 import Formula from "../Components/Formula/Formula";
@@ -65,11 +69,14 @@ const Dashboard = () => {
         {location.pathname === "/department" && <Dashboarddepartment />}
         {location.pathname === "/parameter" && <Dashboardparameter />}
         {location.pathname === "/reason" && <Dashboardreason />}
+        {location.pathname === "/assignaccess" && <AssignAccess />}
         {location.pathname === "/barcode" && <DashboardBarcode />}
         {location.pathname === "/highlighter" && <DashboardHighlighter />}
+        {location.pathname === "/prefix" && <Dashboardprefix />}
         {location.pathname === "/parametergroup" && <DashboardparameterGroup />}
         {location.pathname === "/specimen" && <Specimen />}
         {location.pathname === "/container" && <DashboardContainer />}
+        {location.pathname === "/rolemaster" && <RoleMaster />}
         {location.pathname === "/testmaster" && <DashboardTestMaster />}
         {location.pathname === "/testmaster/add" && <DashboardTestcard />}
         {/\/testmaster\/edit\/\d+/.test(location.pathname) && (
@@ -97,6 +104,7 @@ const Dashboard = () => {
         {location.pathname === "/machinemaster" && <MachineMaster />}
         {location.pathname === "/machinelinkmaster" && <MachineLinkMaster />}
         {location.pathname === "/promocodemaster" && <PromoCodeMaster />}
+        {location.pathname === "/discountmaster" && <DiscountMaster />}
         {location.pathname === "/containerlinkmaster" && (
           <ContainerLinkMaster />
         )}

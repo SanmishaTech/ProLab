@@ -2,35 +2,11 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Dashboard from "./Dashboardreuse";
-// import AddItem from "./Additem"; // Corrected import path
+import Dashboard, { description } from "./Dashboardreuse";
+import AddItem from "./Additem"; // Corrected import path
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
-
-const AddItem = () => {
-  const navigate = useNavigate();
-  const handleAdd = () => {
-    navigate("/patientmaster/add");
-  };
-  return (
-    <Button onClick={handleAdd} variant="outline">
-      Add Patient
-    </Button>
-  );
-};
-const Edititem = (id: string) => {
-  const navigate = useNavigate();
-  const handleAdd = () => {
-    navigate(`/patientmaster/edit/${id?.id}`);
-  };
-  return (
-    <Button onClick={handleAdd} variant="ghost" className="w-full">
-      Edit patient
-    </Button>
-  );
-};
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -39,54 +15,53 @@ export default function Dashboardholiday() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
-  const [parameter, setParameter] = useState<any[]>([]);
-  const [parameterGroup, setParameterGroup] = useState<any[]>([]);
+  const [machine, setMachine] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
-  const [filteredData, setFilteredData] = useState<any[]>(data); // State for filtered data
+  const [filteredData, setFilteredData] = useState<any[]>([]); // State for filtered data
   const [filterValue, setFilterValue] = useState<string>(""); // Store selected filter value
 
   useEffect(() => {
-    // Fetch data from the API
-    const fetchparameter = async () => {
-      try {
-        const response = await axios.get(`/api/parameter/allparameter`);
-        console.log(response.data);
-        setParameter(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    const fetchparametergroup = async () => {
-      try {
-        const response = await axios.get(
-          `/api/parametergroup/allparametergroup`
-        );
-        console.log(response.data);
-        setParameterGroup(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    const fetchtest = async () => {
-      try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
-        console.log(response.data);
-        setTest(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchparameter();
-    fetchparametergroup();
-    fetchtest();
+    // const fetchMachine = async () => {
+    //   try {
+    //     const response = await axios.get(`/api/discountmaster/alldiscount`);
+    //     console.log("This is a mahcine", response.data);
+    //     setMachine(response.data);
+    //   } catch (error) {
+    //     console.error("Error fetching machines:", error);
+    //   }
+    // };
+    // const fetchTests = async () => {
+    //   try {
+    //     const response = await axios.get(`/api/promocodemaster/allpromocode`);
+    //     console.log(response.data);
+    //     setTest(response.data);
+    //   } catch (error) {
+    //     console.error("Error fetching tests:", error);
+    //   }
+    // };
+    // fetchMachine();
+    // fetchTests();
   }, []);
+
   // Define the schema with various input types
-  useEffect(() => {
-    console.log("This is parameter", parameter);
-    console.log("This is parameterGroup", parameterGroup);
-    console.log("This is test", test);
-  }, [parameter, parameterGroup, test]);
   const typeofschema = {
+    discountType: {
+      type: "Select",
+      label: "Discount Type",
+      options: [
+        { value: "value", label: "Value" },
+        { value: "percentage", label: "Percentage" },
+      ],
+    },
+    value: {
+      type: "String",
+      label: "Value",
+    },
+    description: {
+      type: "String",
+      label: "Description",
+    },
+
     // sortBy: { type: "Number", label: "Sort By" },
     // date: { type: "Date", label: "Date" },
     // category: {
@@ -99,17 +74,18 @@ export default function Dashboardholiday() {
     //   ],
     // },
     // isActive: { type: "Checkbox", label: "Is Active" },
-    isbol: { type: "Checkbox", label: "Is bol" },
+    // isbol: { type: "Checkbox", label: "Is bol" },
     // Add more fields as needed
   };
-
+  
+  
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/patientmaster/allpatients`)
+      .get(`/api/discountmaster/alldiscount`)
       .then((response) => {
         setData(response.data);
-        setFilteredData(response.data);
+        setFilteredData(response.data); 
         setLoading(false);
       })
       .catch((err) => {
@@ -122,18 +98,17 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Patient Master" },
+        { label: "Discount Master" },
       ],
-      searchPlaceholder: "Search Patient Master...",
+      searchPlaceholder: "Search Discount...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Patient Master",
-        description: "Manage Patient Master and view their details.",
+        title: "Discount",
+        description: "Manage Discount and view their details.",
         headers: [
-          { label: "First Name", key: "firstName" },
-          { label: "Middle Name", key: "middleName" },
-          { label: "Last Name", key: "lastName" },
-          { label: "Mobile", key: "mobile" },
+          { label: "discount Type", key: "discountType" },
+          { label: "Value", key: "value" },
+          { label: "Description", key: "description" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -149,6 +124,7 @@ export default function Dashboardholiday() {
     });
   }, [User?._id]);
 
+
   // Handlers for actions
   const handleAddProduct = () => {
     console.log("Add Parameter Group clicked");
@@ -160,24 +136,14 @@ export default function Dashboardholiday() {
     // Implement export functionality such as exporting data as CSV or PDF
   };
 
-  const handleFilterChange = async (filterValue: string) => {
+  const handleFilterChange = (filterValue: string) => {
     console.log(`Filter changed: ${filterValue}`);
-    setFilterValue(filterValue);
+    setFilterValue(filterValue); // Store the selected filter value
     if (filterValue === "") {
       setFilteredData(data); // If no filter, show all data
     } else {
-      try {
-        // Make an API request to fetch data by ID
-        const response = await axios.get(
-          `/api/patientmaster/filter?query=${filterValue}`
-        );
-        console.log("Data fetched:", response.data);
-        setFilteredData(response.data); // Assuming the response is a single item, wrap it in an array
-      } catch (error) {
-        console.error("Error fetching data by ID:", error);
-        // Optionally, handle errors by setting a state for error messages
-        setFilteredData(data); // or show an error message or fallback data
-      }
+      const filtered = data.filter((item) => item.discountType === filterValue);
+      setFilteredData(filtered); // Filter data based on the selected discountType
     }
     // Implement filtering logic here, possibly refetching data with filters applied
   };
@@ -212,25 +178,22 @@ export default function Dashboardholiday() {
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error)
-    return <div className="p-4 text-red-500">Error loading parameters.</div>;
+    return <div className="p-4 text-red-500">Error loading machines.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = filteredData
-    ? filteredData?.map((item) => {
-        console.log("This is item", item);
-        return {
-          _id: item?._id,
-          firstName: item?.firstName || "First Name not provided",
-          middleName: item?.middleName || "Middle Name not provided",
-          lastName: item?.lastName || "Last Name not provided",
-          mobile: item?.mobile || "Mobile not provided",
-          delete: `/patientmaster/delete/${item?._id}`,
-          action: "actions", // Placeholder for action buttons
-          // Additional fields can be added here
-        };
-      })
-    : [];
+  if (!data) return [];
+  const mappedTableData = filteredData?.map((item) => {
+    return {
+      _id: item?._id,
+      discountType: item?.discountType || "Discount Type not provided",
+      description: item?.description || "Description not provided",
+      value: item?.value || "Value not provided",
+      delete: `/discountmaster/delete/${item?._id}`,
+      action: "actions", // Placeholder for action buttons
+      // Additional fields can be added here
+    };
+  });
 
   return (
     <div className="p-4">
@@ -240,13 +203,12 @@ export default function Dashboardholiday() {
         userAvatar={config.userAvatar}
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
-        Edititem={Edititem}
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
-        filterValue={filterValue}
         onProductAction={handleProductAction}
         typeofschema={typeofschema}
+        filterValue={filterValue}
         AddItem={() => (
           <AddItem typeofschema={typeofschema} onAdd={handleAddItem} />
         )}

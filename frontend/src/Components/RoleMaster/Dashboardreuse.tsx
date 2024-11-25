@@ -9,8 +9,25 @@ import {
   MoreHorizontal,
   ListFilter,
 } from "lucide-react";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import axios from "axios";
 import { Badge } from "@/components/ui/badge";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import AlertDialogbox from "./AlertBox";
 import {
   Breadcrumb,
@@ -55,7 +72,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
-// import Edititem from "./Edititem";
+import Edititem from "./Edititem";
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 
@@ -65,7 +82,6 @@ export default function Dashboard({
   userAvatar = "/placeholder-user.jpg",
   tableColumns = {},
   AddItem,
-  Edititem,
   filterValue,
   typeofschema,
   tableData = [],
@@ -109,6 +125,10 @@ export default function Dashboard({
     console.log("Delete clicked");
     // Implement delete functionality here
   };
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setGender(e.target.value); // Update the state when the value changes
+  };
   return (
     <div className="flex min-h-screen w-full flex-col ">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:px-6">
@@ -137,6 +157,7 @@ export default function Dashboard({
               className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
             />
           </div>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -191,46 +212,18 @@ export default function Dashboard({
                 ))}
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 gap-1">
-                      <ListFilter className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Filter
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {[
-                      {
-                        label: "Priority Card",
-                        value: true,
-                        checked: filterValue === true,
-                      },
-                    ].map((filter, index) => (
-                      <DropdownMenuCheckboxItem
-                        key={index}
-                        checked={filter.checked}
-                        onCheckedChange={() => onFilterChange(filter.value)} // Apply the filter when selected
-                      >
-                        {filter.label}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* <Button size="sm" className="h-8 gap-1" onClick={onAddProduct}>
-                  <PlusCircle className="h-3.5 w-3.5" />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 gap-1"
+                  onClick={onExport}
+                >
+                  <File className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add Product
+                    Export
                   </span>
-                </Button> */}
-                {console.log(
-                  "This is tableData",
-                  tableData ? tableData.add : null
-                )}
+                </Button>
+
                 <AddItem typeofschema={typeofschema} add={tableData?.add} />
               </div>
             </div>
@@ -290,7 +283,14 @@ export default function Dashboard({
                                       <DropdownMenuLabel>
                                         Actions
                                       </DropdownMenuLabel>
-                                      <Edititem id={row?._id} />
+                                      <Edititem
+                                        editid={row?._id}
+                                        toogleedit={setToggleedit}
+                                        typeofschema={typeofschema}
+                                        setToggleedit={setToggleedit}
+                                        toggleedit={toggleedit}
+                                        editfetch={row?.editfetch}
+                                      />
                                       <DropdownMenuSeparator />
 
                                       <AlertDialogbox url={row?.delete} />

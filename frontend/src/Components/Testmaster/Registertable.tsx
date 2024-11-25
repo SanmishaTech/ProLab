@@ -198,9 +198,9 @@ export default function Dashboardholiday() {
         console.log("This is item", item);
         return {
           _id: item?._id,
-          name: item?.name || "Associate Type not provided",
-          code: item?.code || "First Name not provided",
-          price: item?.price || "Last Name not provided",
+          name: item?.name || "Test Name not provided",
+          code: item?.code || "Test Code not provided",
+          price: item?.price || "Price not provided",
           delete: `/testmaster/delete/${item?._id}`,
           action: "actions", // Placeholder for action buttons
           // Additional fields can be added here

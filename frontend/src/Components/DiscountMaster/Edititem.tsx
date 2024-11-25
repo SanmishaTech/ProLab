@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useParams } from "react-router-dom";
+
 import axios from "axios";
 
 interface AddItemProps {
@@ -54,15 +54,16 @@ const AddItem: React.FC<AddItemProps> = ({
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-
-  
-
   useEffect(() => {
     if (editid) {
       axios
-        .get(`/api/usermaster/reference/${editid}`)
+        .get(`/api/discountmaster/reference/${editid}`)
         .then((res) => {
-          setFormData(res.data);
+          setFormData({
+            ...res.data,
+            name: res.data.name?._id,
+            test: res.data.test?._id,
+          });
         })
         .catch((err) => {
           console.error("Error fetching data:", err);
@@ -77,16 +78,18 @@ const AddItem: React.FC<AddItemProps> = ({
     setLoading(true);
     try {
       await axios
-        .put(`/api/usermaster/update/${editid}`, formData)
+        .put(`/api/discountmaster/update/${editid}`, formData)
         .then((res) => {
           console.log("ppaapppppp", res.data);
           // onAdd(res.data.newService);
           setFormData(res.data.newService);
           setHandleopen(false);
           setError("");
+
+          window.location.reload();
         });
     } catch (err) {
-      setError("Failed to add parameter group. Please try again.");
+      setError("Failed to add Discount Master. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -158,7 +161,10 @@ const AddItem: React.FC<AddItemProps> = ({
 
         case "Date":
           allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
+            <div
+              key={key}
+              className="flex justify-center mr-44 items-center gap-4"
+            >
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
@@ -167,7 +173,7 @@ const AddItem: React.FC<AddItemProps> = ({
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-full justify-start text-left font-normal",
+                      "w-[50%] justify-start text-left font-normal",
                       !formData[key] && "text-muted-foreground"
                     )}
                   >
@@ -200,9 +206,17 @@ const AddItem: React.FC<AddItemProps> = ({
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
-              <Select onValueChange={(value) => handleChange(key, value)}>
+              {console.log("ppappa", formData[key])}
+              <Select
+                // value={formData[key] || ""}
+                defaultValue={formData[key] || ""}
+                onValueChange={(value) => handleChange(key, value)}
+              >
                 <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
+                  <SelectValue
+                    placeholder={`Select ${label.toLowerCase()}`}
+                    // value={formData[key]}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
