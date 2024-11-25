@@ -38,6 +38,7 @@ import Formula from "../Components/Formula/Formula";
 import DashboardCorporateMaster from "@/Components/CorporateMaster/Registertable";
 import CorporateTestCard from "@/Components/CorporateMaster/TestCard";
 import CorporateEditCard from "@/Components/CorporateMaster/Edittestcard";
+import DashboardUser from "@/Components/UserMaster/Registertable";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import ContainerLinkMaster from "@/Components/ContainerLinkMaster/Registertable";
@@ -107,6 +108,7 @@ const Dashboard = () => {
         {location.pathname === "/containerlinkmaster" && (
           <ContainerLinkMaster />
         )}
+        {location.pathname === "/usermaster" && <DashboardUser />}
       </main>
     </div>
   );
