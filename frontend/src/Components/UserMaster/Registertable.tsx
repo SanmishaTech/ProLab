@@ -3,10 +3,34 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Dashboard from "./Dashboardreuse";
-import AddItem from "./Additem"; // Corrected import path
+// import AddItem from "./Additem"; // Corrected import path
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
+
+const AddItem = () => {
+  const navigate = useNavigate();
+  const handleAdd = () => {
+    navigate("/usermaster/add");
+  };
+  return (
+    <Button onClick={handleAdd} variant="outline">
+      Add Item
+    </Button>
+  );
+};
+const Edititem = (id: string) => {
+  const navigate = useNavigate();
+  const handleAdd = () => {
+    navigate(`/usermaster/edit/${id?.id}`);
+  };
+  return (
+    <Button onClick={handleAdd} variant="ghost" className="w-full">
+      Edit Item
+    </Button>
+  );
+};
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -23,7 +47,7 @@ export default function Dashboardholiday() {
     // Fetch data from the API
     const fetchparameter = async () => {
       try {
-        const response = await axios.get(`/api/parameter/allparameter`);
+        const response = await axios.get(`/api/usermaster/allusermaster`);
         console.log(response.data);
         setParameter(response.data);
       } catch (error) {
@@ -32,9 +56,7 @@ export default function Dashboardholiday() {
     };
     const fetchparametergroup = async () => {
       try {
-        const response = await axios.get(
-          `/api/parametergroup/allparametergroup`
-        );
+        const response = await axios.get(`/api/usermaster/allusermaster`);
         console.log(response.data);
         setParameterGroup(response.data);
       } catch (error) {
@@ -43,7 +65,7 @@ export default function Dashboardholiday() {
     };
     const fetchtest = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(`/api/usermaster/allusermaster`);
         console.log(response.data);
         setTest(response.data);
       } catch (error) {
@@ -55,26 +77,32 @@ export default function Dashboardholiday() {
     fetchtest();
   }, []);
   // Define the schema with various input types
-
+  useEffect(() => {
+    console.log("This is parameter", parameter);
+    console.log("This is parameterGroup", parameterGroup);
+    console.log("This is test", test);
+  }, [parameter, parameterGroup, test]);
   const typeofschema = {
-    name: {
-      type: "String",
-      label: "Name",
-    },
-    description: {
-      type: "String",
-      label: "Description",
-    },
-    adn: {
-      type: "String",
-      label: "Alternate Description",
-    },
+    // sortBy: { type: "Number", label: "Sort By" },
+    // date: { type: "Date", label: "Date" },
+    // category: {
+    //   type: "Select",
+    //   label: "Category",
+    //   options: [
+    //     { value: "category1", label: "Category 1" },
+    //     { value: "category2", label: "Category 2" },
+    //     // Add more options as needed
+    //   ],
+    // },
+    // isActive: { type: "Checkbox", label: "Is Active" },
+    isbol: { type: "Checkbox", label: "Is bol" },
+    // Add more fields as needed
   };
 
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/department/alldepartment`)
+      .get(`/api/usermaster/allusermaster`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -89,17 +117,32 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Department Master" },
+        { label: "User Master" },
       ],
-      searchPlaceholder: "Search Department Master...",
+      searchPlaceholder: "Search User Master...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Department Master",
-        description: "Manage Department Master and view their details.",
+        title: "User Master",
+        description: "Manage User Master and view their details.",
         headers: [
-          { label: "Name", key: "name" },
-          { label: "Description", key: "description" },
-          { label: "Alternate Description", key: "adn" },
+          { label: "Employee Code", key: "employeeCode" },
+          { label: "First Name", key: "firstName" },
+          { label: "Last Name", key: "lastName" },
+          { label: "Salutation", key: "salutation" },
+          { label: "Gender", key: "gender" },
+          { label: "Role", key: "role" },
+          { label: "Address", key: "address" },
+          { label: "Address2", key: "address2" },
+          { label: "City", key: "city" },
+          { label: "State", key: "state" },
+          { label: "MobileNo", key: "mobileNo" },
+          { label: "EmailId", key: "emailId" },
+          { label: "Dob", key: "dob" },
+          { label: "SignatureText", key: "signatureText" },
+          { label: "ModifyTest", key: "modifyTest" },
+          { label: "ReportPrint", key: "reportPrint" },
+          { label: "SampleRejection", key: "sampleRejection" },
+          { label: "ReportPdf", key: "reportPdf" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -156,11 +199,7 @@ export default function Dashboardholiday() {
   const handleAddItem = (newItem: any) => {
     console.log("New item added:", newItem);
     // Optionally, you can update the data state to include the new item without refetching
-    if (data.includes(newItem)) {
-      console.log("exists");
-    } else {
-      setData((prevData) => [...prevData, newItem]);
-    }
+    setData((prevData) => [...prevData, newItem]);
   };
 
   if (loading) return <div className="p-4">Loading...</div>;
@@ -174,10 +213,28 @@ export default function Dashboardholiday() {
         console.log("This is item", item);
         return {
           _id: item?._id,
-          name: item?.name || "Name not provided",
-          description: item?.description || "Description not provided",
-          adn: item?.adn || "Alternate Description not provided",
-          delete: `/department/delete/${item?._id}`,
+          employeeCode: item?.employeeCode || "Employee Code not provided",
+          firstName: item?.firstName || "First Name not provided",
+          lastName: item?.lastName || "Last Name not provided",
+          salutation: item?.salutation || "Salutation not provided",
+          gender: item?.gender || "Gender not provided",
+          role: item?.role || "Role not provided",
+          address: item?.address || "Address not provided",
+          address2: item?.address2 || "Address2 not provided",
+          city: item?.city || "City not provided",
+          state: item?.state || "State not provided",
+          mobileNo: item?.mobileNo || "MobileNo not provided",
+          emailId: item?.emailId || "EmailId not provided",
+          dob: item?.dob || "Dob not provided",
+
+          signatureText: item?.signatureText || "SignatureText not provided",
+          modifyTest: item?.modifyTest || "ModifyTest not provided",
+          reportPrint: item?.reportPrint || "ReportPrint not provided",
+          sampleRejection:
+            item?.sampleRejection || "SampleRejection not provided",
+          reportPdf: item?.reportPdf || "ReportPdf not provided",
+
+          delete: `/usermaster/delete/${item?._id}`,
           action: "actions", // Placeholder for action buttons
           // Additional fields can be added here
         };
@@ -192,6 +249,7 @@ export default function Dashboardholiday() {
         userAvatar={config.userAvatar}
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
+        Edititem={Edititem}
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}

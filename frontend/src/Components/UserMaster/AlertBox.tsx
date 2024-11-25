@@ -13,12 +13,6 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 
 export default function AlertDialogbox({ url }) {
-  console.log("This is Delete url", url);
-  const DeleteApi = async () => {
-    console.log("This is Delete url", `/api/${url}`);
-    await axios.delete(`/api/${url}`);
-    window.location.reload();
-  };
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -36,7 +30,14 @@ export default function AlertDialogbox({ url }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={DeleteApi}>Continue</AlertDialogAction>
+          <AlertDialogAction
+            onClick={async () => {
+              await axios.delete(`/api/${url}`);
+              window.location.reload();
+            }}
+          >
+            Continue
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { buttonVariants } from "@/components/ui/button";
 import { UseFormHook } from "@/components/ui/HookFormcomp";
@@ -9,6 +9,14 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user);
+  useEffect(() => {
+    if (user && User?.email) {
+      navigate("/dashboard");
+    }
+  }, [user]);
+
   const navigate = useNavigate();
   const defaultValues = {
     email: "",

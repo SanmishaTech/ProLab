@@ -35,7 +35,6 @@ function App() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("This is data", navItems);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -67,7 +66,6 @@ function App() {
               return (
                 <CommandGroup heading={item.title}>
                   {item.children?.map((child) => {
-                    console.log("This is child", child);
                     const Icon = Icons[child.icon || "arrowRight675.  "];
                     const isActive = location.pathname === child.href;
 
@@ -134,6 +132,7 @@ function App() {
         <Route path="/machinemaster" element={<Dashboard />} />
         <Route path="/machinelinkmaster" element={<Dashboard />} />
         <Route path="/containerLinkMaster" element={<Dashboard />} />
+        <Route path="/usermaster" element={<Dashboard />} />
       </Routes>
     </>
   );

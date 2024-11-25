@@ -36,6 +36,7 @@ var MachineLinkMaster = require("./routes/machineLinkMaster");
 var ContainerLinkMaster = require("./routes/containerLinkMaster");
 var HighlighterRoutes = require("./routes/highlighterRoutes");
 var CorporateMaster = require("./routes/corporateRoutes");
+var UserMaster = require("./routes/userMasterRoutes");
 var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application
@@ -81,6 +82,7 @@ app.use("/api/machinemaster", MachineRoutes);
 app.use("/api/machinelinkmaster", MachineLinkMaster);
 app.use("/api/containerlinkmaster", ContainerLinkMaster);
 app.use("/api/corporatemaster", CorporateMaster);
+app.use("/api/usermaster", UserMaster);
 
 app.use(express.static(path.join(__dirname, "./dist")));
 

@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import MultiSelectorComponent from "./profile";
 import {
   Table,
   TableBody,
@@ -55,7 +56,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
-import Edititem from "./Edititem";
+// import Edititem from "./Edititem";
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 
@@ -65,6 +66,7 @@ export default function Dashboard({
   userAvatar = "/placeholder-user.jpg",
   tableColumns = {},
   AddItem,
+  Edititem,
   typeofschema,
   tableData = [],
   onAddProduct = () => {},
@@ -106,17 +108,6 @@ export default function Dashboard({
   const handleDelete = (id) => {
     console.log("Delete clicked");
     // Implement delete functionality here
-  };
-
-  const refetchdata = async () => {
-    await axios
-      .get(`/api/department/alldepartment`)
-      .then((response) => {
-        setData(response.data);
-      })
-      .catch((err) => {
-        console.error("Error fetching data:", err);
-      });
   };
   return (
     <div className="flex min-h-screen w-full flex-col ">
@@ -223,6 +214,8 @@ export default function Dashboard({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
+               
+                {/* <MultiSelectorComponent /> */}
 
                 {/* <Button size="sm" className="h-8 gap-1" onClick={onAddProduct}>
                   <PlusCircle className="h-3.5 w-3.5" />
@@ -293,14 +286,7 @@ export default function Dashboard({
                                       <DropdownMenuLabel>
                                         Actions
                                       </DropdownMenuLabel>
-                                      <Edititem
-                                        editid={row?._id}
-                                        toogleedit={setToggleedit}
-                                        typeofschema={typeofschema}
-                                        setToggleedit={setToggleedit}
-                                        toggleedit={toggleedit}
-                                        editfetch={row?.editfetch}
-                                      />
+                                      <Edititem id={row?._id} />
                                       <DropdownMenuSeparator />
 
                                       <AlertDialogbox url={row?.delete} />
