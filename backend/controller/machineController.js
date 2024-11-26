@@ -22,7 +22,9 @@ const machineController = {
   },
   getServices: async (req, res, next) => {
     try {
-      const machine = await MachineMaster.find();
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      const machine = await MachineMaster.find({ userId: usertobefound });
       res.status(200).json(machine);
     } catch (error) {
       res.status(500).json({ error: error.message });

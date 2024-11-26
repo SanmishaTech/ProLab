@@ -21,8 +21,8 @@ import axios from "axios";
 import { ComboboxDemo } from "./ComboboxDemo";
 import ApiDrivenInputWithSuggestions from "./Autocompletecomp";
 import { toast } from "sonner";
-import Datepicker from "@/utilityfunctions/Datepicker";
-
+import { SmartDatetimeInput } from "@/utilityfunctions/Datepicker";
+import { DateTimePicker, TimePicker } from "@/components/ui/dateTimepicker";
 export default function PatientCard({ setTopComp }) {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
@@ -282,15 +282,12 @@ export default function PatientCard({ setTopComp }) {
                     "date",
                     new Date(patientForm?.age)?.toLocaleDateString()
                   )}
-                  <Datepicker
-                    placeholder="Patient's age"
+                  <DateTimePicker
+                    granularity="day"
                     value={patientForm?.age}
                     onChange={setDate}
-                    className=""
-                    defaultValues={new Date(
-                      patientForm?.age
-                    )?.toLocaleDateString()}
                   />
+
                   {errors.age && (
                     <span className="text-red-500 text-sm">{errors.age}</span>
                   )}

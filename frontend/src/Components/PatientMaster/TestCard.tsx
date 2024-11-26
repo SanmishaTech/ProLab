@@ -131,7 +131,8 @@ function ProfileForm() {
     mode: "onChange",
   });
   const salutation = form.watch("salutation");
-
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user || "{}");
   //   const { fields, append } = useFieldArray({
   //     name: "urls",
   //     control: form.control,
@@ -151,6 +152,7 @@ function ProfileForm() {
   async function onSubmit(data: PatientFormValues) {
     // console.log("Sas", data);
     console.log("ppappappa");
+    data.userId = User?._id;
     // Implement actual profile update logic here
     await axios.post(`/api/patientmaster`, data).then((res) => {
       console.log("ppappappa", res.data);

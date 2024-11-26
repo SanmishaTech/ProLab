@@ -122,7 +122,6 @@ function ProfileForm({ formData }) {
   }, []);
 
   const getformdatafromnextcomponent = (data) => {
-    
     setFormData(data);
   };
 
@@ -343,81 +342,6 @@ function ProfileForm({ formData }) {
             setData={getformdatafromnextcomponent}
           />{" "}
         </div>
-        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Address..." {...field} />
-                </FormControl>
-                <FormDescription>What is your name of Address</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="telephone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Telephone</FormLabel>
-                <FormControl>
-                  <Input placeholder="Telephone..." {...field} />
-                </FormControl>
-                <FormDescription>
-                  What is your name of Telephone
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="mobile"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mobile</FormLabel>
-                <FormControl>
-                  <Input placeholder="Mobile..." {...field} />
-                </FormControl>
-                <FormDescription>What is your name of Mobile.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Email..." {...field} />
-                </FormControl>
-                <FormDescription>What is your name of Email.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="degree"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Degree</FormLabel>
-                <FormControl>
-                  <Input placeholder="Degree..." {...field} />
-                </FormControl>
-                <FormDescription>What is your name of Degree.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div> */}
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
             Update profile

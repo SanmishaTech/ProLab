@@ -52,6 +52,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const handleAdd = async () => {
     setLoading(true);
     try {
+      formData.userId = User?._id;
       await axios.post(`/api/machinelinkmaster`, formData);
       onAdd(formData); // Notify parent component
       setFormData({});
@@ -229,16 +230,13 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Test Machine Link
-        </Button>
+        <Button variant="outline">Add Test Machine Link</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Test Machine Link
-</DialogTitle>
+          <DialogTitle>Add New Test Machine Link</DialogTitle>
           <DialogDescription>
-            Enter the details of the Test Machine Link
- you want to add.
+            Enter the details of the Test Machine Link you want to add.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

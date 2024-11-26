@@ -61,6 +61,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
       ...formData, // Spread the current form data
       userId: User?._id, // Add the userId to the form data
     };
+    formData.userId = User?._id;
 
     await axios.post("/api/holiday", formData).then(() => {
       window.location.reload();

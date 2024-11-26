@@ -23,6 +23,7 @@ const patientMasterSchema = new mongoose.Schema({
   maritalStatus: { type: String },
   priorityCard: { type: Boolean },
   value: { type: Number },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   percentage: { type: Number },
 });
 

@@ -57,7 +57,6 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
       setFormData({});
       setHandleopen(false);
       setError("");
-      window.location.reload();
     } catch (err) {
       setError("Failed to add Role. Please try again.");
       console.error(err);

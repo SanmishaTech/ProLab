@@ -106,7 +106,7 @@ export default function Dashboardholiday() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/patientmaster/allpatients`)
+      .get(`/api/patientmaster/allpatients/${User?._id}`)
       .then((response) => {
         setData(response.data);
         setFilteredData(response.data);

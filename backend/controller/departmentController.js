@@ -22,9 +22,9 @@ const Servicescontroller = {
   },
   getServices: async (req, res, next) => {
     try {
-      // const userId = req.params.userId;
-      // const usertobefound = new mongoose.Types.ObjectId(userId);
-      const doctor = await Department.find();
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      const doctor = await Department.find({ userId: usertobefound });
       // .populate({
       //   path: "services",
       //   populate: { path: "services" },

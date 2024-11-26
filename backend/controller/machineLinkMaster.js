@@ -4,10 +4,11 @@ const mongoose = require("mongoose");
 const machineController = {
   createThread: async (req, res, next) => {
     try {
-      const { name, test } = req.body;
+      const { name, test, userId } = req.body;
       const newService = new MachineMaster({
         name,
         test,
+        userId,
       });
       const newServics = await newService.save();
 
@@ -21,7 +22,9 @@ const machineController = {
   },
   getServices: async (req, res, next) => {
     try {
-      const machine = await MachineMaster.find()
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      const machine = await MachineMaster.find({ userId: usertobefound })
         .populate({
           path: "name",
         })
@@ -51,13 +54,14 @@ const machineController = {
   updateThreads: async (req, res, next) => {
     try {
       const machineId = req.params.machineId;
-      const { name, test } = req.body;
+      const { name, test, userId } = req.body;
 
       const newService = await MachineMaster.findByIdAndUpdate(
         machineId,
         {
           name,
           test,
+          userId,
         },
         { new: true }
       );

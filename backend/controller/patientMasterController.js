@@ -26,6 +26,7 @@ const patientMasterController = {
         priorityCard,
         value,
         percentage,
+        userId,
       } = req.body;
       const newService = new PatientMaster({
         hfaId,
@@ -49,6 +50,7 @@ const patientMasterController = {
         priorityCard,
         value,
         percentage,
+        userId,
       });
       const newServics = await newService.save();
       res.json({
@@ -61,9 +63,10 @@ const patientMasterController = {
   },
   getServices: async (req, res, next) => {
     try {
-      // const userId = req.params.userId;
-      // const usertobefound = new mongoose.Types.ObjectId(userId);
-      const patient = await PatientMaster.find();
+      const userId = req.params.userId;
+      console.log("This is userId", userId);
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      const patient = await PatientMaster.find({ userId: usertobefound });
       // .populate({
       //   path: "services",
       //   populate: { path: "services" },
@@ -162,17 +165,16 @@ const patientMasterController = {
 
   getPatientByPriorityCard: async (req, res, next) => {
     try {
-
       const { query } = req.query;
       const patients = await PatientMaster.find({ priorityCard: true });
-  
+
       // If no patients are found, return a message
       if (patients.length === 0) {
         return res.status(404).json({
           message: `No patients found with priorityCard: ${priorityCardBool}`,
         });
       }
-  
+
       // Return the matching patients
       res.status(200).json(patients);
     } catch (error) {
