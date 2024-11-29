@@ -7,7 +7,7 @@ import axios from "axios";
 
 interface Suggestion {
   id: string;
-  firstName: string;
+  name: string;
   // Add other properties as needed
 }
 
@@ -20,23 +20,21 @@ const fetchSuggestions = async (
   // await new Promise((resolve) => setTimeout(resolve, 300));
 
   // const mockData: Suggestion[] = [
-  //   { id: "1", firstName: "React" },
-  //   { id: "2", firstName: "Vue" },
-  //   { id: "3", firstName: "Angular" },
-  //   { id: "4", firstName: "Svelte" },
-  //   { id: "5", firstName: "Next.js" },
-  //   { id: "6", firstName: "Nuxt.js" },
-  //   { id: "7", firstName: "SvelteKit" },
-  //   { id: "8", firstName: "Remix" },
-  //   { id: "9", firstName: "Astro" },
-  //   { id: "10", firstName: "Gatsby" },
+  //   { id: "1", name: "React" },
+  //   { id: "2", name: "Vue" },
+  //   { id: "3", name: "Angular" },
+  //   { id: "4", name: "Svelte" },
+  //   { id: "5", name: "Next.js" },
+  //   { id: "6", name: "Nuxt.js" },
+  //   { id: "7", name: "SvelteKit" },
+  //   { id: "8", name: "Remix" },
+  //   { id: "9", name: "Astro" },
+  //   { id: "10", name: "Gatsby" },
   // ];
-  const response = await axios.get(
-    `/api/patientmaster/search/${query}/${userId}`
-  );
+  const response = await axios.get(`/api/testmaster/search/${query}/${userId}`);
 
   return response?.data?.filter((item) =>
-    item?.firstName?.toLowerCase()?.includes(query.toLowerCase())
+    item?.name?.toLowerCase()?.includes(query.toLowerCase())
   );
 };
 
@@ -78,29 +76,30 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
     }
   };
 
-  const handleSuggestionClick = (suggestion: Suggestion) => {
-    setInputValue(`${suggestion.firstName}`);
+  const handleSuggestionClick = async (suggestion: Suggestion) => {
+    const Tatdetails = await axios.get(
+      `/api/testmaster/reference/${suggestion._id}`
+    );
+    setInputValue(`${suggestion.name}`);
     setSelectedValue(suggestion);
     setShowSuggestions(false);
 
     // Update the patient form with all necessary fields
     setPatientForm({
       _id: suggestion._id,
-      firstName: `${suggestion.firstName}`,
-      middleName: `${suggestion.middleName}`,
-      lastName: `${suggestion.lastName}`,
-      country: `${suggestion.country}`,
-      state: `${suggestion.state}`,
-      city: `${suggestion.city}`,
-      address: `${suggestion.address}`,
-      email: `${suggestion.email}`,
-      salutation: `${suggestion.salutation}`,
-      patientType: `${suggestion.patientType}`,
-      bloodGroup: `${suggestion.bloodGroup}`,
-      dob: `${suggestion.dateOfBirth}`,
-      age: suggestion.age.toString(),
-      mobile: suggestion.mobile,
-      gender: suggestion.gender,
+      name: suggestion.name,
+      userId: User?._id,
+      code: suggestion.code,
+      abbrivation: suggestion.abbrivation,
+      specimen: suggestion.specimen,
+      prerquisite: suggestion.prerquisite,
+      price: suggestion.price,
+      department: suggestion.department,
+      profile: suggestion.profile,
+      isFormTest: suggestion.isFormTest,
+      sortOrder: suggestion.sortOrder,
+      machineInterface: suggestion.machineInterface,
+      isSinglePageReport: suggestion.isSinglePageReport,
     });
   };
 
@@ -115,7 +114,7 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
       setActiveSuggestionIndex((prevIndex) => Math.max(prevIndex - 1, -1));
     } else if (e.key === "Enter" && activeSuggestionIndex > -1) {
       const selectedSuggestion = suggestions[activeSuggestionIndex];
-      setInputValue(selectedSuggestion.firstName);
+      setInputValue(selectedSuggestion.name);
       setSelectedValue(selectedSuggestion);
       setShowSuggestions(false);
     }
@@ -143,7 +142,7 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
     console.log(selectedValue);
   }, [selectedValue]);
   return (
-    <div className="relative w-full max-w-sm">
+    <div className="relative w-full max-w-full min-h-[6rem]">
       <Input
         ref={inputRef}
         type="text"
@@ -183,9 +182,7 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
                   role="option"
                   aria-selected={index === activeSuggestionIndex}
                 >
-                  <span className="flex-grow ">
-                    {`${suggestion?.firstName}  ${suggestion?.mobile}`}
-                  </span>
+                  <span className="flex-grow ">{`${suggestion?.name}`}</span>
                   {/* {selectedValue?.id === suggestion.id && (
                     <Check className="h-4 w-4 text-primary ml-2" />
                   )} */}
@@ -199,7 +196,7 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
         <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           Selected:{" "}
           <span className="font-medium text-primary">
-            {selectedValue.firstName}
+            {selectedValue.name}
           </span>
         </div>
       )} */}

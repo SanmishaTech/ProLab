@@ -6,6 +6,7 @@ const tatmasterSchema = new mongoose.Schema({
   endTime: { type: String },
   hoursNeeded: { type: Number },
   urgentHours: { type: Number },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   weekday: [
     "monday",
     "tuesday",

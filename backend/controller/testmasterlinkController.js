@@ -4,11 +4,12 @@ const mongoose = require("mongoose");
 const Servicescontroller = {
   createThread: async (req, res, next) => {
     try {
-      const { test, parameterGroup, parameter } = req.body;
+      const { test, parameterGroup, parameter, userId } = req.body;
       const newService = new Department({
         test,
         parameterGroup,
         parameter,
+        userId,
       });
       const newServics = await newService.save();
       res.json({
@@ -21,10 +22,10 @@ const Servicescontroller = {
   },
   getServices: async (req, res, next) => {
     try {
-      // const userId = req.params.userId;
-      // const usertobefound = new mongoose.Types.ObjectId(userId);
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
       console.log("This is parameter");
-      const doctor = await Department.find()
+      const doctor = await Department.find({ userId: usertobefound })
         .populate({
           path: "test",
         })

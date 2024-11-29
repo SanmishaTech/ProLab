@@ -74,11 +74,14 @@ function ProfileForm({ formData }) {
   const [department, setDepartment] = useState([]);
   const [profile, setProfile] = useState([]);
   const [formdata, setFormData] = useState([]);
-
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user || "{}");
   useEffect(() => {
     const fetchSpecimen = async () => {
       try {
-        const response = await axios.get(`/api/specimen/allspecimen`);
+        const response = await axios.get(
+          `/api/specimen/allspecimen/${User?._id}`
+        );
         console.log(response.data);
         setSpecimen(response.data);
       } catch (error) {
@@ -87,30 +90,9 @@ function ProfileForm({ formData }) {
     };
     const fetchDepartment = async () => {
       try {
-        const response = await axios.get(`/api/department/alldepartment`);
-        console.log(response.data);
-        setDepartment(response.data);
-      } catch (error) {
-        console.error("Error fetching department:", error);
-      }
-    };
-    fetchDepartment();
-    fetchSpecimen();
-  }, []);
-
-  useEffect(() => {
-    const fetchSpecimen = async () => {
-      try {
-        const response = await axios.get(`/api/specimen/allspecimen`);
-        console.log(response.data);
-        setSpecimen(response.data);
-      } catch (error) {
-        console.error("Error fetching specimen:", error);
-      }
-    };
-    const fetchDepartment = async () => {
-      try {
-        const response = await axios.get(`/api/department/alldepartment`);
+        const response = await axios.get(
+          `/api/department/alldepartment/${User?._id}`
+        );
         console.log(response.data);
         setDepartment(response.data);
       } catch (error) {
@@ -147,6 +129,7 @@ function ProfileForm({ formData }) {
     data.prerequisite = content;
     data.consentForm = consent;
     data.interpretedText = interpretation;
+    data.userId = User?._id;
 
     await axios.put(`/api/testmaster/update/${id}`, data).then((res) => {
       console.log("ppappappa", res.data);

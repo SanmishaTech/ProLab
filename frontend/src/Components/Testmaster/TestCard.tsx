@@ -74,15 +74,15 @@ function ProfileForm() {
   const [specimen, setSpecimen] = useState<any[]>([]);
   const [department, setDepartment] = useState<any[]>([]);
   const [formData, setFormData] = useState<any>({});
-  //   const { fields, append } = useFieldArray({
-  //     name: "urls",
-  //     control: form.control,
-  //   });
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user || "{}");
 
   useEffect(() => {
     const fetchSpecimen = async () => {
       try {
-        const response = await axios.get(`/api/specimen/allspecimen`);
+        const response = await axios.get(
+          `/api/specimen/allspecimen/${User?._id}`
+        );
         console.log(response.data);
         setSpecimen(response.data);
       } catch (error) {
@@ -91,7 +91,9 @@ function ProfileForm() {
     };
     const fetchDepartment = async () => {
       try {
-        const response = await axios.get(`/api/department/alldepartment`);
+        const response = await axios.get(
+          `/api/department/alldepartment/${User?._id}`
+        );
         console.log(response.data);
         setDepartment(response.data);
       } catch (error) {
@@ -110,6 +112,7 @@ function ProfileForm() {
     data.consentForm = consent;
     data.interpretedText = interpretation;
     data.profile = formData;
+    data.userId = User?._id;
 
     await axios.post(`/api/testmaster`, data).then((res) => {
       console.log("ppappappa", res.data);

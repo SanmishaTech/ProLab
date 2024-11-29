@@ -1,5 +1,6 @@
 const PatientMaster = require("../Schema/patientMaster");
 const mongoose = require("mongoose");
+const User = require("../Schema/userSchema");
 
 const patientMasterController = {
   createThread: async (req, res, next) => {
@@ -158,6 +159,41 @@ const patientMasterController = {
       }
 
       res.json({ message: "Patient deleted successfully.", newService });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+  searchbyName: async (req, res, next) => {
+    try {
+      const name = req.params.name;
+      const userId = req.params.userId;
+
+      // Use mongoose to find user first if necessary
+      const userwithid = await User.findById(userId);
+      if (!userwithid) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      const agg = [
+        {
+          $search: {
+            index: "patient",
+            autocomplete: {
+              query: name,
+              path: "firstName",
+            },
+          },
+        },
+        {
+          $match: {
+            userId: new mongoose.Types.ObjectId(userId), // Match userId with the correct type
+          },
+        },
+      ];
+      console.log(agg);
+
+      const patient = await PatientMaster.aggregate(agg);
+      res.status(200).json(patient);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

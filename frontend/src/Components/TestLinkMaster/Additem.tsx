@@ -64,6 +64,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
         test: formData.test,
         parameterGroup: formData.parameterGroup,
         parameter: selectedParameters,
+        userId: User?._id,
       });
       onAdd(formData); // Notify parent component
       setFormData({});
@@ -94,7 +95,9 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   useEffect(() => {
     const fetchparameter = async () => {
       try {
-        const response = await axios.get(`/api/parameter/allparameter`);
+        const response = await axios.get(
+          `/api/parameter/allparameter/${User?._id}`
+        );
         console.log(response.data);
         setSelectedFrameworks(
           response.data.map((framework) => ({
@@ -265,7 +268,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
         <DialogHeader>
           <DialogTitle>Add New Test Parameter Link </DialogTitle>
           <DialogDescription>
-            Enter the details of the Test Parameter Link  you want to add.
+            Enter the details of the Test Parameter Link you want to add.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

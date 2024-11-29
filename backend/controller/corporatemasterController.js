@@ -13,6 +13,7 @@ const Servicescontroller = {
         address,
         discount,
         value,
+        userId,
       } = req.body;
       const newService = new CorporateMaster({
         corporateCode,
@@ -23,6 +24,7 @@ const Servicescontroller = {
         address,
         discount,
         value,
+        userId,
       });
       const newServics = await newService.save();
       res.json({
@@ -35,7 +37,9 @@ const Servicescontroller = {
   },
   getServices: async (req, res, next) => {
     try {
-      const corporate = await CorporateMaster.find();
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      const corporate = await CorporateMaster.find({ userId: usertobefound });
 
       res.status(200).json(corporate);
     } catch (error) {
@@ -63,6 +67,7 @@ const Servicescontroller = {
         address,
         discount,
         value,
+        userId,
       } = req.body;
 
       const newService = await CorporateMaster.findByIdAndUpdate(
@@ -76,6 +81,7 @@ const Servicescontroller = {
           address,
           discount,
           value,
+          userId,
         },
         { new: true }
       );

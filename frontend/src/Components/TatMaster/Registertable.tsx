@@ -17,12 +17,11 @@ export default function Dashboardholiday() {
     endTime: { type: "String", label: "End Time" },
     hoursNeeded: { type: "Number", label: "Hours Needed" },
     urgentHours: { type: "Number", label: "Urgent Hours" },
-     
   };
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/tatmaster/alltatmaster`)
+      .get(`/api/tatmaster/alltatmaster/${User?._id}`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -43,7 +42,7 @@ export default function Dashboardholiday() {
       userAvatar: "/path-to-avatar.jpg",
       tableColumns: {
         title: "TaT Master",
-        description: "Manage TaT Master and view their details.", 
+        description: "Manage TaT Master and view their details.",
         headers: [
           { label: "Select Test", key: "one" },
           { label: "Start Time", key: "two" },
@@ -109,14 +108,12 @@ export default function Dashboardholiday() {
   // Map the API data to match the Dashboard component's expected tableData format
   const mappedTableData = data?.map((item) => {
     const services = item?.services || [];
-    
+
     // Capitalize the first letter of each weekday
-    const capitalizedWeekday = item?.weekday?.map(day => {
+    const capitalizedWeekday = item?.weekday?.map((day) => {
       return day.charAt(0).toUpperCase() + day.slice(1); // Capitalize first letter
     }) || ["Weekday not provided"];
 
-    
-  
     return {
       _id: item?._id,
       one: item?.selectTest?.name || "Select Test not provided",
@@ -124,8 +121,8 @@ export default function Dashboardholiday() {
       three: item?.endTime || "End Time not provided",
       four: item?.hoursNeeded || "Hours Needed not provided",
       five: item?.urgentHours || "Urgent Hours not provided",
-      six: capitalizedWeekday.join(", ") || "Weekday not provided",  // Join the weekdays into a string
-  
+      six: capitalizedWeekday.join(", ") || "Weekday not provided", // Join the weekdays into a string
+
       delete: `/tatmaster/delete/${item?._id}`,
       editfetch: `/tatmaster/reference/${item?._id}`,
     };

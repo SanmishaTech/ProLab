@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Topsection from "./Topsection";
 import Order from "./Order";
 import {
@@ -9,6 +9,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { Label } from "@/components/ui/label";
 import {
   File,
   PlusCircle,
@@ -36,6 +37,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import BottomTest from "./BottomTestsection";
 import {
   Table,
   TableBody,
@@ -58,6 +60,9 @@ const Registration = () => {
   const [topComp, setTopComp] = useState();
   const [orderComp, setOrderComp] = useState();
   const navigate = useNavigate();
+  useEffect(() => {
+    console.log("This is topComp", topComp);
+  }, [topComp]);
 
   return (
     <>
@@ -117,10 +122,81 @@ const Registration = () => {
           </DropdownMenu>
         </header>
         <Topsection setTopComp={setTopComp} />
-        <Order setOrderComp={setOrderComp} topComp={topComp} />
+        <Middlesection topsection={topComp} />
+        <BottomTest setOrderComp={setOrderComp} topComp={topComp} />
       </div>
     </>
   );
 };
 
 export default Registration;
+
+const Middlesection = ({ topsection }) => {
+  const [patientForm, setPatientForm] = useState();
+
+  useEffect(() => {
+    console.log("This is topsectioaasssssssssssssssn", topsection);
+    setPatientForm(topsection?.patientId);
+  }, [topsection]);
+
+  return (
+    <div className="flex w-full h-full px-0 mt-4 bg-background items-center scroll-y-auto gap-5 max-w-6xl ">
+      {/* Available Services Card */}
+      <Card className="flex-1 bg-accent/40 shadow-md">
+        <CardHeader>
+          <CardTitle>Contact Details</CardTitle>
+          <CardDescription>Your contact details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className=" grid grid-cols-5 gap-4 max-w-6xl ">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">Country</Label>
+              <Input
+                id="firstName"
+                placeholder="Patient's country"
+                value={patientForm?.country}
+                disabled
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">State</Label>
+              <Input
+                id="state"
+                placeholder="Patient's country"
+                value={patientForm?.state}
+                disabled
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">City</Label>
+              <Input
+                id="firstName"
+                placeholder="Patient's City"
+                value={patientForm?.city}
+                disabled
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">Email</Label>
+              <Input
+                id="firstName"
+                placeholder="Patient's City"
+                value={patientForm?.email}
+                disabled
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">Mobile</Label>
+              <Input
+                id="firstName"
+                placeholder="Patient's Mobile"
+                value={patientForm?.mobile}
+                disabled
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

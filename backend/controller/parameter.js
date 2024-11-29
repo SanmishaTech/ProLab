@@ -5,11 +5,12 @@ const mongoose = require("mongoose");
 const parameterController = {
   createThread: async (req, res, next) => {
     try {
-      const { name, unit, fieldType } = req.body;
+      const { name, unit, fieldType, userId } = req.body;
       const newService = new Parameter({
         name,
         unit,
         fieldType,
+        userId,
       });
       const newServics = await newService.save();
 
@@ -23,12 +24,12 @@ const parameterController = {
   },
   getServices: async (req, res, next) => {
     try {
-      //   const userId = req.params.userId;
-      //   const usertobefound = new mongoose.Types.ObjectId(userId);
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
       //   const patient = await Parameter.find({
       //     userId: usertobefound,
       //   });
-      const parameter = await Parameter.find();
+      const parameter = await Parameter.find({ userId: usertobefound });
       res.status(200).json(parameter);
     } catch (error) {
       res.status(500).json({ error: error.message });

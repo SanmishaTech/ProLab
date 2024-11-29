@@ -42,39 +42,6 @@ export default function Dashboardholiday() {
   const [parameterGroup, setParameterGroup] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
 
-  useEffect(() => {
-    // Fetch data from the API
-    const fetchparameter = async () => {
-      try {
-        const response = await axios.get(`/api/corporate/allcorporates`);
-        console.log(response.data);
-        setParameter(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    const fetchparametergroup = async () => {
-      try {
-        const response = await axios.get(`/api/corporate/allcorporates`);
-        console.log(response.data);
-        setParameterGroup(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    const fetchtest = async () => {
-      try {
-        const response = await axios.get(`/api/corporate/allcorporates`);
-        console.log(response.data);
-        setTest(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchparameter();
-    fetchparametergroup();
-    fetchtest();
-  }, []);
   // Define the schema with various input types
   useEffect(() => {
     console.log("This is parameter", parameter);
@@ -94,13 +61,13 @@ export default function Dashboardholiday() {
     //   ],
     // },
     // isActive: { type: "Checkbox", label: "Is Active" },
-     // Add more fields as needed
+    // Add more fields as needed
   };
 
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/corporatemaster/allcorporates`)
+      .get(`/api/corporatemaster/allcorporates/${User?._id}`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -125,7 +92,7 @@ export default function Dashboardholiday() {
         headers: [
           { label: "Corporate Code", key: "corporateCode" },
           { label: "Corporate Name", key: "corporateName" },
-          {label : "Discount", key : "discount"},
+          { label: "Discount", key: "discount" },
           { label: "Value", key: "value" },
           { label: "Action", key: "action" },
         ],
@@ -193,26 +160,24 @@ export default function Dashboardholiday() {
 
   // Map the API data to match the Dashboard component's expected tableData format
   const mappedTableData = Array.isArray(data)
-  ? data.map((item) => {
-      console.log("This is item", item);
-      // Capitalize the first letter of the discount
-      const formattedDiscount = item?.discount
-        ? item.discount.charAt(0).toUpperCase() + item.discount.slice(1)
-        : "Discount not provided"; // Default value if discount is not available
-      
-      return {
-        _id: item?._id,
-        corporateCode: item?.corporateCode || "Corporate Code not provided",
-        corporateName: item?.corporateName || "Corporate Name not provided",
-        discount: formattedDiscount, // Use the formatted discount value
-        value: item?.value || "Value not provided",
-        delete: `/corporatemaster/delete/${item?._id}`,
-        action: "actions", 
-      };
-    })
-  : []; // fallback to empty array if data is not an array
+    ? data.map((item) => {
+        console.log("This is item", item);
+        // Capitalize the first letter of the discount
+        const formattedDiscount = item?.discount
+          ? item.discount.charAt(0).toUpperCase() + item.discount.slice(1)
+          : "Discount not provided"; // Default value if discount is not available
 
-
+        return {
+          _id: item?._id,
+          corporateCode: item?.corporateCode || "Corporate Code not provided",
+          corporateName: item?.corporateName || "Corporate Name not provided",
+          discount: formattedDiscount, // Use the formatted discount value
+          value: item?.value || "Value not provided",
+          delete: `/corporatemaster/delete/${item?._id}`,
+          action: "actions",
+        };
+      })
+    : []; // fallback to empty array if data is not an array
 
   return (
     <div className="p-4">

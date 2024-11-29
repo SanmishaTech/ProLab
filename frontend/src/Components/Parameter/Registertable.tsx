@@ -19,7 +19,7 @@ export default function Dashboardholiday() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/parameter/allparameter`)
+      .get(`/api/parameter/allparameter/${User?._id}`)
       .then((response) => {
         setData(response.data);
         setLoading(false);

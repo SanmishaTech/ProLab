@@ -52,6 +52,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const handleAdd = async () => {
     setLoading(true);
     try {
+      formData.userId = User?._id;
       await axios.post(`/api/parametergroup`, formData);
       onAdd(formData); // Notify parent component
       setFormData({});

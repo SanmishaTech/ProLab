@@ -576,6 +576,36 @@ function ProfileForm({ formData }) {
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
+            className="flex-1"
+            control={form.control}
+            name="patientType"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Select Patient Type</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Patient Type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="infant">Infant</SelectItem>
+                    <SelectItem value="minor">Minor</SelectItem>
+                    <SelectItem value="adult">Adult</SelectItem>
+                    <SelectItem value="senior">Senior</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>Select the Patient Type</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
             control={form.control}
             name="maritalStatus"
             render={({ field }) => (

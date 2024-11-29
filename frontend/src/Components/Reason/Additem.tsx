@@ -35,10 +35,7 @@ import {
 import axios from "axios";
 
 interface AddItemProps {
-  onAdd: (item: {
-    id: string;
-    name: string;
-  }) => void;
+  onAdd: (item: { id: string; name: string }) => void;
 }
 
 const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
@@ -54,6 +51,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [formData, setFormData] = useState({});
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
+    formData.userId = User?._id;
     await axios.post("/api/reason", formData).then(() => {
       window.location.reload();
     });

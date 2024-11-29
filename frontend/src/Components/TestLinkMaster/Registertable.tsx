@@ -24,7 +24,9 @@ export default function Dashboardholiday() {
     // Fetch data from the API
     const fetchparameter = async () => {
       try {
-        const response = await axios.get(`/api/parameter/allparameter`);
+        const response = await axios.get(
+          `/api/parameter/allparameter/${User?._id}`
+        );
         console.log(response.data);
         setParameter(response.data);
       } catch (error) {
@@ -34,7 +36,7 @@ export default function Dashboardholiday() {
     const fetchparametergroup = async () => {
       try {
         const response = await axios.get(
-          `/api/parametergroup/allparametergroup`
+          `/api/parametergroup/allparametergroup/${User?._id}`
         );
         console.log("Parameterlink", response.data);
         setParameterGroup(response.data);
@@ -44,7 +46,9 @@ export default function Dashboardholiday() {
     };
     const fetchtest = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(
+          `/api/testmaster/alltestmaster/${User?._id}`
+        );
         console.log(response.data);
         setTest(response.data);
       } catch (error) {
@@ -65,25 +69,27 @@ export default function Dashboardholiday() {
     test: {
       type: "Select",
       label: "Test",
-      options: test?.map((item) => ({
-        value: item._id,
-        label: item.name,
-      })) || [],
+      options:
+        test?.map((item) => ({
+          value: item._id,
+          label: item.name,
+        })) || [],
     },
     parameterGroup: {
       type: "Select",
       label: "Parameter Group",
-      options: parameterGroup?.map((item) => ({
-        value: item._id,
-        label: item.description,
-      })) || [],
+      options:
+        parameterGroup?.map((item) => ({
+          value: item._id,
+          label: item.description,
+        })) || [],
     },
   };
 
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/testmasterlink/allLinkmaster`)
+      .get(`/api/testmasterlink/allLinkmaster/${User?._id}`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -104,7 +110,8 @@ export default function Dashboardholiday() {
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
         title: "Test Parameter Link Master",
-        description: "Manage Test Parameter Link  Master and view their details.",
+        description:
+          "Manage Test Parameter Link  Master and view their details.",
         headers: [
           { label: "name", key: "name" },
           { label: "Parameter Group", key: "parameterGroup" },
@@ -147,11 +154,14 @@ export default function Dashboardholiday() {
       setSelectedItemId(product._id);
     } else if (action === "delete") {
       if (confirm("Are you sure you want to delete this item?")) {
-        axios.delete(`/api/testmasterlink/delete/${product._id}`)
+        axios
+          .delete(`/api/testmasterlink/delete/${product._id}`)
           .then(() => {
-            setData(prevData => prevData.filter(item => item._id !== product._id));
+            setData((prevData) =>
+              prevData.filter((item) => item._id !== product._id)
+            );
           })
-          .catch(err => {
+          .catch((err) => {
             console.error("Error deleting item:", err);
             setError("Failed to delete item");
           });
@@ -163,14 +173,16 @@ export default function Dashboardholiday() {
   const handleAddItem = async (updatedItem: any) => {
     try {
       console.log("Updated item received:", updatedItem);
-      
+
       // Fetch fresh data from the API
-      const response = await axios.get(`/api/testmasterlink/allLinkmaster`);
+      const response = await axios.get(
+        `/api/testmasterlink/allLinkmaster/${User?._id}`
+      );
       setData(response.data);
-      
+
       // Clear the selected item
       setSelectedItemId(null);
-      
+
       console.log("Data refreshed successfully");
     } catch (err) {
       console.error("Error refreshing data:", err);
@@ -212,10 +224,10 @@ export default function Dashboardholiday() {
         onProductAction={handleProductAction}
         typeofschema={typeofschema}
         AddItem={() => (
-          <AddItem 
-            typeofschema={typeofschema} 
-            onAdd={() => {}} 
-            editid={selectedItemId} 
+          <AddItem
+            typeofschema={typeofschema}
+            onAdd={() => {}}
+            editid={selectedItemId}
           />
         )}
       />

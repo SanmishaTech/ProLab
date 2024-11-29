@@ -16,6 +16,7 @@ const associateSchema = new mongoose.Schema({
   mobile: { type: String },
   email: { type: String },
   degree: { type: String },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 
 const AssociateMaster = mongoose.model("AssociateMaster", associateSchema);

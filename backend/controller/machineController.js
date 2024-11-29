@@ -4,11 +4,13 @@ const mongoose = require("mongoose");
 const machineController = {
   createThread: async (req, res, next) => {
     try {
-      const { name, model, companyName } = req.body;
+      const { name, model, companyName, userId } = req.body;
+      console.log("This is userId", userId);
       const newService = new MachineMaster({
         name,
         model,
         companyName,
+        userId,
       });
       const newServics = await newService.save();
 

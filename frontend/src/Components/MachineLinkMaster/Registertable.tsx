@@ -32,7 +32,9 @@ export default function Dashboardholiday() {
     };
     const fetchTests = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(
+          `/api/testmaster/alltestmaster/${User?._id}`
+        );
         console.log(response.data);
         setTest(response.data);
       } catch (error) {

@@ -56,6 +56,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [formData, setFormData] = useState({});
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
+    formData.userId = User?._id;
     await axios.post("/api/parameter", formData).then(() => {
       window.location.reload();
     });

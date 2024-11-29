@@ -17,7 +17,7 @@ export default function Dashboardholiday() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/reason/allreason`)
+      .get(`/api/reason/allreason/${User?._id}`)
       .then((response) => {
         setData(response.data);
 
@@ -97,30 +97,35 @@ export default function Dashboardholiday() {
     return <div className="p-4 text-red-500">Error loading registrations.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
-// Ensure data is an array and contains items
-const mappedTableData = Array.isArray(data) && data.length > 0 ? data.map((item) => {
-  const services = item?.services || [];
-  const paidAmount = item?.paymentMode?.paidAmount || 0;
+  // Ensure data is an array and contains items
+  const mappedTableData =
+    Array.isArray(data) && data.length > 0
+      ? data.map((item) => {
+          const services = item?.services || [];
+          const paidAmount = item?.paymentMode?.paidAmount || 0;
 
-  // Calculate the total service price based on each service's populated details.
-  const totalServicePrice = services.reduce((acc, service) => {
-    const servicePrice = service?.serviceId?.price || 0; // Replace 'price' with the actual field name for service price
-    return acc + servicePrice;
-  }, 0);
+          // Calculate the total service price based on each service's populated details.
+          const totalServicePrice = services.reduce((acc, service) => {
+            const servicePrice = service?.serviceId?.price || 0; // Replace 'price' with the actual field name for service price
+            return acc + servicePrice;
+          }, 0);
 
-  // Calculate balance amount based on total service price and paid amount.
-  const balanceAmount =
-    totalServicePrice - paidAmount > 0 ? totalServicePrice - paidAmount : 0;
+          // Calculate balance amount based on total service price and paid amount.
+          const balanceAmount =
+            totalServicePrice - paidAmount > 0
+              ? totalServicePrice - paidAmount
+              : 0;
 
-  return {
-    _id: item?._id,
-    one: item?.name || "Unknown",
-    edit: `/reason/update/${item?._id}`,
-    delete: `/reason/delete/${item?._id}`,
-    editfetch: `/reason/reference/${item?._id}`,
-    // two: item?. || "Unknown",
-  };
-}) : []; 
+          return {
+            _id: item?._id,
+            one: item?.name || "Unknown",
+            edit: `/reason/update/${item?._id}`,
+            delete: `/reason/delete/${item?._id}`,
+            editfetch: `/reason/reference/${item?._id}`,
+            // two: item?. || "Unknown",
+          };
+        })
+      : [];
   return (
     <div className="p-4">
       <Dashboard

@@ -10,9 +10,9 @@ const corporateSchema = new mongoose.Schema({
   city: { type: String },
   address: { type: String },
   discount: { type: String },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   value: { type: Number },
 });
 
 const CorporateMaster = mongoose.model("CorporateMaster", corporateSchema);
 module.exports = CorporateMaster;
-  

@@ -47,7 +47,9 @@ export default function Dashboardholiday() {
     // Fetch data from the API
     const fetchparameter = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(
+          `/api/testmaster/alltestmaster/${User?._id}`
+        );
         console.log(response.data);
         setParameter(response.data);
       } catch (error) {
@@ -56,7 +58,9 @@ export default function Dashboardholiday() {
     };
     const fetchparametergroup = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(
+          `/api/testmaster/alltestmaster/${User?._id}`
+        );
         console.log(response.data);
         setParameterGroup(response.data);
       } catch (error) {
@@ -102,7 +106,7 @@ export default function Dashboardholiday() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/testmaster/alltestmaster`)
+      .get(`/api/testmaster/alltestmaster/${User?._id}`)
       .then((response) => {
         setData(response.data);
         setLoading(false);

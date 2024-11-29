@@ -99,7 +99,9 @@ function ProfileForm() {
   useEffect(() => {
     const fetchSpecimen = async () => {
       try {
-        const response = await axios.get(`/api/specimen/allspecimen`);
+        const response = await axios.get(
+          `/api/specimen/allspecimen/${User?._id}`
+        );
         console.log(response.data);
         setSpecimen(response.data);
       } catch (error) {

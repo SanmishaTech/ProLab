@@ -11,7 +11,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
 
 import axios from "axios";
@@ -29,7 +35,8 @@ const frameworksList = [
 const generateTimeOptions = () => {
   const times = [];
   for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 15) { // Use 15-minute intervals
+    for (let m = 0; m < 60; m += 15) {
+      // Use 15-minute intervals
       const hour = String(h).padStart(2, "0");
       const minute = String(m).padStart(2, "0");
       const second = "00"; // Default to 00 seconds
@@ -65,11 +72,14 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
     urgentHours: 0,
     weekday: [],
   });
-
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user || "{}");
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(
+          `/api/testmaster/alltestmaster/${User?._id}`
+        );
         setServices(response.data);
       } catch (error) {
         console.error("Error fetching services:", error);
@@ -80,8 +90,9 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
 
   const handleAdd = async () => {
     try {
+      formData.userId = User?._id;
       await axios.post("/api/tatmaster", formData);
-      window.location.reload();  
+      window.location.reload();
     } catch (error) {
       setError("Failed to add the item.");
     }
@@ -120,13 +131,15 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
               id="selectTest"
               name="selectTest"
               value={formData.selectTest}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, selectTest: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, selectTest: value }))
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select Test" />
               </SelectTrigger>
               <SelectContent>
-                {services.map((service) => (
+                {services?.map((service) => (
                   <SelectItem key={service.id} value={service._id}>
                     {service.name}
                   </SelectItem>
