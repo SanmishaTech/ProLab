@@ -68,16 +68,17 @@ const AddItem: React.FC<AddItemProps> = ({
         const response = await axios.get(`/api/${editfetch}`);
         setFormData(response.data);
       } catch (error) {
-        console.error('Error fetching data', error);
+        console.error("Error fetching data", error);
         setError("Failed to fetch data.");
       }
     };
-  
+
     fetcheditdetails();
   }, [editfetch]);
- 
+
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
+    formData.userId = User?._id;
     await axios.put(`/api/${editid}`, formData).then(() => {
       window.location.reload();
     });

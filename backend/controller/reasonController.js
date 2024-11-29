@@ -4,9 +4,10 @@ const mongoose = require("mongoose");
 const reasonController = {
   createThread: async (req, res, next) => {
     try {
-      const { name } = req.body;
+      const { name, userId } = req.body;
       const newService = new Reason({
         name,
+        userId,
       });
       const newServics = await newService.save();
 
@@ -20,7 +21,9 @@ const reasonController = {
   },
   getServices: async (req, res, next) => {
     try {
-      const reason = await Reason.find();
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      const reason = await Reason.find({ userId: usertobefound });
       res.status(200).json(reason);
     } catch (error) {
       res.status(500).json({ error: error.message });

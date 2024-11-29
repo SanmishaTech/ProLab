@@ -74,11 +74,14 @@ function ProfileForm({ formData }) {
   const [department, setDepartment] = useState([]);
   const [profile, setProfile] = useState([]);
   const [formdata, setFormData] = useState([]);
-
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user || "{}");
   useEffect(() => {
     const fetchSpecimen = async () => {
       try {
-        const response = await axios.get(`/api/specimen/allspecimen`);
+        const response = await axios.get(
+          `/api/specimen/allspecimen/${User?._id}`
+        );
         console.log(response.data);
         setSpecimen(response.data);
       } catch (error) {
@@ -87,30 +90,9 @@ function ProfileForm({ formData }) {
     };
     const fetchDepartment = async () => {
       try {
-        const response = await axios.get(`/api/department/alldepartment`);
-        console.log(response.data);
-        setDepartment(response.data);
-      } catch (error) {
-        console.error("Error fetching department:", error);
-      }
-    };
-    fetchDepartment();
-    fetchSpecimen();
-  }, []);
-
-  useEffect(() => {
-    const fetchSpecimen = async () => {
-      try {
-        const response = await axios.get(`/api/specimen/allspecimen`);
-        console.log(response.data);
-        setSpecimen(response.data);
-      } catch (error) {
-        console.error("Error fetching specimen:", error);
-      }
-    };
-    const fetchDepartment = async () => {
-      try {
-        const response = await axios.get(`/api/department/alldepartment`);
+        const response = await axios.get(
+          `/api/department/alldepartment/${User?._id}`
+        );
         console.log(response.data);
         setDepartment(response.data);
       } catch (error) {
@@ -122,7 +104,6 @@ function ProfileForm({ formData }) {
   }, []);
 
   const getformdatafromnextcomponent = (data) => {
-    
     setFormData(data);
   };
 
@@ -148,6 +129,7 @@ function ProfileForm({ formData }) {
     data.prerequisite = content;
     data.consentForm = consent;
     data.interpretedText = interpretation;
+    data.userId = User?._id;
 
     await axios.put(`/api/testmaster/update/${id}`, data).then((res) => {
       console.log("ppappappa", res.data);
@@ -343,81 +325,6 @@ function ProfileForm({ formData }) {
             setData={getformdatafromnextcomponent}
           />{" "}
         </div>
-        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Address..." {...field} />
-                </FormControl>
-                <FormDescription>What is your name of Address</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="telephone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Telephone</FormLabel>
-                <FormControl>
-                  <Input placeholder="Telephone..." {...field} />
-                </FormControl>
-                <FormDescription>
-                  What is your name of Telephone
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="mobile"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mobile</FormLabel>
-                <FormControl>
-                  <Input placeholder="Mobile..." {...field} />
-                </FormControl>
-                <FormDescription>What is your name of Mobile.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Email..." {...field} />
-                </FormControl>
-                <FormDescription>What is your name of Email.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="degree"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Degree</FormLabel>
-                <FormControl>
-                  <Input placeholder="Degree..." {...field} />
-                </FormControl>
-                <FormDescription>What is your name of Degree.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div> */}
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
             Update profile

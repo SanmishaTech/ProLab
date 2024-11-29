@@ -59,25 +59,25 @@ const AddItem: React.FC<AddItemProps> = ({
   useEffect(() => {
     if (editid) {
       setLoading(true);
-      console.log('Fetching data for editid:', editid);
-      
+      console.log("Fetching data for editid:", editid);
+
       axios
         .get(`/api/testmasterlink/reference/${editid}`)
         .then((res) => {
-          console.log('Fetched data:', res.data);
-          
+          console.log("Fetched data:", res.data);
+
           const initialFormData = {
             test: res.data.test?._id,
             parameterGroup: res.data.parameterGroup?._id,
-            parameter: res.data.parameter?.map((p: any) => p._id) || []
+            parameter: res.data.parameter?.map((p: any) => p._id) || [],
           };
-          
-          console.log('Setting initial form data:', initialFormData);
+
+          console.log("Setting initial form data:", initialFormData);
           setFormData(initialFormData);
-          
+
           if (res.data.parameter) {
             const parameterIds = res.data.parameter.map((p: any) => p._id);
-            console.log('Setting selected parameters:', parameterIds);
+            console.log("Setting selected parameters:", parameterIds);
             setSelectedParameters(parameterIds);
           }
         })
@@ -97,7 +97,11 @@ const AddItem: React.FC<AddItemProps> = ({
   const handleAdd = async () => {
     setLoading(true);
     try {
-      if (!formData.test || !formData.parameterGroup || !selectedParameters.length) {
+      if (
+        !formData.test ||
+        !formData.parameterGroup ||
+        !selectedParameters.length
+      ) {
         setError("Please fill in all required fields");
         setLoading(false);
         return;
@@ -119,8 +123,8 @@ const AddItem: React.FC<AddItemProps> = ({
         updateData,
         {
           headers: {
-            'Content-Type': 'application/json',
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
@@ -131,7 +135,8 @@ const AddItem: React.FC<AddItemProps> = ({
       }
     } catch (err: any) {
       console.error("Update error:", err);
-      const errorMessage = err.response?.data?.message || err.message || "Failed to update";
+      const errorMessage =
+        err.response?.data?.message || err.message || "Failed to update";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -139,8 +144,8 @@ const AddItem: React.FC<AddItemProps> = ({
   };
 
   useEffect(() => {
-    console.log('Current formData:', formData);
-    console.log('Current selectedParameters:', selectedParameters);
+    console.log("Current formData:", formData);
+    console.log("Current selectedParameters:", selectedParameters);
   }, [formData, selectedParameters]);
 
   // Capitalize the first letter of each word for labels
@@ -156,14 +161,16 @@ const AddItem: React.FC<AddItemProps> = ({
         ...prevData,
         [name]: value,
       };
-      console.log('Updated formData:', newData);
+      console.log("Updated formData:", newData);
       return newData;
     });
   };
   useEffect(() => {
     const fetchparameter = async () => {
       try {
-        const response = await axios.get(`/api/parameter/allparameter`);
+        const response = await axios.get(
+          `/api/parameter/allparameter/${User?._id}`
+        );
         console.log(response.data);
         setSelectedFrameworks(
           response.data.map((framework) => ({
@@ -180,8 +187,8 @@ const AddItem: React.FC<AddItemProps> = ({
 
   // Add this useEffect to monitor form data changes
   useEffect(() => {
-    console.log('typeofschema:', typeofschema);
-    console.log('Current formData:', formData);
+    console.log("typeofschema:", typeofschema);
+    console.log("Current formData:", formData);
   }, [formData, typeofschema]);
 
   // Dynamically render form fields based on the schema
@@ -278,8 +285,8 @@ const AddItem: React.FC<AddItemProps> = ({
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
-              <Select 
-                value={formData[key] || ''} 
+              <Select
+                value={formData[key] || ""}
                 onValueChange={(value) => {
                   console.log(`Selecting ${key}:`, value);
                   handleChange(key, value);
@@ -292,10 +299,7 @@ const AddItem: React.FC<AddItemProps> = ({
                   <SelectGroup>
                     <SelectLabel>{label}</SelectLabel>
                     {value.options?.map((option: any) => (
-                      <SelectItem 
-                        key={option.value} 
-                        value={option.value}
-                      >
+                      <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
                     ))}
@@ -345,9 +349,7 @@ const AddItem: React.FC<AddItemProps> = ({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Edit item</DialogTitle>
-          <DialogDescription>
-            Make changes to your item here.
-          </DialogDescription>
+          <DialogDescription>Make changes to your item here.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {error && (
@@ -367,7 +369,7 @@ const AddItem: React.FC<AddItemProps> = ({
               className="col-span-3"
               options={selectedFrameworks}
               onValueChange={(values) => {
-                console.log('MultiSelect values changed:', values);
+                console.log("MultiSelect values changed:", values);
                 setSelectedParameters(values);
               }}
               value={selectedParameters}
@@ -378,12 +380,12 @@ const AddItem: React.FC<AddItemProps> = ({
         </div>
 
         <DialogFooter>
-          <Button 
-            onClick={handleAdd} 
+          <Button
+            onClick={handleAdd}
             disabled={loading}
-            className={loading ? 'opacity-50 cursor-not-allowed' : ''}
+            className={loading ? "opacity-50 cursor-not-allowed" : ""}
           >
-            {loading ? 'Updating...' : 'Update'}
+            {loading ? "Updating..." : "Update"}
           </Button>
         </DialogFooter>
       </DialogContent>

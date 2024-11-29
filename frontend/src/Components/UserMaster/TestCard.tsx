@@ -3,7 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { MoveLeft } from "lucide-react";
+import { MoveLeft, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,8 +23,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Editor } from "@/Components/Editor/Editor";
 
+import { Editor } from "@/Components/Editor/Editor";
+import { DateTimePicker, TimePicker } from "@/components/ui/dateTimepicker";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -34,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { SmartDatetimeInput } from "@/utilityfunctions/Datepicker";
 import axios from "axios";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -41,20 +43,34 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import MultiSelectorComponent from "./profile";
-
 const profileFormSchema = z.object({
-  template: z.string().optional(),
-  name: z.string().optional(),
-  code: z.string().optional(),
-  abbrivation: z.string().optional(),
-  specimen: z.string().optional(),
-  price: z.any().optional(),
+  employeeCode: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+
+  salutation: z.string().optional(),
+  gender: z.string().optional(),
   department: z.string().optional(),
-  profile: z.boolean().optional(),
-  isFormTest: z.boolean().optional(),
-  sortOrder: z.number().optional(),
-  machineInterface: z.boolean().optional(),
-  isSinglePageReport: z.boolean().optional(),
+  address: z.string().optional(),
+  pincode: z.string().optional(),
+  address2: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  role: z.string().optional(),
+  emailId: z.string().optional(),
+  collectionCenter: z.string().optional(),
+  mobileNo: z.string().optional(),
+  country: z.string().optional(),
+  dob: z.string().optional(),
+  signatureText: z.string().optional(),
+  modifyTest: z.boolean().optional(),
+  reportPrint: z.boolean().optional(),
+  sampleRejection: z.boolean().optional(),
+  reportPdf: z.boolean().optional(),
+  signatureFile: z.any().optional(),
+  username: z.string().optional(),
+  email: z.string().optional(),
+  password: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -74,6 +90,7 @@ function ProfileForm() {
   const [specimen, setSpecimen] = useState<any[]>([]);
   const [department, setDepartment] = useState<any[]>([]);
   const [formData, setFormData] = useState<any>({});
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   //   const { fields, append } = useFieldArray({
   //     name: "urls",
   //     control: form.control,
@@ -82,7 +99,9 @@ function ProfileForm() {
   useEffect(() => {
     const fetchSpecimen = async () => {
       try {
-        const response = await axios.get(`/api/specimen/allspecimen`);
+        const response = await axios.get(
+          `/api/specimen/allspecimen/${User?._id}`
+        );
         console.log(response.data);
         setSpecimen(response.data);
       } catch (error) {
@@ -104,17 +123,12 @@ function ProfileForm() {
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
-    // console.log("Sas", data);
-    console.log("ppappappa");
-    data.prerquisite = content;
-    data.consentForm = consent;
-    data.interpretedText = interpretation;
-    data.profile = formData;
+    console.log("Ading new user", data);
 
-    await axios.post(`/api/testmaster`, data).then((res) => {
+    await axios.post(`/api/usermaster`, data).then((res) => {
       console.log("ppappappa", res.data);
-      toast.success("Test Master Created Successfully");
-      navigate("/testmaster");
+      toast.success("User Created Successfully");
+      navigate("/usermaster");
     });
   }
 
@@ -133,15 +147,56 @@ function ProfileForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8 pb-[2rem]"
       >
-        {" "}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
+          <FormField
+            control={form.control}
+            name="employeeCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Employee Code</FormLabel>
+                <FormControl>
+                  <Input placeholder="Employee Code..." {...field} />
+                </FormControl>
+                <FormDescription>What is your Employee Code?</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="firstName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>First Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="First Name..." {...field} />
+                </FormControl>
+                <FormDescription>What is your First Name?</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Last Name..." {...field} />
+                </FormControl>
+                <FormDescription>What is your Last Name?</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             className="flex-1"
             control={form.control}
-            name="template"
+            name="salutation"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Associate</FormLabel>
+                <FormLabel>Salutation</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -149,13 +204,14 @@ function ProfileForm() {
                 >
                   <FormControl className="w-full">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select Associate type" />
+                      <SelectValue placeholder="Select salutation" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="clinic">Clinic</SelectItem>
-                    <SelectItem value="doctor">Doctor</SelectItem>
-                    <SelectItem value="hospital">Hospital</SelectItem>
+                    <SelectItem value="mr">Mr</SelectItem>
+                    <SelectItem value="mrs">Mrs</SelectItem>
+                    <SelectItem value="ms">Baby</SelectItem>
+                    <SelectItem value="dr">Dr</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>
@@ -165,44 +221,88 @@ function ProfileForm() {
               </FormItem>
             )}
           />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
+            className="flex-1"
             control={form.control}
-            name="name"
+            name="gender"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Test Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Test name..." {...field} />
-                </FormControl>
-                <FormDescription>What is Test name?</FormDescription>
+              <FormItem className="w-full">
+                <FormLabel>Select Gender</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Gender " />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="others">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>Select the Gender</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            className="flex-1"
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Select Role</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Role " />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="doctor">Doctor</SelectItem>
+                    <SelectItem value="nurse">Nurse</SelectItem>
+                    <SelectItem value="technician">Technician</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>Select the Role</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="code"
+            name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Test Code</FormLabel>
+                <FormLabel>Address 1</FormLabel>
                 <FormControl>
-                  <Input placeholder="Test code..." {...field} />
+                  <Textarea placeholder="Type your message here." {...field} />
                 </FormControl>
-                <FormDescription>What is Test Code?</FormDescription>
+                <FormDescription>What is your Address 1?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="abbrivation"
+            name="address2"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Abbrivation</FormLabel>
+                <FormLabel>Address 2</FormLabel>
                 <FormControl>
-                  <Input placeholder="Abbrivation..." {...field} />
+                  <Textarea placeholder="Type your message here." {...field} />
                 </FormControl>
-                <FormDescription>What is abbrivation?</FormDescription>
+                <FormDescription>What is your Address 2?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -210,53 +310,15 @@ function ProfileForm() {
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
-            className="flex-1"
             control={form.control}
-            name="specimen"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Select Specimen</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  className="w-full"
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a Specimen " />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {specimen?.map((specimen) => (
-                      <SelectItem key={specimen._id} value={specimen._id}>
-                        {specimen.specimen}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription>Select the Specimen</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className=" p-4 space-y-4">
-          <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Prereqizite
-          </Label>
-          <Editor value={content} onChange={setContent} onBlur={setContent} />
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-full p-4">
-          <FormField
-            control={form.control}
-            name="price"
+            name="pincode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price</FormLabel>
+                <FormLabel>Pincode</FormLabel>
                 <FormControl>
-                  <Input placeholder="Price..." {...field} />
+                  <Input placeholder="Type your Pincode here." {...field} />
                 </FormControl>
-                <FormDescription>What is your name of Price.</FormDescription>
+                <FormDescription>What is your Pincode?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -264,10 +326,10 @@ function ProfileForm() {
           <FormField
             className="flex-1"
             control={form.control}
-            name="department"
+            name="country"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Select Department</FormLabel>
+                <FormLabel>Select Country</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"
@@ -275,80 +337,204 @@ function ProfileForm() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a Department " />
+                      <SelectValue placeholder="Select a Role " />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {department?.map((department) => (
-                      <SelectItem key={department._id} value={department._id}>
-                        {department.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="india">India</SelectItem>
+                    <SelectItem value="usa">USA</SelectItem>
+                    <SelectItem value="uk">UK</SelectItem>
+                    <SelectItem value="france">France</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription>Select The department</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div>
-          <Label>Consent Form</Label>
-          <Editor value={consent} onChange={setconsent} onBlur={setconsent} />
-        </div>
-        <div>
-          <Label>Interpretetion Text</Label>
-          <Editor
-            value={interpretation}
-            onChange={setinterpretation}
-            onBlur={setinterpretation}
-          />
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-full p-4">
-          <MultiSelectorComponent setData={getformdatafromnextcomponent} />{" "}
-        </div>
-        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Address..." {...field} />
-                </FormControl>
-                <FormDescription>What is your name of Address</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="telephone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Telephone</FormLabel>
-                <FormControl>
-                  <Input placeholder="Telephone..." {...field} />
-                </FormControl>
-                <FormDescription>
-                  What is your name of Telephone
-                </FormDescription>
+                <FormDescription>Select the Role</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
+            className="flex-1"
             control={form.control}
-            name="mobile"
+            name="state"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Select State</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Role " />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="maharashtra">Maharashtra</SelectItem>
+                    <SelectItem value="gujarat">Gujarat</SelectItem>
+                    <SelectItem value="rajasthan">Rajasthan</SelectItem>
+                    <SelectItem value="tamilnadu">Tamilnadu</SelectItem>
+                    <SelectItem value="telangana">Telangana</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>Select the Role</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            className="flex-1"
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Select City</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Role " />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="dombivli">Dombivli</SelectItem>
+                    <SelectItem value="bangalore">Bangalore</SelectItem>
+                    <SelectItem value="mumbai">Mumbai</SelectItem>
+                    <SelectItem value="chennai">Chennai</SelectItem>
+                    <SelectItem value="delhi">Delhi</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>Select the Role</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
+          <FormField
+            control={form.control}
+            name="mobileNo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Mobile</FormLabel>
+                <FormLabel>Mobile No</FormLabel>
                 <FormControl>
-                  <Input placeholder="Mobile..." {...field} />
+                  <Input placeholder="Mobile No..." {...field} />
                 </FormControl>
-                <FormDescription>What is your name of Mobile.</FormDescription>
+                <FormDescription>What is your Mobile No?</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="emailId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email Id</FormLabel>
+                <FormControl>
+                  <Input placeholder="Email Id..." {...field} />
+                </FormControl>
+                <FormDescription>What is your Email Id?</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="dob"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Date of Birth</FormLabel>
+                <FormControl>
+                  <DateTimePicker
+                    granularity="day"
+                    value={dateOfBirth}
+                    onChange={setDateOfBirth}
+                  />
+                </FormControl>
+                <FormDescription>What is your Date of Birth?</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            className="flex-1"
+            control={form.control}
+            name="collectionCenter"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Select Collection Center</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Collection Center " />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="akshaya">Akshaya</SelectItem>
+                    <SelectItem value="akshara">Akshara</SelectItem>
+                    <SelectItem value="dombivli">dombivi</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>Select the Role</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
+          <FormField
+            control={form.control}
+            name="signatureText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Signature Text</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Signature Text..." {...field} />
+                </FormControl>
+                <FormDescription>What is your Signature Text?</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="signatureFile"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Signature File</FormLabel>
+                <FormControl>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    placeholder="Signature File..."
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>What is your Signature File?</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 max-w-full p-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>User Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="User name..." {...field} />
+                </FormControl>
+                <FormDescription>What is your User name?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -360,28 +546,127 @@ function ProfileForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="Email..." {...field} />
+                  <Input placeholder="User name..." {...field} />
                 </FormControl>
-                <FormDescription>What is your name of Email.</FormDescription>
+                <FormDescription>
+                  What email would you like to login with?
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="degree"
+            name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Degree</FormLabel>
+                <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Degree..." {...field} />
+                  <Input placeholder="Password..." {...field} />
                 </FormControl>
-                <FormDescription>What is your name of Degree.</FormDescription>
+                <FormDescription>What Would be your password?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div> */}
+        </div>
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-1 max-w-full p-4">
+          <FormField
+            control={form.control}
+            name="modifyTest"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex gap-2 items-center">
+                  <FormLabel>Right To Modify Approved Test?</FormLabel>
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      {...field}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked === true)
+                      }
+                    />
+                  </FormControl>
+                </div>
+                <FormDescription>What is your Modify Test?</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="reportPrint"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex gap-2 items-center">
+                  <FormLabel>Right To Reprint Report?</FormLabel>
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      {...field}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked === true)
+                      }
+                    />
+                  </FormControl>
+                </div>
+                <FormDescription>
+                  Does this person has right to reprint the report?
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="sampleRejection"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex gap-2 items-center">
+                  <FormLabel>Right To Sample Rejection?</FormLabel>
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      {...field}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked === true)
+                      }
+                    />
+                  </FormControl>
+                </div>
+                <FormDescription>
+                  Does this person has right to reject Samples?
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="reportPdf"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex gap-2 items-center">
+                  <FormLabel>Right To view reports in PDF?</FormLabel>
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      {...field}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked === true)
+                      }
+                    />
+                  </FormControl>
+                </div>
+                <FormDescription>
+                  Does this person has right to view reports in PDF?
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
             Add Profile
@@ -397,7 +682,7 @@ export default function SettingsProfilePage() {
   return (
     <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
       <Button
-        onClick={() => navigate("/testmaster")}
+        onClick={() => navigate("/usermaster")}
         className="ml-4 flex gap-2 m-8 mb-4"
       >
         <MoveLeft className="w-5 text-white" />

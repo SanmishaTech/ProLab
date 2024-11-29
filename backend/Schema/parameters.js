@@ -5,6 +5,7 @@ const parameterSchema = new mongoose.Schema({
   name: { type: String },
   unit: { type: String },
   fieldType: { type: String },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 
 const Parameter = mongoose.model("Parameter", parameterSchema);

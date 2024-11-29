@@ -65,7 +65,9 @@ export default function Dashboardholiday() {
     };
     const fetchtest = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(
+          `/api/testmaster/alltestmaster/${User?._id}`
+        );
         console.log(response.data);
         setTest(response.data);
       } catch (error) {
@@ -102,7 +104,7 @@ export default function Dashboardholiday() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/associatemaster/allassociates`)
+      .get(`/api/associatemaster/allassociates/${User?._id}`)
       .then((response) => {
         setData(response.data);
         setLoading(false);

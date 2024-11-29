@@ -12,7 +12,6 @@ export default function Dashboardholiday() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const typeofschema = {
-    name: "String",
     description: "String",
     date: "Date",
   };
@@ -42,7 +41,6 @@ export default function Dashboardholiday() {
         title: "Holiday",
         description: "Manage Holiday and view their details.",
         headers: [
-          { label: "Name", key: "one" },
           { label: "Description", key: "two" },
           { label: "Date", key: "three" },
           { label: "Action", key: "action" },

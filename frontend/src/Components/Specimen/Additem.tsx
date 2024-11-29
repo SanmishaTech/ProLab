@@ -58,13 +58,14 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema, add }) => {
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
     console.log(formData);
+    formData.userId = User?._id;
     await axios.post(`/api/specimen`, formData).then(() => {
+      setName("");
+      setDate(null);
+      // Reset form fields
+      setHandleopen(false);
       window.location.reload();
     });
-    setName("");
-    setDate(null);
-    // Reset form fields
-    setHandleopen(false);
   };
   function capitalizeText(text) {
     return text.replace(/\b\w/g, (char) => char.toUpperCase());

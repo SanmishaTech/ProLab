@@ -7,6 +7,7 @@ const testlinkmasterSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "ParameterGroup",
   },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   parameter: [{ type: mongoose.Schema.Types.ObjectId, ref: "Parameter" }],
 });
 

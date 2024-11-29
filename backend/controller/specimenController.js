@@ -4,9 +4,10 @@ const mongoose = require("mongoose");
 const Servicescontroller = {
   createThread: async (req, res, next) => {
     try {
-      const { specimen } = req.body;
+      const { specimen, userId } = req.body;
       const newService = new Department({
         specimen,
+        userId,
       });
       const newServics = await newService.save();
       res.json({
@@ -19,9 +20,9 @@ const Servicescontroller = {
   },
   getServices: async (req, res, next) => {
     try {
-      // const userId = req.params.userId;
-      // const usertobefound = new mongoose.Types.ObjectId(userId);
-      const doctor = await Department.find();
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      const doctor = await Department.find({ userId: usertobefound });
       // .populate({
       //   path: "services",
       //   populate: { path: "services" },
@@ -44,12 +45,13 @@ const Servicescontroller = {
   updateThreads: async (req, res, next) => {
     try {
       const doctorId = req.params.departmentId;
-      const { specimen } = req.body;
+      const { specimen, userId } = req.body;
 
       const newService = await Department.findByIdAndUpdate(
         doctorId,
         {
           specimen,
+          userId,
         },
         { new: true }
       );

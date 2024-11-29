@@ -132,12 +132,14 @@ function App() {
         <Route path="/machinemaster" element={<Dashboard />} />
         <Route path="/machinelinkmaster" element={<Dashboard />} />
         <Route path="/containerLinkMaster" element={<Dashboard />} />
-         <Route path="/usermaster" element={<Dashboard />} />
- 
+
         <Route path="/discountmaster" element={<Dashboard />} />
         <Route path="/rolemaster" element={<Dashboard />} />
         <Route path="/assignaccess" element={<Dashboard />} />
-       </Routes>
+        <Route path="/usermaster" element={<Dashboard />} />
+        <Route path="/usermaster/add" element={<Dashboard />} />
+        <Route path="/usermaster/edit/:id" element={<Dashboard />} />
+      </Routes>
     </>
   );
 }

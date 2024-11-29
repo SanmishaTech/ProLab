@@ -16,6 +16,9 @@ const userMasterSchema = new mongoose.Schema({
   state: { type: String },
   mobileNo: { type: String },
   emailId: { type: String },
+  pincode: { type: String },
+  country: { type: String },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   dob: { type: Date },
   collectionCenter: [
     { type: mongoose.Schema.Types.ObjectId, ref: "CollectionCenter" },

@@ -23,7 +23,9 @@ export default function Dashboardholiday() {
     // Fetch data from the API
     const fetchparameter = async () => {
       try {
-        const response = await axios.get(`/api/parameter/allparameter`);
+        const response = await axios.get(
+          `/api/parameter/allparameter/${User?._id}`
+        );
         console.log(response.data);
         setParameter(response.data);
       } catch (error) {
@@ -33,7 +35,7 @@ export default function Dashboardholiday() {
     const fetchparametergroup = async () => {
       try {
         const response = await axios.get(
-          `/api/parametergroup/allparametergroup`
+          `/api/parametergroup/allparametergroup/${User?._id}`
         );
         console.log(response.data);
         setParameterGroup(response.data);
@@ -43,7 +45,9 @@ export default function Dashboardholiday() {
     };
     const fetchtest = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(
+          `/api/testmaster/alltestmaster/${User?._id}`
+        );
         console.log(response.data);
         setTest(response.data);
       } catch (error) {
@@ -59,7 +63,7 @@ export default function Dashboardholiday() {
   const typeofschema = {
     name: {
       type: "String",
-      label: "Name",
+      label: "Department Name",
     },
     description: {
       type: "String",
@@ -74,7 +78,7 @@ export default function Dashboardholiday() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/department/alldepartment`)
+      .get(`/api/department/alldepartment/${User?._id}`)
       .then((response) => {
         setData(response.data);
         setLoading(false);

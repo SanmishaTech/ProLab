@@ -5,12 +5,13 @@ const mongoose = require("mongoose");
 const holidayController = {
   createThread: async (req, res, next) => {
     try {
-      const { name, description, date } = req.body;
+      const { name, description, date, userId } = req.body;
+      console.log("This is userId", userId);
       const newService = new Holiday({
         name,
         description,
         date,
-        // userId,
+        userId,
       });
       const newServics = await newService.save();
 
@@ -25,7 +26,8 @@ const holidayController = {
   getServices: async (req, res, next) => {
     try {
       const userId = req.params.userId;
-      const patient = await Holiday.find();
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      const patient = await Holiday.find({ userId: usertobefound });
       res.status(200).json(patient);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -34,6 +36,7 @@ const holidayController = {
   getServicesbyId: async (req, res, next) => {
     try {
       const patientId = req.params.referenceId;
+
       const services = await Holiday.findById(patientId);
       res.status(200).json(services);
     } catch (error) {
@@ -77,7 +80,7 @@ const holidayController = {
   updateThreads: async (req, res, next) => {
     try {
       const patientId = req.params.referenceId;
-      const { name, description, date } = req.body;
+      const { name, description, date, userId } = req.body;
 
       const newService = await Holiday.findByIdAndUpdate(
         patientId,
@@ -85,6 +88,7 @@ const holidayController = {
           name,
           description,
           date,
+          userId,
         },
         { new: true }
       );

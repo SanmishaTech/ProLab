@@ -93,9 +93,11 @@ function ProfileForm() {
   });
 
   const navigate = useNavigate();
-
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user || "{}");
   async function onSubmit(data: ProfileFormValues) {
     console.log("ppappappa");
+    data.userId = User?._id;
     await axios.post(`/api/corporatemaster`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Corporate Master Created Successfully");
@@ -105,7 +107,10 @@ function ProfileForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pb-[2rem]">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8 pb-[2rem]"
+      >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
             control={form.control}
@@ -158,7 +163,11 @@ function ProfileForm() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Select Country</FormLabel>
-                <Select onValueChange={field.onChange} className="w-full" defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a Country" />
@@ -184,7 +193,11 @@ function ProfileForm() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Select State</FormLabel>
-                <Select onValueChange={field.onChange} className="w-full" defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a State" />
@@ -210,7 +223,11 @@ function ProfileForm() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Select City</FormLabel>
-                <Select onValueChange={field.onChange} className="w-full" defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select City" />
@@ -239,7 +256,11 @@ function ProfileForm() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Select Discount Type </FormLabel>
-                <Select onValueChange={field.onChange} className="w-full" defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a Discount Type" />
@@ -285,7 +306,10 @@ export default function SettingsProfilePage() {
   const navigate = useNavigate();
   return (
     <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
-      <Button onClick={() => navigate("/corporate")} className="ml-4 flex gap-2 m-8 mb-4">
+      <Button
+        onClick={() => navigate("/corporate")}
+        className="ml-4 flex gap-2 m-8 mb-4"
+      >
         <MoveLeft className="w-5 text-white" />
         Back
       </Button>

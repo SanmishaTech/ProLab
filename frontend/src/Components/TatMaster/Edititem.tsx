@@ -93,7 +93,9 @@ const AddItem: React.FC<AddItemProps> = ({
     // Fetch services for the dropdown
     const fetchServices = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(
+          `/api/testmaster/alltestmaster/${User?._id}`
+        );
         setServices(response.data);
       } catch (error) {
         console.error("Error fetching services:", error);
@@ -335,7 +337,7 @@ const AddItem: React.FC<AddItemProps> = ({
                 <SelectValue placeholder="Select Test" />
               </SelectTrigger>
               <SelectContent>
-                {services.map((service) => (
+                {services?.map((service) => (
                   <SelectItem key={service._id} value={service._id}>
                     {service.name}
                   </SelectItem>

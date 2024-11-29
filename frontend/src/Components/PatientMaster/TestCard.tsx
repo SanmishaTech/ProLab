@@ -34,6 +34,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { DateTimePicker } from "@/components/ui/dateTimepicker";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -131,7 +132,8 @@ function ProfileForm() {
     mode: "onChange",
   });
   const salutation = form.watch("salutation");
-
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user || "{}");
   //   const { fields, append } = useFieldArray({
   //     name: "urls",
   //     control: form.control,
@@ -151,6 +153,7 @@ function ProfileForm() {
   async function onSubmit(data: PatientFormValues) {
     // console.log("Sas", data);
     console.log("ppappappa");
+    data.userId = User?._id;
     // Implement actual profile update logic here
     await axios.post(`/api/patientmaster`, data).then((res) => {
       console.log("ppappappa", res.data);
@@ -489,32 +492,16 @@ function ProfileForm() {
             <Label htmlFor="dateOfBirth" className="text-right">
               Date of Birth
             </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full mt-2 justify-start text-left font-normal",
-                    !dateOfBirth && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2" />
-                  {dateOfBirth ? (
-                    format(new Date(dateOfBirth), "PPP")
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 ">
-                <Calendar
-                  mode="single"
-                  selected={dateOfBirth ? new Date(dateOfBirth) : null}
-                  onSelect={handleDateChange} // Handle date change
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <DateTimePicker
+              granularity="day"
+              value={dateOfBirth ? new Date(dateOfBirth) : null}
+              onChange={handleDateChange}
+              displayFormat={{
+                hour24: "MM/dd/yyyy", // Customize to your preferred format
+                hour12: "MM/dd/yyyy", // Also customize for 12-hour format if relevant
+              }}
+            />
+
             <FormDescription className="mt-2">
               What is your Date of birth.
             </FormDescription>
@@ -626,6 +613,36 @@ function ProfileForm() {
           />
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
+          <FormField
+            className="flex-1"
+            control={form.control}
+            name="patientType"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Select Patient Type</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Patient Type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="infant">Infant</SelectItem>
+                    <SelectItem value="minor">Minor</SelectItem>
+                    <SelectItem value="adult">Adult</SelectItem>
+                    <SelectItem value="senior">Senior</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>Select the Patient Type</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="maritalStatus"

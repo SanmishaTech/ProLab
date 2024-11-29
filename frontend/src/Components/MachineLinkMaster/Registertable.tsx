@@ -21,7 +21,9 @@ export default function Dashboardholiday() {
   useEffect(() => {
     const fetchMachine = async () => {
       try {
-        const response = await axios.get(`/api/machinemaster/allmachinemaster`);
+        const response = await axios.get(
+          `/api/machinemaster/allmachinemaster/${User?._id}`
+        );
         console.log("This is a mahcine", response.data);
         setMachine(response.data);
       } catch (error) {
@@ -30,7 +32,9 @@ export default function Dashboardholiday() {
     };
     const fetchTests = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
+        const response = await axios.get(
+          `/api/testmaster/alltestmaster/${User?._id}`
+        );
         console.log(response.data);
         setTest(response.data);
       } catch (error) {
@@ -79,7 +83,7 @@ export default function Dashboardholiday() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/machinelinkmaster/allmachinelinkmaster`)
+      .get(`/api/machinelinkmaster/allmachinelinkmaster/${User?._id}`)
       .then((response) => {
         setData(response.data);
         setLoading(false);

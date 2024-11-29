@@ -73,6 +73,7 @@ const AddItem: React.FC<AddItemProps> = ({
   }, []);
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
+    formData.userId = User?._id;
     await axios.put(`/api/${editid}`, formData).then(() => {
       window.location.reload();
     });

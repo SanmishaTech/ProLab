@@ -35,10 +35,12 @@ import DiscountMaster from "@/Components/DiscountMaster/Registertable";
 import MachineLinkMaster from "@/Components/MachineLinkMaster/Registertable";
 import PromoCodeMaster from "@/Components/PromoCodeMaster/Registertable";
 import Formula from "../Components/Formula/Formula";
+import DashboardTestuserMaster from "@/Components/UserMaster/TestCard";
 import DashboardCorporateMaster from "@/Components/CorporateMaster/Registertable";
 import CorporateTestCard from "@/Components/CorporateMaster/TestCard";
 import CorporateEditCard from "@/Components/CorporateMaster/Edittestcard";
 import DashboardUser from "@/Components/UserMaster/Registertable";
+import DashboardedittestuserMaster from "@/Components/UserMaster/Edittestcard";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import ContainerLinkMaster from "@/Components/ContainerLinkMaster/Registertable";
@@ -109,6 +111,10 @@ const Dashboard = () => {
           <ContainerLinkMaster />
         )}
         {location.pathname === "/usermaster" && <DashboardUser />}
+        {location.pathname === "/usermaster/add" && <DashboardTestuserMaster />}
+        {/\/usermaster\/edit\/\d+/.test(location.pathname) && (
+          <DashboardedittestuserMaster />
+        )}
       </main>
     </div>
   );

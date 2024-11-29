@@ -21,38 +21,46 @@ import axios from "axios";
 import { ComboboxDemo } from "./ComboboxDemo";
 import ApiDrivenInputWithSuggestions from "./Autocompletecomp";
 import { toast } from "sonner";
-import Datepicker from "@/utilityfunctions/Datepicker";
-
+import { SmartDatetimeInput } from "@/utilityfunctions/Datepicker";
+import { DateTimePicker, TimePicker } from "@/components/ui/dateTimepicker";
 export default function PatientCard({ setTopComp }) {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
   const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [referrals, setReferrals] = useState([]);
+  const [referrals, setReferrals] = useState({
+    primaryRefferedBy: "",
+    secondaryRefferedBy: "",
+    billedTo: "",
+    corporateCustomer: "",
+    clinicHistory: "",
+    medicationHistory: "",
+  });
   const [newReferral, setNewReferral] = useState("");
-  const [selectedRefferal, setSelectedRefferal] = useState();
+  const [selectedRefferal, setSelectedRefferal] = useState("");
   const [selectedPatient, setSelectedPatient] = useState();
   const [date, setDate] = useState(new Date());
+  const [associates, setAssociates] = useState([]);
 
   const [patientForm, setPatientForm] = useState({
     userId: "",
-    name: "",
+    firstName: "",
     age: "",
-    phone: "",
+    salutation: "",
     gender: "",
   });
   const [errors, setErrors] = useState({
-    name: "",
+    firstName: "",
     age: "",
-    phone: "",
+    salutation: "",
     gender: "",
   });
 
   // Validation Functions
-  const validateName = (name) => {
-    if (!name.trim()) {
+  const validateName = (firstName) => {
+    if (!firstName.trim()) {
       return "Name is required.";
-    } else if (name.trim().length < 2) {
+    } else if (firstName.trim().length < 2) {
       return "Name must be at least 2 characters long.";
     }
     return "";
@@ -69,11 +77,11 @@ export default function PatientCard({ setTopComp }) {
     return "";
   };
 
-  const validatePhone = (phone) => {
+  const validatePhone = (salutation) => {
     const phoneRegex = /^[0-9]{10}$/; // Simple regex for 10-digit numbers
-    if (!phone.trim()) {
+    if (!salutation.trim()) {
       return "Phone number is required.";
-    } else if (!phoneRegex.test(phone)) {
+    } else if (!phoneRegex.test(salutation)) {
       return "Phone number must be a valid 10-digit number.";
     }
     return "";
@@ -93,7 +101,9 @@ export default function PatientCard({ setTopComp }) {
         return;
       }
       try {
-        const response = await axios.get(`/api/patients/search/${searchTerm}`);
+        const response = await axios.get(
+          `/api/patientmaster/search/${searchTerm}`
+        );
         console.log(response.data);
         setPatients(response.data);
       } catch (error) {
@@ -119,7 +129,7 @@ export default function PatientCard({ setTopComp }) {
           `/api/reference/allReference/${User?._id}`
         );
         console.log(response.data);
-        setReferrals(response.data);
+        // setReferrals(response.data);
       } catch (error) {
         console.error("Error fetching referrals:", error);
         toast.error("Failed to fetch referrals.");
@@ -127,6 +137,10 @@ export default function PatientCard({ setTopComp }) {
     };
     fetchReferrals();
   }, [User?._id]);
+
+  const handleReferralChange = (id: string, value: string) => {
+    setReferrals({ ...referrals, [id]: value });
+  };
 
   // Handle Form Changes with Validation
   const handlePatientFormChange = (
@@ -138,12 +152,12 @@ export default function PatientCard({ setTopComp }) {
     // Validate the specific field
     let error = "";
     switch (id) {
-      case "name":
+      case "firstName":
         error = validateName(value);
         break;
       case "age":
         break;
-      case "phone":
+      case "salutation":
         error = validatePhone(value);
         break;
       case "gender":
@@ -155,17 +169,36 @@ export default function PatientCard({ setTopComp }) {
     setErrors({ ...errors, [id]: error });
   };
 
+  useEffect(() => {
+    const fetchAssociates = async () => {
+      try {
+        const response = await axios.get(
+          `/api/associatemaster/allassociates/${User?._id}`
+        );
+        console.log(response.data);
+        setAssociates(response.data);
+      } catch (error) {
+        console.error("Error fetching associates:", error);
+        toast.error("Failed to fetch associates.");
+      }
+    };
+    fetchAssociates();
+  }, []);
+
+  useEffect(() => {
+    console.log("This is referrals", referrals);
+  }, [referrals]);
   // Validate Entire Form
   const validateForm = () => {
-    const nameError = validateName(patientForm.name);
+    const nameError = validateName(patientForm.firstName);
     const ageError = validateAge(patientForm.age);
-    const phoneError = validatePhone(patientForm.phone);
+    const phoneError = validatePhone(patientForm.salutation);
     const genderError = validateGender(patientForm.gender);
 
     setErrors({
-      name: nameError,
+      firstName: nameError,
       age: ageError,
-      phone: phoneError,
+      salutation: phoneError,
       gender: genderError,
     });
 
@@ -184,9 +217,9 @@ export default function PatientCard({ setTopComp }) {
     // Implement actual patient addition logic here
     console.log("Adding new patient:", patientForm);
     const requestSend = {
-      name: patientForm?.name,
+      firstName: patientForm?.firstName,
       age: date,
-      phone: patientForm?.phone,
+      salutation: patientForm?.salutation,
       gender: patientForm?.gender,
       userId: User?._id,
     };
@@ -195,44 +228,20 @@ export default function PatientCard({ setTopComp }) {
       const response = await axios.post("/api/patients", requestSend);
       toast.success("Patient Added Successfully");
       setPatients([...patients, response.data]);
-      setErrors({ name: "", age: "", phone: "", gender: "" });
+      setErrors({ firstName: "", age: "", salutation: "", gender: "" });
     } catch (error) {
       console.error("Error adding patient:", error);
       toast.error("Failed to add patient. Please try again.");
     }
   };
 
-  // Handle Adding a New Referral
-  const handleAddReferral = async () => {
-    if (newReferral && !referrals.some((ref) => ref.name === newReferral)) {
-      try {
-        const response = await axios.post("/api/reference", {
-          name: newReferral,
-          userId: User?._id,
-        });
-        console.log(response.data);
-        setReferrals([...referrals, response?.data?.reference]);
-        setSelectedRefferal(response?.data?.reference?.name);
-        setNewReferral("");
-        toast.success("Referral Added Successfully");
-      } catch (error) {
-        console.error("Error adding referral:", error);
-        toast.error("Failed to add referral. Please try again.");
-      }
-    } else if (referrals.some((ref) => ref.name === newReferral)) {
-      toast.error("Referral already exists.");
-    }
-  };
-
   // Update Top Component with Selected Referral and Patient
   useEffect(() => {
-    console.log("Selected Refferal", referrals, selectedRefferal);
-    const selectedRefferalid = referrals.find(
-      (refferal) => refferal?.name === selectedRefferal
-    );
+    console.log("Selected Refferal");
+    const selectedRefferalid = referrals;
     const Component = {
-      referral: selectedRefferalid?._id,
-      patientId: patientForm?._id,
+      referral: selectedRefferalid,
+      patientId: patientForm,
     };
     console.log("Selected Things", Component);
     setTopComp(Component);
@@ -259,38 +268,74 @@ export default function PatientCard({ setTopComp }) {
 
             {/* Add Patient Form */}
             <form onSubmit={handleAddPatient} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3   gap-4">
                 {/* Name Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
+                  <Label htmlFor="firstName">First Name</Label>
                   <Input
-                    id="name"
-                    placeholder="Patient's name"
-                    value={patientForm.name}
+                    id="firstName"
+                    placeholder="Patient's firstName"
+                    value={patientForm.firstName}
+                    disabled
                     onChange={handlePatientFormChange}
-                    className={errors.name ? "border-red-500" : ""}
+                    className={errors.firstName ? "border-red-500" : ""}
                   />
-                  {errors.name && (
-                    <span className="text-red-500 text-sm">{errors.name}</span>
+                  {errors.firstName && (
+                    <span className="text-red-500 text-sm">
+                      {errors.firstName}
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="middleName">Middle Name</Label>
+                  <Input
+                    id="middleName"
+                    placeholder="Patient's middleName"
+                    disabled
+                    value={patientForm.middleName}
+                    onChange={handlePatientFormChange}
+                    className={errors.middleName ? "border-red-500" : ""}
+                  />
+                  {errors.middleName && (
+                    <span className="text-red-500 text-sm">
+                      {errors.middleName}
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    placeholder="Patient's lastName"
+                    value={patientForm.lastName}
+                    onChange={handlePatientFormChange}
+                    disabled
+                    className={errors.lastName ? "border-red-500" : ""}
+                  />
+                  {errors.lastName && (
+                    <span className="text-red-500 text-sm">
+                      {errors.lastName}
+                    </span>
                   )}
                 </div>
 
                 {/* Age Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="age">Age</Label>
-                  {console.log(
-                    "date",
-                    new Date(patientForm?.age)?.toLocaleDateString()
-                  )}
-                  <Datepicker
-                    placeholder="Patient's age"
-                    value={patientForm?.age}
+                  <Label htmlFor="age">Date of Birth</Label>
+
+                  <DateTimePicker
+                    granularity="day"
+                    disabled={true}
+                    displayFormat={{
+                      hour24: "MM/dd/yyyy", // Customize to your preferred format
+                      hour12: "MM/dd/yyyy", // Also customize for 12-hour format if relevant
+                    }}
+                    value={new Date(patientForm?.dob).getDate()}
                     onChange={setDate}
-                    className=""
-                    defaultValues={new Date(
-                      patientForm?.age
-                    )?.toLocaleDateString()}
                   />
+
                   {errors.age && (
                     <span className="text-red-500 text-sm">{errors.age}</span>
                   )}
@@ -298,17 +343,20 @@ export default function PatientCard({ setTopComp }) {
 
                 {/* Phone Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="salutation">Salutation</Label>
                   <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="Phone number"
-                    value={patientForm.phone}
+                    id="salutation"
+                    type="text"
+                    disabled
+                    placeholder="salutation"
+                    value={patientForm.salutation}
                     onChange={handlePatientFormChange}
-                    className={errors.phone ? "border-red-500" : ""}
+                    className={errors.salutation ? "border-red-500" : ""}
                   />
-                  {errors.phone && (
-                    <span className="text-red-500 text-sm">{errors.phone}</span>
+                  {errors.salutation && (
+                    <span className="text-red-500 text-sm">
+                      {errors.salutation}
+                    </span>
                   )}
                 </div>
 
@@ -317,6 +365,7 @@ export default function PatientCard({ setTopComp }) {
                   <Label htmlFor="gender">Gender</Label>
                   <Select
                     value={patientForm.gender}
+                    disabled
                     onValueChange={(value) => {
                       setPatientForm({ ...patientForm, gender: value });
                       const genderError = validateGender(value);
@@ -339,21 +388,54 @@ export default function PatientCard({ setTopComp }) {
                     </span>
                   )}
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Blood Group</Label>
+                  <Input
+                    id="bloodGroup"
+                    placeholder="bloodGroup"
+                    value={patientForm.bloodGroup}
+                    onChange={handlePatientFormChange}
+                    disabled
+                    className={errors.bloodGroup ? "border-red-500" : ""}
+                  />
+                  {errors.bloodGroup && (
+                    <span className="text-red-500 text-sm">
+                      {errors.bloodGroup}
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Patient Type</Label>
+                  <Input
+                    id="patientType"
+                    placeholder="patientType"
+                    value={patientForm.patientType}
+                    onChange={handlePatientFormChange}
+                    disabled
+                    className={errors.patientType ? "border-red-500" : ""}
+                  />
+                  {errors.patientType && (
+                    <span className="text-red-500 text-sm">
+                      {errors.patientType}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Submit Button */}
-              <Button
+              {/* <Button
                 type="submit"
                 disabled={
-                  !patientForm.name ||
-                  !patientForm.phone ||
+                  !patientForm.firstName ||
+                  !patientForm.salutation ||
                   !patientForm.gender ||
                   Object.values(errors).some((error) => error)
                 }
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Save Patient
-              </Button>
+              </Button> */}
             </form>
           </div>
         </CardContent>
@@ -366,35 +448,119 @@ export default function PatientCard({ setTopComp }) {
           <CardDescription>Add referral information</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {/* Select Referral */}
+          <div className="grid grid-cols-2 gap-4 items-center">
             <div className="space-y-2">
-              <Label htmlFor="referral">Referred By</Label>
+              <Label htmlFor="referral">Primary Referred By</Label>
               <Select
-                value={selectedRefferal}
+                id="primaryRefferedBy"
+                value={referrals.primaryRefferedBy}
                 onValueChange={(value) => {
-                  console.log("Value", value);
-                  setSelectedRefferal(value);
+                  handleReferralChange("primaryRefferedBy", value);
                 }}
               >
                 <SelectTrigger id="referral">
                   <SelectValue placeholder="Select referral" />
                 </SelectTrigger>
                 <SelectContent>
-                  {referrals?.map((referral, index) => (
-                    <SelectItem key={index} value={referral?.name}>
-                      {referral?.name}
-                    </SelectItem>
-                  ))}
+                  {associates &&
+                    associates.map((associate, index) => (
+                      <SelectItem key={index} value={associate?._id}>
+                        {associate?.firstName} {associate?.lastName}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Add New Referral */}
-            <div className="flex space-x-2">
+            <div className="space-y-2">
+              <Label htmlFor="referral">Secondary Referred By</Label>
+              <Select
+                value={referrals.secondaryRefferedBy}
+                onValueChange={(value) => {
+                  handleReferralChange("secondaryRefferedBy", value);
+                }}
+              >
+                <SelectTrigger id="referral">
+                  <SelectValue placeholder="Select referral" />
+                </SelectTrigger>
+                <SelectContent>
+                  {associates &&
+                    associates.map((associate, index) => (
+                      <SelectItem key={index} value={associate?._id}>
+                        {associate?.firstName} {associate?.lastName}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="referral">Billed To</Label>
+              <Select
+                value={referrals.billedTo}
+                onValueChange={(value) => {
+                  handleReferralChange("billedTo", value);
+                }}
+              >
+                <SelectTrigger id="referral">
+                  <SelectValue placeholder="Select referral" />
+                </SelectTrigger>
+                <SelectContent>
+                  {associates &&
+                    associates.map((associate, index) => (
+                      <SelectItem key={index} value={associate?._id}>
+                        {associate?.firstName} {associate?.lastName}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="referral">Corporate Customer</Label>
+              <Select
+                value={referrals.corporateCustomer}
+                onValueChange={(value) => {
+                  handleReferralChange("corporateCustomer", value);
+                }}
+              >
+                <SelectTrigger id="referral">
+                  <SelectValue placeholder="Select referral" />
+                </SelectTrigger>
+                <SelectContent>
+                  {associates &&
+                    associates.map((associate, index) => (
+                      <SelectItem key={index} value={associate?._id}>
+                        {associate?.firstName} {associate?.lastName}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2 col-span-2">
+              <Label htmlFor="referral">Clinic History</Label>
               <Input
                 type="text"
-                placeholder="New referral name"
+                placeholder="New referral firstName"
+                value={referrals.clinicHistory}
+                onChange={(e) => {
+                  handleReferralChange("clinicHistory", e.target.value);
+                }}
+              />
+            </div>
+            <div className="space-y-2 col-span-2">
+              <Label htmlFor="referral">Medication History</Label>
+              <Input
+                type="text"
+                placeholder="New referral firstName"
+                value={referrals.medicationHistory}
+                onChange={(e) => {
+                  handleReferralChange("medicationHistory", e.target.value);
+                }}
+              />
+            </div>
+
+            {/* <div className="flex space-x-2">
+              <Input
+                type="text"
+                placeholder="New referral firstName"
                 value={newReferral}
                 onChange={(e) => setNewReferral(e.target.value)}
               />
@@ -402,7 +568,7 @@ export default function PatientCard({ setTopComp }) {
                 <Plus className="h-4 w-4 mr-2" />
                 Add
               </Button>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>

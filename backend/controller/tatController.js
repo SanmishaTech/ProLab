@@ -11,6 +11,7 @@ const tatController = {
         hoursNeeded,
         urgentHours,
         weekday,
+        userId,
       } = req.body;
 
       const newService = new TatMaster({
@@ -20,6 +21,7 @@ const tatController = {
         hoursNeeded,
         urgentHours,
         weekday,
+        userId,
       });
 
       const newServices = await newService.save();
@@ -55,7 +57,7 @@ const tatController = {
   updateThreads: async (req, res) => {
     try {
       const tatTestId = req.params.tatTestId;
-      const { 
+      const {
         selectTest,
         startTime,
         endTime,

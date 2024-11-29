@@ -73,6 +73,7 @@ const AddItem: React.FC<AddItemProps> = ({
   const handleAdd = async () => {
     setLoading(true);
     try {
+      formData.userId = User?._id;
       await axios
         .put(`/api/department/update/${editid}`, formData)
         .then((res) => {

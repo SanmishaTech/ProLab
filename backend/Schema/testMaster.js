@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 
 const testSchema = new mongoose.Schema({
   name: { type: String },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   code: { type: String },
   abbrivation: { type: String },
   specimen: { type: mongoose.Schema.Types.ObjectId, ref: "Specimen" },

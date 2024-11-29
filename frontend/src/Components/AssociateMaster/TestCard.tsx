@@ -127,7 +127,8 @@ function ProfileForm() {
     defaultValues,
     mode: "onChange",
   });
-
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user || "{}");
   //   const { fields, append } = useFieldArray({
   //     name: "urls",
   //     control: form.control,
@@ -138,6 +139,7 @@ function ProfileForm() {
     // console.log("Sas", data);
     console.log("ppappappa");
     // Implement actual profile update logic here
+    data.userId = User?._id;
     await axios.post(`/api/associatemaster`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Associate Master Created Successfully");
