@@ -6,7 +6,7 @@ const patientMasterController = {
   createThread: async (req, res, next) => {
     try {
       const {
-        hfaId,
+        patientId,
         salutation,
         firstName,
         middleName,
@@ -30,7 +30,7 @@ const patientMasterController = {
         userId,
       } = req.body;
       const newService = new PatientMaster({
-        hfaId,
+        patientId,
         salutation,
         firstName,
         middleName,
@@ -91,7 +91,7 @@ const patientMasterController = {
     try {
       const patientID = req.params.patientId;
       const {
-        hfaId,
+        patientId,
         salutation,
         firstName,
         middleName,
@@ -117,7 +117,7 @@ const patientMasterController = {
       const newService = await PatientMaster.findByIdAndUpdate(
         patientID,
         {
-          hfaId,
+          patientId,
           salutation,
           firstName,
           middleName,
@@ -144,7 +144,7 @@ const patientMasterController = {
       if (!newService) {
         return res.status(404).json({ message: "Patient not found." });
       }
-
+      console.log("This is newService", newService);
       res.json({ message: "Patient updated successfully.", newService });
     } catch (error) {
       res.status(500).json({ error: error.message });
