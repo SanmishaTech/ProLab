@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   File,
@@ -67,6 +67,8 @@ export default function Dashboard({
 
   typeofschema,
   tableData = [],
+  setAddTestTable,
+  AddTestTable,
   onAddProduct = () => {},
   onExport = () => {},
   onFilterChange = () => {},
@@ -77,6 +79,7 @@ export default function Dashboard({
   const [toggleedit, setToggleedit] = useState(false);
   const [editid, setEditid] = useState();
   const [toggledelete, setToggledelete] = useState();
+  const [totalprice, setTotalprice] = useState(0);
   // State to manage expanded rows (array of _id)
   const [expandedRows, setExpandedRows] = useState([]);
 
@@ -92,6 +95,14 @@ export default function Dashboard({
       }
     });
   };
+
+  useEffect(() => {
+    // Calculating total price
+    const totalprice = AddTestTable?.map((item) =>
+      Number(item.price || 0)
+    ).reduce((a, b) => a + b, 0);
+    setTotalprice(totalprice);
+  }, [AddTestTable]);
 
   const AddItem = () => <div>Add Item Placeholder</div>;
   const Edititem = () => <div>Edit Item Placeholder</div>;
@@ -122,13 +133,15 @@ export default function Dashboard({
                   <CardDescription>{tableColumns.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Table>
+                  <Table className="table-auto w-full border-collapse border border-gray-200">
                     <TableHeader>
                       <TableRow>
                         {tableColumns?.headers?.map((header, index) => (
                           <TableHead
                             key={index}
-                            className={header.hiddenOn ? header.hiddenOn : ""}
+                            className={`text-right px-4 py-2 border border-gray-200 ${
+                              header.hiddenOn || ""
+                            }`}
                           >
                             {header.label}
                           </TableHead>
@@ -139,16 +152,17 @@ export default function Dashboard({
                     <TableBody>
                       {tableData?.map((row) => (
                         <React.Fragment key={row._id}>
+                          {console.log("This is row", tableData)}
                           <TableRow>
                             {tableColumns?.headers?.map((header, index) => (
                               <TableCell
                                 key={index}
-                                className={
-                                  header.hiddenOn ? header.hiddenOn : ""
-                                }
+                                className={`text-right px-4 py-2 border border-gray-200 ${
+                                  header.hiddenOn || ""
+                                }`}
                               >
                                 {header.key === "one" ? (
-                                  row.one
+                                  <Input value={row?.one || ""} disabled />
                                 ) : header.key === "action" ? (
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -174,7 +188,7 @@ export default function Dashboard({
                                     </DropdownMenuContent>
                                   </DropdownMenu>
                                 ) : header.key === "two" ? (
-                                  row.two
+                                  <Input value={row?.two || ""} disabled />
                                 ) : header.key === "three" ? (
                                   row.three
                                 ) : header.key === "four" ? (
@@ -182,87 +196,42 @@ export default function Dashboard({
                                 ) : header.key === "five" ? (
                                   row.five
                                 ) : header.key === "six" ? (
-                                  `₹${row.six}`
+                                  <Input
+                                    value={row.six || ""}
+                                    onChange={(e) => {
+                                      setAddTestTable((prev) =>
+                                        prev.map((item) =>
+                                          item._id === row._id
+                                            ? {
+                                                ...item,
+                                                price: e.target.value, // Ensure you update the correct key
+                                              }
+                                            : item
+                                        )
+                                      );
+                                    }}
+                                  />
                                 ) : (
                                   row[header.key]
                                 )}
                               </TableCell>
                             ))}
                           </TableRow>
-                          {expandedRows.includes(row._id) && (
-                            <></>
-                            // <TableRow>
-                            //   <TableCell
-                            //     colSpan={tableColumns.headers.length + 1}
-                            //   >
-                            //     <div className="p-4 bg-muted rounded-md">
-                            //       <h4 className="text-sm font-semibold mb-2">
-                            //         Services
-                            //       </h4>
-                            //       {/* Nested Services Table */}
-                            //       <Table className="mb-4">
-                            //         <TableHeader>
-                            //           <TableRow>
-                            //             <TableHead>Service Name</TableHead>
-                            //             <TableHead>Description</TableHead>
-                            //             <TableHead>Price ($)</TableHead>
-                            //             <TableHead>Urgent</TableHead>
-                            //           </TableRow>
-                            //         </TableHeader>
-                            //         <TableBody>
-                            //           {row?.services?.map((service) => (
-                            //             <TableRow key={service._id}>
-                            //               <TableCell>{service.name}</TableCell>
-                            //               <TableCell>
-                            //                 {service.description}
-                            //               </TableCell>
-                            //               <TableCell>
-                            //                 &#x20b9;{service.price}
-                            //               </TableCell>
-                            //               <TableCell>
-                            //                 {service.urgent}
-                            //               </TableCell>
-                            //             </TableRow>
-                            //           ))}
-                            //         </TableBody>
-                            //         <TableFooter>
-                            //           <TableRow>
-                            //             <TableCell colSpan={2}>
-                            //               <strong>Total</strong>
-                            //             </TableCell>
-                            //             <TableCell>
-                            //               &#x20b9;{" "}
-                            //               {row?.services
-                            //                 ?.reduce(
-                            //                   (total, service) =>
-                            //                     total + service.price,
-                            //                   0
-                            //                 )
-                            //                 .toFixed(2)}
-                            //             </TableCell>
-                            //           </TableRow>
-                            //         </TableFooter>
-                            //       </Table>
-                            //     </div>
-                            //   </TableCell>
-                            // </TableRow>
-                          )}
                         </React.Fragment>
                       ))}
                     </TableBody>
+                    <TableFooter>
+                      <TableRow>
+                        <TableCell colSpan={tableColumns?.headers?.length + 1}>
+                          Total
+                        </TableCell>
+                        <TableCell>{totalprice}</TableCell>
+                      </TableRow>
+                    </TableFooter>
                   </Table>
                 </CardContent>
-                <CardFooter>
-                  <div className="text-xs text-muted-foreground">
-                    Showing <strong>{tableColumns?.pagination?.from}</strong>-
-                    <strong>{tableColumns?.pagination?.to}</strong> of{" "}
-                    <strong>{tableColumns?.pagination?.total}</strong>{" "}
-                    registrations
-                  </div>
-                </CardFooter>
               </Card>
             </TabsContent>
-            {/* Add more TabsContent as needed */}
           </Tabs>
         </main>
       </div>

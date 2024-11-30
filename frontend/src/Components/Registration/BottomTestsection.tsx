@@ -40,6 +40,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
+  TableFooter,
   TableRow,
 } from "@/components/ui/table";
 import AddItem from "./AddItem";
@@ -229,13 +230,12 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
         title: "Patient Master",
         description: "Manage Patient Master and view their details.",
         headers: [
-          { label: "Test Abbvr", key: "firstName" },
-          { label: "Test Name", key: "middleName" },
-          { label: "TAT", key: "lastName" },
-          { label: "Urgent Date & Time", key: "mobile" },
-          { label: "Outsourced", key: "Outsourced" },
-          { label: "Price", key: "Price" },
-          { label: "Action", key: "action" },
+          { label: "Test Abbvr", key: "one" },
+          { label: "Test Name", key: "two" },
+          { label: "TAT", key: "three" },
+          { label: "Urgent Date & Time", key: "four" },
+          { label: "Outsourced", key: "five" },
+          { label: "Price", key: "six" },
         ],
         actions: [
           { label: "Edit", value: "edit" },
@@ -251,26 +251,35 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
   }, [User?._id]);
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = filteredData
-    ? filteredData?.map((item) => {
-        console.log("This is item", item);
-        return {
-          _id: item?._id,
-          firstName: item?.firstName || "First Name not provided",
-          middleName: item?.middleName || "Middle Name not provided",
-          lastName: item?.lastName || "Last Name not provided",
-          mobile: item?.mobile || "Mobile not provided",
-          delete: `/patientmaster/delete/${item?._id}`,
-          action: "actions", // Placeholder for action buttons
-          // Additional fields can be added here
-        };
-      })
-    : [];
+  const mappedTableData =
+    AddTestTable &&
+    AddTestTable?.map((item) => {
+      console.log("This is item", item);
+      return {
+        _id: item?._id,
+        one: item?.abbrivation || "First Name not provided",
+        two: item?.name || "Middle Name not provided",
+        three: item?.lastName || "Last Name not provided",
+        four: item?.mobile || "Mobile not provided",
+        five: item?.Outsourced || "Outsourced not provided",
+        six: item?.price || "Price not provided",
+        delete: `/patientmaster/delete/${item?._id}`,
+        action: "actions", // Placeholder for action buttons
+        // Additional fields can be added here
+      };
+    });
 
   useEffect(() => {
     console.log("This is bottomSection", bottomSection);
+    if (!bottomSection || bottomSection.length < 0) return;
+    if (bottomSection.length === 0) return;
+    console.log("p020", AddTestTable);
     if (AddTestTable?.length === 0) {
-      setAddTestTable(bottomSection);
+      setAddTestTable([bottomSection]);
+      return;
+    }
+    console.log("This is AddTestTable", bottomSection);
+    if (AddTestTable.map((item) => item._id).includes(bottomSection._id)) {
       return;
     }
     setAddTestTable([...AddTestTable, bottomSection]);
@@ -292,12 +301,45 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
             <Label>Select Test</Label>
             <ApiDrivenInputWithSuggestions setPatientForm={setBottomSection} />
           </div>
-          <ScrollArea className="h-[30rem] w-full rounded-md ">
+          <ScrollArea className="min-h-[13rem] w-full rounded-md  ">
             <Dashboard
               tableColumns={config?.tableColumns}
+              setAddTestTable={setAddTestTable}
+              AddTestTable={AddTestTable}
               tableData={mappedTableData}
             />
           </ScrollArea>
+          {/* Discount  */}
+          <Card className="bg-accent/10 border-t-0">
+            <CardHeader>{/* <CardTitle>Discount</CardTitle> */}</CardHeader>
+            <CardContent>
+              <Table className="table-auto w-full border-collapse border border-gray-200">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right px-4 py-2 border border-gray-200">
+                      Subtotal
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="text-right px-4 py-2 border border-gray-200">
+                      saaaa
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={2}>
+                      <strong>Total</strong>
+                      <br />
+                      <span>{total}</span>
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </CardContent>
+          </Card>
           {/* Payment Mode */}
           <Card className="mt-2 bg-accent/10 shadow-lg">
             <CardHeader>

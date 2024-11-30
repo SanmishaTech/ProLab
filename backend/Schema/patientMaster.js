@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 
 const patientMasterSchema = new mongoose.Schema({
-  hfaId: { type: String },
+  patientId: { type: String },
   salutation: { type: String },
   firstName: { type: String },
   middleName: { type: String },

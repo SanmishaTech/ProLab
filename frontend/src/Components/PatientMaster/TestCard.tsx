@@ -54,7 +54,7 @@ import { Controller } from "react-hook-form";
 const patientFormSchema = z.object({
   middleName: z.string().optional(),
   salutation: z.string().optional(),
-  hfaId: z.string().optional(),
+  patientId: z.string().optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   country: z
@@ -264,14 +264,14 @@ function ProfileForm() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField
             control={form.control}
-            name="hfaId"
+            name="patientId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>HFA ID</FormLabel>
+                <FormLabel>Patient ID</FormLabel>
                 <FormControl>
-                  <Input placeholder="HFA ID..." {...field} />
+                  <Input placeholder="Patient ID..." {...field} />
                 </FormControl>
-                <FormDescription>What is your ID?</FormDescription>
+                <FormDescription>What is your Patient ID?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

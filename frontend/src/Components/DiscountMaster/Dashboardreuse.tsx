@@ -260,7 +260,6 @@ export default function Dashboard({
                   </span>
                 </Button>
 
-               
                 <AddItem typeofschema={typeofschema} add={tableData?.add} />
               </div>
             </div>
