@@ -22,7 +22,10 @@ const discountMasterController = {
   },
   getServices: async (req, res, next) => {
     try {
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
       const discount = await Discount.find();
+
       res.status(200).json(discount);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -114,8 +117,13 @@ const discountMasterController = {
       const { discountType } = req.query;
 
       // Check if discountType is provided and validate it
-      if (!discountType || (discountType !== 'value' && discountType !== 'percentage')) {
-        return res.status(400).json({ message: "Invalid discountType, it must be 'value' or 'percentage'" });
+      if (
+        !discountType ||
+        (discountType !== "value" && discountType !== "percentage")
+      ) {
+        return res.status(400).json({
+          message: "Invalid discountType, it must be 'value' or 'percentage'",
+        });
       }
 
       // Query to find documents with the specified discountType
@@ -123,7 +131,9 @@ const discountMasterController = {
 
       // If no discounts are found, return a message
       if (discounts.length === 0) {
-        return res.status(404).json({ message: `No discounts found for discountType: ${discountType}` });
+        return res.status(404).json({
+          message: `No discounts found for discountType: ${discountType}`,
+        });
       }
 
       // Return the matching discounts
@@ -132,6 +142,5 @@ const discountMasterController = {
       res.status(500).json({ error: error.message });
     }
   },
-
 };
 module.exports = discountMasterController;

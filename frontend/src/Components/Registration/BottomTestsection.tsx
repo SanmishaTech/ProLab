@@ -58,6 +58,8 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 interface Item {
   id: string;
@@ -96,6 +98,24 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [AddTestTable, setAddTestTable] = useState([]);
+  const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
+  const [discounts, setDiscounts] = useState([]);
+  const [discountarray, setdiscountarray] = useState([]);
+  const [discountType, setDiscountType] = useState("");
+  const [calculatedprice, setcalculatedprice] = useState(0);
+  const [subtotalPrice, setSubtotalPrice] = useState(0);
+  const [associates, setAssociates] = useState([]);
+  const [homevisit, setHomevisit] = useState(0);
+  const [homevisitPricetotal, setHomevisitPricetotal] = useState(0);
+  const [homevisitcharge, sethomevisitcharge] = useState("");
+  const [paymentmodeprice, setpaymentmodeprice] = useState(false);
+  const [paymentDeliverymode, setPaymentDeliverymode] = useState([]);
+
+  const frameworksList = [
+    { value: "sms", label: "Sms" },
+    { value: "whatsapp", label: "Whatsapp" },
+    { value: "email", label: "Email" },
+  ];
 
   useEffect(() => {
     console.log("This is bottomSection", bottomSection);
@@ -120,6 +140,38 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
       setOrderComp([...topComp, newItem.id]); // Assuming setOrderComp needs service IDs
     }
   };
+
+  useEffect(() => {
+    // Fetch data from the API
+    axios
+      .get(`/api/associatemaster/allassociates/${User?._id}`)
+      .then((response) => {
+        setAssociates(response.data);
+        console.log("This is associates", response.data);
+      });
+  }, [User?._id]);
+
+  useEffect(() => {
+    console.log("This is bottomSection", bottomSection);
+    // fetch discounts
+    axios
+      .get(`/api/discountmaster/alldiscount/${User?._id}`)
+      .then((response) => {
+        console.log("This is response discount", response.data);
+        setDiscounts(response.data);
+      });
+  }, []);
+
+  const calculateDiscount = () => {
+    // match value for discount and calculate actual discount using total amount
+    const discounted = calculatedprice - Number(discountType);
+    setSubtotalPrice(discounted);
+    console.log("This is value discount", discountType);
+    console.log("This is totalprice", calculatedprice);
+  };
+  useEffect(() => {
+    calculateDiscount();
+  }, [discountType, calculatedprice]);
 
   // Function to toggle urgency
   const toggleUrgent = (id: string) => {
@@ -210,6 +262,14 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
   };
 
   useEffect(() => {
+    // discounted price total
+    console.log("This is subtotalPrice", homevisit);
+
+    const visitingprice = Number(subtotalPrice) + Number(homevisit);
+    setHomevisitPricetotal(visitingprice);
+  }, [homevisit, subtotalPrice]);
+
+  useEffect(() => {
     // Fetch data from the API
     axios
       .get(`/api/patientmaster/allpatients/${User?._id}`)
@@ -227,8 +287,6 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     // Define the dashboard configuration
     setConfig({
       tableColumns: {
-        title: "Patient Master",
-        description: "Manage Patient Master and view their details.",
         headers: [
           { label: "Test Abbvr", key: "one" },
           { label: "Test Name", key: "two" },
@@ -307,102 +365,271 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
               setAddTestTable={setAddTestTable}
               AddTestTable={AddTestTable}
               tableData={mappedTableData}
+              setcalculatedprice={setcalculatedprice}
             />
           </ScrollArea>
           {/* Discount  */}
-          <Card className="bg-accent/10 border-t-0">
+
+          <Card className="bg-accent/10  mt-2">
             <CardHeader>{/* <CardTitle>Discount</CardTitle> */}</CardHeader>
             <CardContent>
               <Table className="table-auto w-full border-collapse border border-gray-200">
-                <TableHeader>
+                {/* <TableHeader>
                   <TableRow>
                     <TableHead className="text-right px-4 py-2 border border-gray-200">
                       Subtotal
                     </TableHead>
                   </TableRow>
-                </TableHeader>
+                </TableHeader> */}
                 <TableBody>
                   <TableRow>
-                    <TableCell className="text-right px-4 py-2 border border-gray-200">
-                      saaaa
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]">
+                      Discount
+                    </TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]">
+                      <div className="grid gap-3">
+                        <Select
+                          placeholder="Select Discount"
+                          value={discountarray}
+                          onValueChange={(value) => {
+                            const discount = discounts.filter(
+                              (item) => item.value === value
+                            );
+                            setdiscountarray(discount.description);
+
+                            setDiscountType(value);
+                          }}
+                        >
+                          <SelectTrigger
+                            id="paymentMode"
+                            aria-label="Select payment mode"
+                          >
+                            <SelectValue placeholder="Select Mode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {discounts.map((discount) => (
+                              <SelectItem value={discount.value}>
+                                {discount.description}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Textarea></Textarea>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 w-[10rem]"></TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 max-w-[10rem]">
+                      <Input
+                        type="number"
+                        className="max-w-sm"
+                        value={discountType}
+                        onChange={(e) => setDiscountType(e.target.value)}
+                      />
                     </TableCell>
                   </TableRow>
                 </TableBody>
                 <TableFooter>
                   <TableRow>
-                    <TableCell colSpan={2}>
-                      <strong>Total</strong>
-                      <br />
-                      <span>{total}</span>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                    <TableCell className="text-right px-4 py-2 border border-gray-200 min-w-[10rem]">
+                      <strong>SubTotal</strong>
+                    </TableCell>
+                    <TableCell
+                      colSpan={1}
+                      className="text-right px-4 py-2 border border-gray-200 min-w-[10rem]"
+                    >
+                      <strong>{subtotalPrice}</strong>
                     </TableCell>
                   </TableRow>
                 </TableFooter>
               </Table>
             </CardContent>
           </Card>
-          {/* Payment Mode */}
-          <Card className="mt-2 bg-accent/10 shadow-lg">
+          {/* Visiting charges  */}
+          <Card className="bg-accent/10  mt-2">
             <CardHeader>
-              <CardTitle>Payment Mode</CardTitle>
+              {/* <CardTitle>visiting charge</CardTitle> */}
             </CardHeader>
             <CardContent>
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <Select
-                    value={paymentMode}
-                    onValueChange={(value) => setPaymentMode(value)}
-                  >
-                    <SelectTrigger
-                      id="paymentMode"
-                      aria-label="Select payment mode"
+              <Table className="table-auto w-full border-collapse border border-gray-200">
+                {/* <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right px-4 py-2 border border-gray-200">
+                      Subtotal
+                    </TableHead>
+                  </TableRow>
+                </TableHeader> */}
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]">
+                      Home visit charges
+                    </TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]">
+                      <div className="grid gap-3">
+                        <Select
+                          value={homevisitcharge}
+                          onValueChange={(value) => sethomevisitcharge(value)}
+                        >
+                          <SelectTrigger
+                            id="paymentMode"
+                            aria-label="Select payment mode"
+                          >
+                            <SelectValue placeholder="Select Mode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {associates.map((associate) => (
+                              <SelectItem value={associate.firstName}>
+                                {associate.firstName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 w-[10rem]"></TableCell>
+                    <TableCell className="text-right px-4 py-2 border border-gray-200 w-[10rem]">
+                      <Label>Visiting Charges</Label>
+                    </TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 max-w-[10rem]">
+                      <Input
+                        type="number"
+                        className="max-w-sm"
+                        value={homevisit}
+                        onChange={(e) => setHomevisit(e.target.value)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                    <TableCell
+                      colSpan={2}
+                      className="text-right px-4 py-2 border border-gray-200 min-w-[10rem]"
                     >
-                      <SelectValue placeholder="Select Mode" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Cash">Cash</SelectItem>
-                      <SelectItem value="CC/DC">CC/DC Cards</SelectItem>
-                      <SelectItem value="UPI">UPI</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {(paymentMode === "CC/DC" || paymentMode === "UPI") && (
-                  <div className="grid gap-4">
-                    <div className="font-semibold">
-                      {paymentMode === "CC/DC"
-                        ? "Reference Number"
-                        : "UPI Number"}
-                    </div>
-                    <Input
-                      type="text"
-                      placeholder={
-                        paymentMode === "CC/DC"
-                          ? "Enter Reference Number"
-                          : "Enter UPI Number"
-                      }
-                      value={
-                        paymentMode === "CC/DC" ? referenceNumber : upiNumber
-                      }
-                      onChange={(e) =>
-                        paymentMode === "CC/DC"
-                          ? setReferenceNumber(e.target.value)
-                          : setUpiNumber(e.target.value)
-                      }
-                    />
-                  </div>
-                )}
-                <div className="grid gap-4">
-                  <div className="font-semibold">Amount Paid</div>
-                  <Input
-                    type="number"
-                    placeholder="Enter Amount Paid"
-                    value={paidAmount}
-                    onChange={(e) => setPaidAmount(e.target.value)}
-                  />
-                </div>
-              </div>
+                      <strong>Grand Total</strong>
+                    </TableCell>
+                    <TableCell
+                      colSpan={1}
+                      className="text-right px-4 py-2 border border-gray-200 min-w-[10rem]"
+                    >
+                      <strong>{homevisitPricetotal}</strong>
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
             </CardContent>
           </Card>
+          {/* Visiting charges  */}
+
+          <Card className="bg-accent/10  mt-2">
+            <CardHeader>{/* <CardTitle>Discount</CardTitle> */}</CardHeader>
+            <CardContent>
+              <Table className="table-auto w-full border-collapse border border-gray-200">
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]">
+                      Payment Mode
+                    </TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]">
+                      <div className="flex  gap-2">
+                        <Select
+                          value={paymentMode}
+                          onValueChange={(value) => setPaymentMode(value)}
+                        >
+                          <SelectTrigger
+                            id="paymentMode"
+                            aria-label="Select payment mode"
+                          >
+                            <SelectValue placeholder="Select Mode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Cash">Cash</SelectItem>
+                            <SelectItem value="CC/DC">CC/DC Cards</SelectItem>
+                            <SelectItem value="UPI">UPI</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input type="number" className="max-w-sm" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 w-[10rem]"></TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 max-w-[10rem]">
+                      <Input
+                        type="number"
+                        className="max-w-sm"
+                        value={paymentmodeprice}
+                        onChange={(e) => setpaymentmodeprice(e.target.value)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                    <TableCell className="text-right px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                    <TableCell
+                      colSpan={1}
+                      className="text-right px-4 py-2 border border-gray-200 min-w-[10rem]"
+                    >
+                      <strong>
+                        {homevisitPricetotal - paymentmodeprice < 0
+                          ? 0
+                          : homevisitPricetotal - paymentmodeprice}
+                      </strong>
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Patient delivery charges  */}
+
+          <Card className="bg-accent/10  mt-2">
+            <CardHeader>{/* <CardTitle>Discount</CardTitle> */}</CardHeader>
+            <CardContent>
+              <Table className="table-auto w-full border-collapse border border-gray-200">
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]">
+                      Payment Delivery Mode
+                    </TableCell>
+                    <TableCell
+                      colSpan={2}
+                      className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"
+                    >
+                      <div className="flex  gap-2">
+                        <MultiSelect
+                          options={frameworksList}
+                          onValueChange={(values) => {
+                            setSelectedFrameworks(values);
+                          }}
+                          placeholder="Select Days"
+                          variant="inverted"
+                          maxCount={7}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      colSpan={2}
+                      className="text-left px-4 py-2 border border-gray-200 w-[10rem]"
+                    ></TableCell>
+                    <TableCell
+                      colSpan={2}
+                      className="text-left px-4 py-2 border border-gray-200 max-w-[10rem]"
+                    ></TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button>Register</Button>
+            </CardFooter>
+          </Card>
+          {/* Payment Mode */}
         </CardContent>
       </Card>
     </div>

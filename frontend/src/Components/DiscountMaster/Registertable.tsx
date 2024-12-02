@@ -77,15 +77,14 @@ export default function Dashboardholiday() {
     // isbol: { type: "Checkbox", label: "Is bol" },
     // Add more fields as needed
   };
-  
-  
+
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get(`/api/discountmaster/alldiscount`)
+      .get(`/api/discountmaster/alldiscount/${User?._id}`)
       .then((response) => {
         setData(response.data);
-        setFilteredData(response.data); 
+        setFilteredData(response.data);
         setLoading(false);
       })
       .catch((err) => {
@@ -123,7 +122,6 @@ export default function Dashboardholiday() {
       },
     });
   }, [User?._id]);
-
 
   // Handlers for actions
   const handleAddProduct = () => {

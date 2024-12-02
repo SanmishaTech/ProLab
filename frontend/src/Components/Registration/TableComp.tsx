@@ -64,7 +64,7 @@ export default function Dashboard({
   searchPlaceholder = "Search...",
   userAvatar = "/placeholder-user.jpg",
   tableColumns = {},
-
+  setcalculatedprice,
   typeofschema,
   tableData = [],
   setAddTestTable,
@@ -102,6 +102,7 @@ export default function Dashboard({
       Number(item.price || 0)
     ).reduce((a, b) => a + b, 0);
     setTotalprice(totalprice);
+    setcalculatedprice(totalprice);
   }, [AddTestTable]);
 
   const AddItem = () => <div>Add Item Placeholder</div>;
@@ -222,10 +223,22 @@ export default function Dashboard({
                     </TableBody>
                     <TableFooter>
                       <TableRow>
-                        <TableCell colSpan={tableColumns?.headers?.length + 1}>
-                          Total
+                        <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                        <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                        <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                        <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                        <TableCell
+                          colSpan={1}
+                          className="text-right px-4 py-2 border border-gray-200 min-w-[10rem]"
+                        >
+                          <strong>SubTotal</strong>
                         </TableCell>
-                        <TableCell>{totalprice}</TableCell>
+                        <TableCell
+                          colSpan={1}
+                          className="text-right px-4 py-2 border border-gray-200 min-w-[10rem]"
+                        >
+                          <strong>{totalprice}</strong>
+                        </TableCell>
                       </TableRow>
                     </TableFooter>
                   </Table>
