@@ -242,9 +242,6 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
         paymentMode: {
           paymentMode: paymentMode,
           paidAmount: numericPaidAmount,
-          upiNumber: paymentMode === "UPI" ? upiNumber : undefined,
-          referenceNumber:
-            paymentMode === "CC/DC" ? referenceNumber : undefined,
         },
         userId: User?._id,
         // Remove completionDays as it's calculated on the backend
@@ -342,6 +339,71 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     }
     setAddTestTable([...AddTestTable, bottomSection]);
   }, [bottomSection]);
+
+  const onRegisterClick = async () => {
+    //sending data to backend with defined schema
+    if (topComp?.length < 1) {
+      toast.error("Please add at least one Patient or Refferal to the order.");
+      return;
+    }
+    if (AddTestTable?.length < 1) {
+      toast.error("Please add at least one Test to the order.");
+      return;
+    }
+
+    const data = {
+      patientId: topComp?.patientId,
+      referral: {
+        primaryRefferal: topComp?.referral?.primaryRefferedBy,
+        secondaryRefferal: topComp?.referral?.secondaryRefferedBy,
+        billedTo: topComp?.referral?.billedTo,
+        coporateCustomer: topComp?.referral?.corporateCustomer,
+        clinicHistory: topComp?.referral?.clinicHistory,
+        medicationHistory: topComp?.referral?.medicationHistory,
+      },
+      tests: AddTestTable?.map((items) => {
+        return {
+          tests: items?._id,
+          tat: items?.tat,
+          urgentTime: items?.urgentTime,
+          outsourced: items?.outsourced,
+          price: items?.price,
+        };
+      }),
+      totaltestprice: calculatedprice,
+      discount: {
+        discountapplied: discounts?.find((item) => item.value === discountType)
+          ?._id,
+        dicountReason: "",
+        discountValue: discountType,
+      },
+      priceAfterDiscount: subtotalPrice,
+      homevisit: {
+        homevisitAssignedto: associates?.find(
+          (item) => item.firstName === homevisitcharge
+        )?._id,
+        visitCharges: homevisit,
+      },
+      priceafterhomevisit: homevisitPricetotal,
+      paymentMode: {
+        paymentMode: paymentMode,
+        paidAmount: paymentmodeprice,
+      },
+      totalBalance: homevisitPricetotal - paymentmodeprice,
+      paymentDeliveryMode: {
+        paymentDeliveryMode: selectedFrameworks,
+      },
+      userId: User?._id,
+    };
+    console.log("This is data", data);
+
+    //save the data to the database
+    await axios.post("/api/registration", data).then((res) => {
+      console.log("ppapppppp", res.data);
+      toast.success("Registration created successfully");
+      navigate("/registrationlist");
+    });
+  };
 
   return (
     <div className="flex w-full h-full px-0 mt-4 bg-background items-center scroll-y-auto gap-5 ">
@@ -546,9 +608,9 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
                             <SelectValue placeholder="Select Mode" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Cash">Cash</SelectItem>
-                            <SelectItem value="CC/DC">CC/DC Cards</SelectItem>
-                            <SelectItem value="UPI">UPI</SelectItem>
+                            <SelectItem value="cash">Cash</SelectItem>
+                            <SelectItem value="cc/dc">CC/DC Cards</SelectItem>
+                            <SelectItem value="upi">UPI</SelectItem>
                           </SelectContent>
                         </Select>
                         <Input type="number" className="max-w-sm" />
@@ -626,7 +688,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
               </Table>
             </CardContent>
             <CardFooter className="flex justify-end">
-              <Button>Register</Button>
+              <Button onClick={() => onRegisterClick()}>Register</Button>
             </CardFooter>
           </Card>
           {/* Payment Mode */}

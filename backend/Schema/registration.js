@@ -1,46 +1,150 @@
-// models/registration.js
-
 const mongoose = require("mongoose");
 
-const serviceEntrySchema = new mongoose.Schema({
-  serviceId: {
+const patientschema = new mongoose.Schema({
+  patientId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Service", // Corrected reference
+    ref: "Patient",
     required: true,
   },
-  urgent: { type: Boolean, default: false },
+});
+const referralschema = new mongoose.Schema({
+  primaryRefferal: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "AssociateMaster",
+  },
+  secondaryRefferal: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "AssociateMaster",
+  },
+  billedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "AssociateMaster",
+  },
+  coporateCustomer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "CorporateMaster",
+    default: null,
+  },
+  clinicHistory: {
+    type: String,
+    default: null,
+  },
+  medicationHistory: {
+    type: String,
+    default: null,
+  },
+});
+
+const testSchema = new mongoose.Schema({
+  tests: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "TestMaster",
+  },
+
+  tat: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TatMaster",
+      required: true,
+      default: null,
+    },
+  ],
+  urgentTime: {
+    type: Date,
+    default: null,
+  },
+  outsourced: {
+    type: Boolean,
+    default: false,
+  },
+  price: {
+    type: Number,
+    default: 0,
+  },
+});
+
+const discountschema = new mongoose.Schema({
+  discountapplied: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "DiscountMaster",
+    default: null,
+  },
+  dicountReason: {
+    type: String,
+    default: null,
+  },
+  discountValue: {
+    type: Number,
+    default: 0,
+  },
+});
+
+const homevisitschema = new mongoose.Schema({
+  homevisitAssignedto: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "AssociateMaster",
+    default: null,
+  },
+  visitCharges: {
+    type: Number,
+    default: 0,
+  },
+});
+
+const paymentModeschema = new mongoose.Schema({
+  paymentMode: {
+    type: String,
+    required: true,
+  },
+  paidAmount: {
+    type: Number,
+    required: true,
+  },
+});
+
+const paymentDeliverySchema = new mongoose.Schema({
+  paymentDeliveryMode: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
 });
 
 const registrationSchema = new mongoose.Schema(
   {
     patientId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Patient",
+      ref: "PatientMaster",
       required: true,
     },
-    referral: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Reference",
+    referral: [referralschema],
+    tests: [testSchema],
+    totaltestprice: {
+      type: Number,
+      default: 0,
     },
-    services: [serviceEntrySchema], // Modified to include urgency per service
-    paymentMode: {
-      paymentMode: {
-        type: String,
-        enum: ["Cash", "CC/DC", "UPI"], // Added enum for validation
-        required: true,
-      },
-      paidAmount: { type: Number, required: true },
-      upiNumber: { type: String }, // Applicable if paymentMode is UPI
-      referenceNumber: { type: String }, // Applicable if paymentMode is CC/DC
+    discount: [discountschema],
+    priceAfterDiscount: {
+      type: Number,
+      default: 0,
     },
+    homevisit: [homevisitschema],
+    priceafterhomevisit: {
+      type: Number,
+      default: 0,
+    },
+    paymentMode: [paymentModeschema],
+    totalBalance: {
+      type: Number,
+      default: 0,
+    },
+    paymentDeliveryMode: [paymentDeliverySchema],
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    completionDays: { type: Number, required: true }, // Calculated field
-    completionDate: { type: Date, required: true }, // Exact completion date
-    totalAmount: { type: Number, required: true }, // Total amount considering urgent pricing
   },
   { timestamps: true }
 );
