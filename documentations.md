@@ -8,7 +8,7 @@ Inside the component, You will see this code first of all:
 
 <p>Lets dive Deep into he code. </p>
 
-# dependencies
+# Dependencies
 
 <p>This Specific part above basically represents the improting the dependancies for the component, and variables and other states related to the component.
 </p>
