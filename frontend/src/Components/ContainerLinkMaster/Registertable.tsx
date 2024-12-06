@@ -22,8 +22,11 @@ export default function Dashboardholiday() {
     const fetchcontainer = async () => {
       try {
         const response = await axios.get(`/api/container/allcontainer`);
-        console.log("This is a mahcine", response.data);
-        setMachine(response.data);
+        console.log(
+          "This is a mahcine",
+          response.data.data.containerlinkmaster
+        );
+        setMachine(response.data.data.containerlinkmaster);
       } catch (error) {
         console.error("Error fetching machines:", error);
       }
