@@ -14,7 +14,7 @@ Inside the component, You will see this code first of all:
 </p>
 
 ```
- 
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Dashboard from "./Dashboardreuse";
@@ -35,9 +35,9 @@ export default function Dashboardholiday() {
 
 
 ```
- 
+
 # Fetching Table Data
- 
+
 <p>This is the part where we fetch the data from the database and render it in the table.</p>
 
 ```js
