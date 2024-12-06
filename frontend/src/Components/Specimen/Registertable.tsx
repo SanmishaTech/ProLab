@@ -17,8 +17,6 @@ export default function Dashboardholiday() {
   };
 
   useEffect(() => {
-    // Fetch data from the API
-
     axios
       .get(`/api/specimen/allspecimen/${User?._id}`)
       .then((response) => {
