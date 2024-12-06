@@ -7,6 +7,7 @@ export const navItems: NavItem[] = [
     href: "/dashboard",
     icon: "dashboardIcon",
   },
+
   {
     title: "Masters",
     href: "/lab",
@@ -140,6 +141,11 @@ export const navItems: NavItem[] = [
         icon: "Associate",
       },
     ],
+  },
+  {
+    title: "Registration",
+    href: "/registration",
+    icon: "settingsIcon",
   },
   {
     title: "Access Control",
