@@ -186,7 +186,7 @@ export default function Dashboard({
 <h2> Below Photo shows which part it is: </h2>
 
 <p align="center">
-  <img src="./frontend/src/images/Searchtopcomponent.png" width="650" title="hover text">
+  <img src="./frontend/src/images/Searchtopcomponent.png" width="1920" title="hover text">
  </p>
 
 # Table Component
@@ -344,5 +344,5 @@ export default function Dashboard({
 <h2> Below Photo shows Table component: </h2>
 
 <p align="center">
-  <img src="./frontend/src/images/TableComponent.png" width="650" title="hover text">
+  <img src="./frontend/src/images/TableComponent.png" width="1920" title="hover text">
  </p>
