@@ -79,6 +79,7 @@ useEffect(() => {
 <span>Here We define the Type of schema we want to use to add variables and delete variables, Basically variables Which needs to be taken from user as a input</span>
 
 <h5> For String component we use the following code</h5>
+
 ```js
 const typeofschema = {
   name: {
