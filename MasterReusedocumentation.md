@@ -183,6 +183,12 @@ export default function Dashboard({
 </header>
 ```
 
+<h2> Below Photo shows which part it is: </h2>
+
+<p align="center">
+  <img src="./frontend/src/images/Searchtopcomponent.png" width="650" title="hover text">
+ </p>
+
 # Table Component
 
 <h3> In this Below Code we define the Table Component which is the main part of the Master Reusable Component</h3>
@@ -193,8 +199,7 @@ export default function Dashboard({
 
 <p align="center">
   <img src="./frontend/src/images/TopComponentfilter.png" width="650" title="hover text">
-  <img src="./frontend/src/images/TopComponentfilter.png" width="650" alt="accessibility text">
-</p>
+ </p>
 
 ```js
 <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
@@ -335,3 +340,9 @@ export default function Dashboard({
   </Tabs>
 </main>
 ```
+
+<h2> Below Photo shows Table component: </h2>
+
+<p align="center">
+  <img src="./frontend/src/images/TableComponent.png" width="650" title="hover text">
+ </p>
