@@ -13,7 +13,7 @@ Inside the component, You will see this code first of all:
 <p>This Specific part above basically represents the improting the dependancies for the component, and variables and other states related to the component.
 </p>
 
-`
+```
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Dashboard from "./Dashboardreuse";
@@ -29,7 +29,7 @@ const [data, setData] = useState([]);
 const [loading, setLoading] = useState(true);
 const [error, setError] = useState(null);
 
-`
+```
 
 <p>This is the part where we define the variables we will be using to render the components inside the popup for add and remove items. </p>
 <p>
