@@ -1,15 +1,15 @@
-const Department = require("../Schema/container");
+const Container = require("../Schema/container");
 const mongoose = require("mongoose");
 
-const Servicescontroller = {
+const ContainerController = {
   createThread: async (req, res, next) => {
     try {
       const { container, userId } = req.body;
-      const newService = new Department({
+      const newContainer = new Container({
         container,
         userId,
       });
-      const newServics = await newService.save();
+      const newServics = await newContainer.save();
       res.json({
         message: "Service created successfully",
         service: newServics,
@@ -22,7 +22,7 @@ const Servicescontroller = {
     try {
       const userId = req.params.userId;
       const usertobefound = new mongoose.Types.ObjectId(userId);
-      const doctor = await Department.find({ userId: usertobefound });
+      const doctor = await Container.find({ userId: usertobefound });
       // .populate({
       //   path: "services",
       //   populate: { path: "services" },
@@ -36,7 +36,7 @@ const Servicescontroller = {
   getServicesbyId: async (req, res, next) => {
     try {
       const doctorId = req.params.referenceId;
-      const services = await Department.findById(doctorId);
+      const services = await Container.findById(doctorId);
       res.status(200).json(services);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -77,4 +77,4 @@ const Servicescontroller = {
     }
   },
 };
-module.exports = Servicescontroller;
+module.exports = ContainerController;

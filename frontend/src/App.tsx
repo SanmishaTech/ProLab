@@ -139,6 +139,8 @@ function App() {
         <Route path="/usermaster" element={<Dashboard />} />
         <Route path="/usermaster/add" element={<Dashboard />} />
         <Route path="/usermaster/edit/:id" element={<Dashboard />} />
+        <Route path="/service" element={<Dashboard />} />
+        <Route path="/labmaster" element={<Dashboard />} />
       </Routes>
     </>
   );

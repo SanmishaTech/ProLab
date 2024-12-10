@@ -49,21 +49,21 @@ const Servicescontroller = {
     try {
       const userId = req.params.userId;
       const usertobefound = new mongoose.Types.ObjectId(userId);
-      const doctor = await AssociateMaster.find({ userId: usertobefound });
+      const associate = await AssociateMaster.find({ userId: usertobefound });
       // .populate({
       //   path: "services",
       //   populate: { path: "services" },
       // });
 
-      res.status(200).json(doctor);
+      res.status(200).json(associate);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
   getServicesbyId: async (req, res, next) => {
     try {
-      const doctorId = req.params.referenceId;
-      const services = await AssociateMaster.findById(doctorId);
+      const associateId = req.params.referenceId;
+      const services = await AssociateMaster.findById(associateId);
       res.status(200).json(services);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -71,7 +71,7 @@ const Servicescontroller = {
   },
   updateThreads: async (req, res, next) => {
     try {
-      const doctorId = req.params.associateId;
+      const associateId = req.params.associateId;
       const {
         associateType,
         salutation,
@@ -89,7 +89,7 @@ const Servicescontroller = {
       } = req.body;
 
       const newService = await AssociateMaster.findByIdAndUpdate(
-        doctorId,
+        associateId,
         {
           associateType,
           salutation,
@@ -118,8 +118,8 @@ const Servicescontroller = {
   },
   deleteThread: async (req, res, next) => {
     try {
-      const doctorId = req.params.specimenId;
-      const newService = await AssociateMaster.findByIdAndDelete(doctorId);
+      const associateId = req.params.specimenId;
+      const newService = await AssociateMaster.findByIdAndDelete(associateId);
       if (!newService) {
         return res.status(404).json({ message: "Service not found." });
       }

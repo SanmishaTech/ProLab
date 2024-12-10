@@ -4,8 +4,17 @@ const mongoose = require("mongoose");
 const barcodeController = {
   createThread: async (req, res, next) => {
     try {
-      const { patientName,patientId,sid,dateOfAppointment, timeOfAppointment, testName, testAbbreviation, container } = req.body;
-      const newService = new Barcode({
+      const {
+        patientName,
+        patientId,
+        sid,
+        dateOfAppointment,
+        timeOfAppointment,
+        testName,
+        testAbbreviation,
+        container,
+      } = req.body;
+      const newbarcode = new Barcode({
         patientName,
         patientId,
         sid,
@@ -15,11 +24,11 @@ const barcodeController = {
         testAbbreviation,
         container,
       });
-      const newServics = await newService.save();
+      const newBarcode = await newbarcode.save();
 
       res.json({
         message: "Barcode created successfully",
-        service: newServics,
+        service: newBarcode,
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -36,8 +45,8 @@ const barcodeController = {
   getServicesbyId: async (req, res, next) => {
     try {
       const barcodeID = req.params.barcodeId;
-      const services = await Barcode.findById(barcodeID);
-      res.status(200).json(services);
+      const barcode = await Barcode.findById(barcodeID);
+      res.status(200).json(barcode);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -45,8 +54,17 @@ const barcodeController = {
   updateThreads: async (req, res, next) => {
     try {
       const barcodeID = req.params.barcodeId;
-      const { patientName,patientId,sid,dateOfAppointment, timeOfAppointment, testName, testAbbreviation, container } = req.body;
-      const newService = await Barcode.findByIdAndUpdate(
+      const {
+        patientName,
+        patientId,
+        sid,
+        dateOfAppointment,
+        timeOfAppointment,
+        testName,
+        testAbbreviation,
+        container,
+      } = req.body;
+      const barcode = await Barcode.findByIdAndUpdate(
         barcodeID,
         {
           patientName,
@@ -55,16 +73,16 @@ const barcodeController = {
           dateOfAppointment,
           timeOfAppointment,
           testName,
-          testAbbreviation, 
-          container
+          testAbbreviation,
+          container,
         },
         { new: true }
       );
-      if (!newService) {
+      if (!barcode) {
         return res.status(404).json({ message: "Barcode not found." });
       }
 
-      res.json({ message: "barcode updated successfully.", newService });
+      res.json({ message: "barcode updated successfully.", barcode });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

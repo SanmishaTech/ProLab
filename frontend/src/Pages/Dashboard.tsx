@@ -41,6 +41,8 @@ import CorporateTestCard from "@/Components/CorporateMaster/TestCard";
 import CorporateEditCard from "@/Components/CorporateMaster/Edittestcard";
 import DashboardUser from "@/Components/UserMaster/Registertable";
 import DashboardedittestuserMaster from "@/Components/UserMaster/Edittestcard";
+import ServicePayable from "@/Components/ServicePayable/Registertable";
+import Labmaster from "@/Components/Labmaster/Labmaster";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import ContainerLinkMaster from "@/Components/ContainerLinkMaster/Registertable";
@@ -115,6 +117,8 @@ const Dashboard = () => {
         {/\/usermaster\/edit\/\d+/.test(location.pathname) && (
           <DashboardedittestuserMaster />
         )}
+        {location.pathname === "/service" && <ServicePayable />}
+        {location.pathname === "/labmaster" && <Labmaster />}
       </main>
     </div>
   );
