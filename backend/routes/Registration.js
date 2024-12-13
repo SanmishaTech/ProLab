@@ -1,11 +1,11 @@
 var express = require("express");
 var router = express.Router();
-const referenceController = require("../controller/registrationController");
+const Registration = require("../controller/registrationController");
 
-router.post("/", referenceController.createThread);
-router.get("/allregistration/:userId", referenceController.getServices);
-router.get("/reference/:referenceId", referenceController.getServicesbyId);
-router.put("/update/:referenceId", referenceController.updateThreads);
+router.post("/", Registration.createThread);
+router.get("/allregistration/:userId", Registration.getServices);
+router.get("/reference/:referenceId", Registration.getServicesbyId);
+router.put("/update/:referenceId", Registration.updateThreads);
 // router.delete("/delete/:serviceId", Servicescontroller.deleteThread);
 
 module.exports = router;

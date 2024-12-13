@@ -40,6 +40,8 @@ var DiscountMaster = require("./routes/discountRoutes");
 var RoleMaster = require("./routes/roleMasterRoutes");
 var PrefixRoutes = require("./routes/prefixRoutes");
 var ServicePayable = require("./routes/servicePayableRoutes");
+var LabmasterRoutes = require("./routes/labmasterRoutes");
+var CollectionMaster = require("./routes/collectionMasterRoutes");
 var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application
@@ -89,6 +91,8 @@ app.use("/api/discountmaster", DiscountMaster);
 app.use("/api/rolemaster", RoleMaster);
 app.use("/api/prefix", PrefixRoutes);
 app.use("/api/service", ServicePayable);
+app.use("/api/labmaster", LabmasterRoutes);
+app.use("/api/collectionmaster", CollectionMaster);
 
 app.use(express.static(path.join(__dirname, "./dist")));
 

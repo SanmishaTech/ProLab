@@ -94,7 +94,7 @@ function App() {
           })}
         </CommandList>
       </CommandDialog>
-      <Toaster position="top-right" />
+      <Toaster position="top-right" richColors />
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -141,6 +141,9 @@ function App() {
         <Route path="/usermaster/edit/:id" element={<Dashboard />} />
         <Route path="/service" element={<Dashboard />} />
         <Route path="/labmaster" element={<Dashboard />} />
+        <Route path="/autocomplete" element={<Dashboard />} />
+        <Route path="/collectionmaster" element={<Dashboard />} />
+        <Route path="/collectionmaster/add" element={<Dashboard />} />
       </Routes>
     </>
   );

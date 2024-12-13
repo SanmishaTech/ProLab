@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -17,8 +17,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import axios from "axios";
 
 const Labmaster = () => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    employeeCode: "",
+    email: "",
+    mobileNo: "",
+    country: "",
+    state: "",
+    city: "",
+    address1: "",
+    address2: "",
+    pinCode: "",
+  });
+
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user || "{}");
+
+  useEffect(() => {
+    if (User?._id) {
+      const fetchData = async () => {
+        const data = await axios.get(`/api/labmaster/allholiday/${User?._id}`);
+        setFormData(...data.data);
+        console.log(data.data);
+      };
+      fetchData();
+    }
+  }, [User?._id]);
+
+  const handleInputchange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData((prevState: any) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+  const handleSubmit = async (e: any) => {
+    formData.userId = User?._id;
+    await axios.post("/api/labmaster", formData);
+  };
+
+  useEffect(() => {
+    console.log(formData);
+  }, [formData]);
   return (
     <>
       <Card className="bg-accent/40 m-8">
@@ -31,31 +77,51 @@ const Labmaster = () => {
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 First Name:
               </p>
-              <Input />
+              <Input
+                value={formData.firstName}
+                onChange={handleInputchange}
+                name="firstName"
+              />
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Last Name:
               </p>
-              <Input />
+              <Input
+                value={formData.lastName}
+                onChange={handleInputchange}
+                name="lastName"
+              />
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Employee Code:
               </p>
-              <Input />
+              <Input
+                name="employeeCode"
+                value={formData.employeeCode}
+                onChange={handleInputchange}
+              />
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                EmailID
+                EmailID:
               </p>
-              <Input />
+              <Input
+                value={formData.email}
+                name="email"
+                onChange={handleInputchange}
+              />
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Mobile No:
               </p>
-              <Input />
+              <Input
+                value={formData.mobileNo}
+                name="mobileNo"
+                onChange={handleInputchange}
+              />
             </div>
           </div>
         </CardContent>
@@ -71,7 +137,14 @@ const Labmaster = () => {
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Select Country:
               </p>
-              <Select className="w-full">
+              <Select
+                className="w-full"
+                value={formData.country}
+                onValueChange={(value) =>
+                  handleInputchange({ target: { name: "country", value } })
+                }
+                name="country"
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Country" />
                 </SelectTrigger>
@@ -87,7 +160,14 @@ const Labmaster = () => {
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Select State:
               </p>
-              <Select className="w-full">
+              <Select
+                className="w-full"
+                value={formData.state}
+                onValueChange={(value) =>
+                  handleInputchange({ target: { name: "state", value } })
+                }
+                name="state"
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select State" />
                 </SelectTrigger>
@@ -131,7 +211,14 @@ const Labmaster = () => {
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Select City:
               </p>
-              <Select className="w-full">
+              <Select
+                className="w-full"
+                value={formData.city}
+                onValueChange={(value) =>
+                  handleInputchange({ target: { name: "city", value } })
+                }
+                name="city"
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select City" />
                 </SelectTrigger>
@@ -148,23 +235,40 @@ const Labmaster = () => {
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Address1 :
               </p>
-              <Input />
+              <Textarea
+                value={formData.address1}
+                name="address1"
+                onChange={handleInputchange}
+              />
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Address2 :
               </p>
-              <Input />
+              <Textarea
+                value={formData.address2}
+                name="address2"
+                onChange={handleInputchange}
+              />
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Pin Code:
               </p>
-              <Input />
+              <Input
+                value={formData.pinCode}
+                name="pinCode"
+                onChange={handleInputchange}
+              />
             </div>
           </div>
         </CardContent>
-        <CardFooter></CardFooter>
+        <CardFooter>
+          <div className="flex w-full justify-between">
+            <Button>Change Password</Button>
+            <Button onClick={handleSubmit}>Save</Button>
+          </div>
+        </CardFooter>
       </Card>
     </>
   );

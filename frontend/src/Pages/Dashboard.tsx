@@ -46,6 +46,9 @@ import Labmaster from "@/Components/Labmaster/Labmaster";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import ContainerLinkMaster from "@/Components/ContainerLinkMaster/Registertable";
+import Autocomplete from "@/Components/Autocomplete/Autocomplete";
+import CollectionMaster from "@/Components/CollectionMaster/Registertable";
+import CollectionAdd from "@/Components/CollectionMaster/TestCard";
 
 const Dashboard = () => {
   const location = useLocation();
@@ -119,6 +122,9 @@ const Dashboard = () => {
         )}
         {location.pathname === "/service" && <ServicePayable />}
         {location.pathname === "/labmaster" && <Labmaster />}
+        {location.pathname === "/autocomplete" && <Autocomplete />}
+        {location.pathname === "/collectionmaster" && <CollectionMaster />}
+        {location.pathname === "/collectionmaster/add" && <CollectionAdd />}
       </main>
     </div>
   );
