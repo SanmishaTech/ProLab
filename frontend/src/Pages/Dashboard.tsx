@@ -49,6 +49,7 @@ import ContainerLinkMaster from "@/Components/ContainerLinkMaster/Registertable"
 import Autocomplete from "@/Components/Autocomplete/Autocomplete";
 import CollectionMaster from "@/Components/CollectionMaster/Registertable";
 import CollectionAdd from "@/Components/CollectionMaster/TestCard";
+import DashboardEditTest from "@/Components/CollectionMaster/Edittestcard";
 
 const Dashboard = () => {
   const location = useLocation();
@@ -125,6 +126,9 @@ const Dashboard = () => {
         {location.pathname === "/autocomplete" && <Autocomplete />}
         {location.pathname === "/collectionmaster" && <CollectionMaster />}
         {location.pathname === "/collectionmaster/add" && <CollectionAdd />}
+        {/\/collectionmaster\/edit\/\d+/.test(location.pathname) && (
+          <DashboardEditTest />
+        )}
       </main>
     </div>
   );

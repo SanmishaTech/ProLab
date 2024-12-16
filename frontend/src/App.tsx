@@ -144,6 +144,7 @@ function App() {
         <Route path="/autocomplete" element={<Dashboard />} />
         <Route path="/collectionmaster" element={<Dashboard />} />
         <Route path="/collectionmaster/add" element={<Dashboard />} />
+        <Route path="/collectionmaster/edit/:id" element={<Dashboard />} />
       </Routes>
     </>
   );

@@ -17,6 +17,10 @@ const ContainerController = {
         contactName1,
         contactName2,
         prefix,
+        suffix,
+        noOfDigits,
+        mobileNo,
+        startNumber,
         userId,
       } = req.body;
       const newContainer = new Container({
@@ -32,6 +36,10 @@ const ContainerController = {
         contactName1,
         contactName2,
         prefix,
+        suffix,
+        noOfDigits,
+        mobileNo,
+        startNumber,
         userId,
       });
       const newServics = await newContainer.save();
@@ -75,13 +83,18 @@ const ContainerController = {
         city,
         pinCode,
         telephone,
+        emailId,
         contactName1,
         contactName2,
         prefix,
+        suffix,
+        noOfDigits,
+        mobileNo,
+        startNumber,
         userId,
       } = req.body;
 
-      const newService = await Department.findByIdAndUpdate(
+      const newService = await Container.findByIdAndUpdate(
         doctorId,
         {
           collectionName,
@@ -92,9 +105,14 @@ const ContainerController = {
           city,
           pinCode,
           telephone,
+          emailId,
           contactName1,
           contactName2,
           prefix,
+          suffix,
+          noOfDigits,
+          mobileNo,
+          startNumber,
           userId,
         },
         { new: true }
@@ -111,7 +129,7 @@ const ContainerController = {
   deleteThread: async (req, res, next) => {
     try {
       const doctorId = req.params.collectionMaster;
-      const newService = await Department.findByIdAndDelete(doctorId);
+      const newService = await Container.findByIdAndDelete(doctorId);
       if (!newService) {
         return res.status(404).json({ message: "Service not found." });
       }

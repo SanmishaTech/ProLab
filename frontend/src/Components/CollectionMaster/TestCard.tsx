@@ -42,6 +42,50 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import MultiSelectorComponent from "./profile";
 
+const city = [
+  { value: "dombivli", label: "Dombivli" },
+  { value: "bangalore", label: "Bangalore" },
+  { value: "mumbai", label: "Mumbai" },
+  { value: "chennai", label: "Chennai" },
+  { value: "delhi", label: "Delhi" },
+];
+
+const state = [
+  { value: "maharashtra", label: "Maharashtra" },
+  { value: "gujarat", label: "Gujarat" },
+  { value: "rajasthan", label: "Rajasthan" },
+  { value: "tamilnadu", label: "Tamilnadu" },
+  { value: "telangana", label: "Telangana" },
+  { value: "karnataka", label: "Karnataka" },
+  { value: "kerala", label: "Kerala" },
+  { value: "jammu and kashmir", label: "Jammu and Kashmir" },
+  { value: "punjab", label: "Punjab" },
+  { value: "madhya pradesh", label: "Madhya Pradesh" },
+];
+
+const country = [
+  { value: "india", label: "India" },
+  { value: "usa", label: "USA" },
+  { value: "uk", label: "UK" },
+  { value: "australia", label: "Australia" },
+  { value: "canada", label: "Canada" },
+  { value: "china", label: "China" },
+  { value: "germany", label: "Germany" },
+  { value: "france", label: "France" },
+  { value: "spain", label: "Spain" },
+  { value: "italy", label: "Italy" },
+  { value: "netherlands", label: "Netherlands" },
+  { value: "sweden", label: "Sweden" },
+  { value: "denmark", label: "Denmark" },
+  { value: "norway", label: "Norway" },
+  { value: "finland", label: "Finland" },
+  { value: "poland", label: "Poland" },
+  { value: "portugal", label: "Portugal" },
+  { value: "romania", label: "Romania" },
+  { value: "belgium", label: "Belgium" },
+  { value: "ireland", label: "Ireland" },
+];
+
 const profileFormSchema = z.object({
   collectionName: z.string().optional(),
   address1: z.string().optional(),
@@ -187,14 +231,32 @@ function ProfileForm() {
             control={form.control}
             name="country"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Country</FormLabel>
-                <FormControl>
-                  <Input placeholder="Country..." {...field} />
-                </FormControl>
-                <FormDescription>What is Country?</FormDescription>
-                <FormMessage />
-              </FormItem>
+              <FormControl>
+                <FormItem className="w-full">
+                  <FormLabel>Country</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    className="w-full"
+                  >
+                    <FormControl className="w-full">
+                      <SelectTrigger value={field.value}>
+                        <SelectValue placeholder="Select Country" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {country.map((country) => (
+                        <SelectItem value={country.value}>
+                          {country.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>What is Country?</FormDescription>
+
+                  <FormMessage />
+                </FormItem>
+              </FormControl>
             )}
           />
         </div>
@@ -203,28 +265,64 @@ function ProfileForm() {
             control={form.control}
             name="state"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>State</FormLabel>
-                <FormControl>
-                  <Input placeholder="State..." {...field} />
-                </FormControl>
-                <FormDescription>What is State?</FormDescription>
-                <FormMessage />
-              </FormItem>
+              <FormControl>
+                <FormItem className="w-full">
+                  <FormLabel>State</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    className="w-full"
+                  >
+                    <FormControl className="w-full">
+                      <SelectTrigger value={field.value}>
+                        <SelectValue placeholder="Select State" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {state.map((country) => (
+                        <SelectItem value={country.value}>
+                          {country.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>What is State?</FormDescription>
+
+                  <FormMessage />
+                </FormItem>
+              </FormControl>
             )}
           />
           <FormField
             control={form.control}
             name="city"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>City</FormLabel>
-                <FormControl>
-                  <Input placeholder="City..." {...field} />
-                </FormControl>
-                <FormDescription>What is City?</FormDescription>
-                <FormMessage />
-              </FormItem>
+              <FormControl>
+                <FormItem className="w-full">
+                  <FormLabel>City</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    className="w-full"
+                  >
+                    <FormControl className="w-full">
+                      <SelectTrigger value={field.value}>
+                        <SelectValue placeholder="Select City" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {city.map((country) => (
+                        <SelectItem value={country.value}>
+                          {country.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>What is State?</FormDescription>
+
+                  <FormMessage />
+                </FormItem>
+              </FormControl>
             )}
           />
           <FormField

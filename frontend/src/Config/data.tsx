@@ -40,6 +40,7 @@ export const navItems: NavItem[] = [
         href: "/machinelinkmaster",
         icon: "link2",
       },
+
       {
         title: "Test Parameter link Master",
         href: "/testlinkmaster",
@@ -103,6 +104,16 @@ export const navItems: NavItem[] = [
         title: "Machine Master",
         href: "/machinemaster",
         icon: "Machine",
+      },
+      {
+        title: "Service Payable",
+        href: "/service",
+        icon: "link",
+      },
+      {
+        title: "Lab Master",
+        href: "/labmaster",
+        icon: "department",
       },
 
       // {

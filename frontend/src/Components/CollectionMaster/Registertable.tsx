@@ -23,7 +23,8 @@ const AddItem = () => {
 const Edititem = (id: string) => {
   const navigate = useNavigate();
   const handleAdd = () => {
-    navigate(`/testmaster/edit/${id?.id}`);
+    navigate(`/collectionmaster/edit/${id?.id}`);
+    console.log("This is id", id);
   };
   return (
     <Button onClick={handleAdd} variant="ghost" className="w-full">
@@ -210,7 +211,7 @@ export default function Dashboardholiday() {
           code: item?.emailId || "Test Code not provided",
           pin: item?.pinCode || "Test Code not provided",
           price: item?.country || "Price not provided",
-          delete: `/testmaster/delete/${item?._id}`,
+          delete: `/collectionmaster/delete/${item?._id}`,
           action: "actions", // Placeholder for action buttons
           // Additional fields can be added here
         };
