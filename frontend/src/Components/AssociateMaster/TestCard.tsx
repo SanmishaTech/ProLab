@@ -143,7 +143,8 @@ function ProfileForm() {
     await axios.post(`/api/associatemaster`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Associate Master Created Successfully");
-      navigate("/associatemaster");
+      // navigate("/associatemaster");
+      window.history.back();
     });
   }
 
@@ -430,7 +431,7 @@ function ProfileForm() {
         </div>
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
-            Update profile
+            Add Associates
           </Button>
         </div>
       </form>
@@ -443,7 +444,7 @@ export default function SettingsProfilePage() {
   return (
     <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
       <Button
-        onClick={() => navigate("/associatemaster")}
+        onClick={() => window.history.back()}
         className="ml-4 flex gap-2 m-8 mb-4"
       >
         <MoveLeft className="w-5 text-white" />

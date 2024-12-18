@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import axios from "axios";
+import { Search } from "lucide-react";
 
 interface Suggestion {
   id: string;
@@ -85,18 +86,18 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
 
     // Update the patient form with all necessary fields
     setPatientForm({
-      _id: suggestion._id,
-      firstName: `${suggestion.firstName}`,
-      middleName: `${suggestion.middleName}`,
-      lastName: `${suggestion.lastName}`,
-      country: `${suggestion.country}`,
-      state: `${suggestion.state}`,
-      city: `${suggestion.city}`,
-      address: `${suggestion.address}`,
-      email: `${suggestion.email}`,
-      salutation: `${suggestion.salutation}`,
-      patientType: `${suggestion.patientType}`,
-      bloodGroup: `${suggestion.bloodGroup}`,
+      _id: suggestion?._id,
+      firstName: `${suggestion?.firstName}`,
+      middleName: `${suggestion?.middleName}`,
+      lastName: `${suggestion?.lastName}`,
+      country: `${suggestion?.country}`,
+      state: `${suggestion?.state}`,
+      city: `${suggestion?.city}`,
+      address: `${suggestion?.address}`,
+      email: `${suggestion?.email}`,
+      salutation: `${suggestion?.salutation}`,
+      patientType: `${suggestion?.patientType}`,
+      bloodGroup: `${suggestion?.bloodGroup}`,
       dob: `${suggestion.dateOfBirth}`,
       age: suggestion.age.toString(),
       mobile: suggestion.mobile,
@@ -156,11 +157,16 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
         aria-controls="suggestions-list"
         aria-expanded={showSuggestions}
       />
-      {isLoading && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+      {isLoading ? (
+        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 opacity-100 transition-all duration-500 ease-in-out">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
         </div>
+      ) : (
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 opacity-100 transition-all duration-500 ease-in-out">
+          <Search />
+        </div>
       )}
+
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}

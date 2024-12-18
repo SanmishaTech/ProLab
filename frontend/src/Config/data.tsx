@@ -11,7 +11,7 @@ export const navItems: NavItem[] = [
   {
     title: "Masters",
     href: "/lab",
-    icon: "dashboardIcon",
+    icon: "layers",
     children: [
       {
         title: "Department",
@@ -33,7 +33,7 @@ export const navItems: NavItem[] = [
   {
     title: "Test Related Master",
     href: "/testmaster",
-    icon: "sad",
+    icon: "layers",
     children: [
       {
         title: "Test Machine Link Master",
@@ -98,7 +98,7 @@ export const navItems: NavItem[] = [
   {
     title: "Lab Setup",
     href: "/lab",
-    icon: "Asdsad",
+    icon: "layers",
     children: [
       {
         title: "Machine Master",
@@ -156,12 +156,12 @@ export const navItems: NavItem[] = [
   {
     title: "Registration",
     href: "/registration",
-    icon: "settingsIcon",
+    icon: "notepadText",
   },
   {
     title: "Access Control",
     href: "/lab",
-    icon: "Asdsad",
+    icon: "layers",
     children: [
       {
         title: "Role Master",

@@ -70,7 +70,6 @@ const Dashboard = () => {
       </div>
       <main className="w-full flex-1 overflow-hidden ">
         {location.pathname === "/dashboard" && <Dashboardcomponent />}
-        {location.pathname === "/registration" && <Registration />}
         {location.pathname === "/registrationlist" && <DashboardPage />}
         {location.pathname === "/services" && <DashboardServices />}
         {location.pathname === "/holiday" && <Dashboardholiday />}
@@ -129,6 +128,11 @@ const Dashboard = () => {
         {/\/collectionmaster\/edit\/\d+/.test(location.pathname) && (
           <DashboardEditTest />
         )}
+        {location.pathname === "/registration" && <Registration />}
+        {location.pathname === "/registration/patient/add" && (
+          <PatientTestCard />
+        )}
+        {location.pathname === "/registration/referral/add" && <TestCard />}
       </main>
     </div>
   );

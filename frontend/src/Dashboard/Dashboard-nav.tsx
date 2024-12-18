@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { NavItem } from "@/types";
@@ -28,6 +29,7 @@ export function DashboardNav({
   setOpen,
   isMobileNav = false,
 }: DashboardNavProps) {
+  const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
   const location = useLocation();
   const { isMinimized } = useSidebar();
 
@@ -38,9 +40,15 @@ export function DashboardNav({
   return (
     <nav className="grid items-start gap-2">
       <TooltipProvider delayDuration={0}>
-        <Accordion type="multiple" className="w-full">
+        <Accordion
+          type="multiple"
+          className="w-full"
+          onValueChange={(value) => {
+            setActiveAccordion(value.length ? value[0] : null);
+          }}
+        >
           {items.map((item, index) => {
-            const Icon = Icons[item.icon || "arrowRight"];
+            const Icon = Icons[item.icon || "group"];
             const isActive = location.pathname === item.href;
             const hasChildren = item.children && item.children.length > 0;
 
@@ -62,16 +70,16 @@ export function DashboardNav({
                             {Icon && (
                               <Icon
                                 className={`ml-3 size-5 flex-none ${
-                                  isActive
-                                    ? "text-iconActive text-black"
-                                    : "text-iconActive"
+                                  activeAccordion === item.title
+                                    ? "text-black"
+                                    : "text-iconDark"
                                 }`}
                               />
                             )}
                           </div>
                         </AccordionTrigger>
                       </TooltipTrigger>
-                      <TooltipContent side="right" className="z-50">
+                      <TooltipContent side="right" className="z-50 bg-white">
                         {item.title}
                       </TooltipContent>
                     </Tooltip>
@@ -180,7 +188,7 @@ export function DashboardNav({
                           to={item.disabled ? "/" : item.href}
                           className={cn(
                             "flex items-center gap-2 overflow-hidden text-black rounded-md py-2 pl-2 text-sm font-medium hover:bg-secondary hover:text-accent-foreground",
-                            isActive ? "bg-accent text-black" : "transparent",
+                            isActive ? "bg-accent text-black" : "transparent ",
                             item.disabled && "cursor-not-allowed opacity-80"
                           )}
                           onClick={() => {
@@ -190,9 +198,7 @@ export function DashboardNav({
                           {Icon && (
                             <Icon
                               className={`ml-3 size-5 flex-none ${
-                                isActive
-                                  ? "text-accent text-black"
-                                  : "text-accentlight"
+                                isActive ? "text-black" : "text-gray-400"
                               }`}
                             />
                           )}
@@ -217,9 +223,7 @@ export function DashboardNav({
                       {Icon && (
                         <Icon
                           className={`ml-3 size-5 flex-none ${
-                            isActive
-                              ? "text-accent text-black"
-                              : "text-accentlight"
+                            isActive ? "text-black" : "text-gray-400"
                           }`}
                         />
                       )}

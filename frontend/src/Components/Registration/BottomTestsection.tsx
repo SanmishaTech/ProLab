@@ -412,7 +412,6 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
         <CardHeader>
           <div className="flex flex-row items-center justify-between">
             <CardTitle>Test Details</CardTitle>
-            <AddItem onAdd={addItem} />
           </div>
           <CardDescription>Add or remove Test for your patient</CardDescription>
         </CardHeader>

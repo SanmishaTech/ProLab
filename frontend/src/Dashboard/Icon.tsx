@@ -46,11 +46,12 @@ import {
   Link2,
   Barcode,
   Pencil,
- } from "lucide-react";
+  Group,
+  Layers,
+  NotepadText,
+} from "lucide-react";
 import specimen from "@/images/icons8-specimen-container.svg";
-
 export type Icon = LucideIcon;
-
 export const Icons: Record<string, Icon> = {
   dashboard: LayoutDashboardIcon,
   logo: Command,
@@ -59,6 +60,7 @@ export const Icons: Record<string, Icon> = {
   profile: User2Icon,
   spinner: Loader2,
   kanban: CircuitBoardIcon,
+  group: Group,
   chevronLeft: ChevronLeft,
   chevronRight: ChevronRight,
   chevronDown: ChevronDown, // Ensure this is added
@@ -76,6 +78,9 @@ export const Icons: Record<string, Icon> = {
   arrowRight: ArrowRight,
   help: HelpCircle,
   pizza: Pizza,
+  notepadText: NotepadText,
+  layers: Layers,
+  layers2: Layers,
   sun: SunMedium,
   moon: Moon,
   laptop: Laptop,
@@ -87,13 +92,13 @@ export const Icons: Record<string, Icon> = {
   department: Building2,
   Tat: Clock,
   Formula: Parentheses,
-   Machine:Cog,
-   Highlighter:Highlighter,
-   Rejection:MessageSquareX,
-   link:Link,
-   link2:Link2,
-   barcode:Barcode,
-   Pencil:Pencil,
+  Machine: Cog,
+  Highlighter: Highlighter,
+  Rejection: MessageSquareX,
+  link: Link,
+  link2: Link2,
+  barcode: Barcode,
+  Pencil: Pencil,
 
   gitHub: ({ ...props }: LucideProps) => (
     <svg

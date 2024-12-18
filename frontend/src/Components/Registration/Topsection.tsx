@@ -23,6 +23,8 @@ import ApiDrivenInputWithSuggestions from "./Autocompletecomp";
 import { toast } from "sonner";
 import { SmartDatetimeInput } from "@/utilityfunctions/Datepicker";
 import { DateTimePicker, TimePicker } from "@/components/ui/dateTimepicker";
+import { useNavigate } from "react-router-dom";
+
 export default function PatientCard({ setTopComp }) {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
@@ -41,7 +43,7 @@ export default function PatientCard({ setTopComp }) {
   const [selectedPatient, setSelectedPatient] = useState();
   const [date, setDate] = useState(new Date());
   const [associates, setAssociates] = useState([]);
-
+  const navigate = useNavigate();
   const [patientForm, setPatientForm] = useState({
     userId: "",
     firstName: "",
@@ -252,17 +254,22 @@ export default function PatientCard({ setTopComp }) {
       {/* Patient Information Card */}
       <Card className="flex-1 bg-accent/40 shadow-md">
         <CardHeader>
-          <CardTitle>Patient Information</CardTitle>
-          <CardDescription>Search and add patient details</CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Patient Information</CardTitle>
+              <CardDescription>Search and add patient details</CardDescription>
+            </div>
+          </div>
         </CardHeader>
+
         <CardContent>
           <div className="space-y-4">
             {/* Search Form */}
             <form onSubmit={handleSearch} className="flex space-x-2">
               <ApiDrivenInputWithSuggestions setPatientForm={setPatientForm} />
-              <Button type="submit">
-                <Search className="h-4 w-4 mr-2" />
-                Search
+              <Button onClick={() => navigate("/registration/patient/add")}>
+                <Plus className="w-5 text-white" />
+                Add Patient
               </Button>
             </form>
 
@@ -443,9 +450,13 @@ export default function PatientCard({ setTopComp }) {
 
       {/* Referral Information Card */}
       <Card className="flex-1 bg-accent/40 shadow-md">
-        <CardHeader>
-          <CardTitle>Referral Information</CardTitle>
-          <CardDescription>Add referral information</CardDescription>
+        <CardHeader className="flex justify-between">
+          <div className="flex justify-between items-center">
+            <CardTitle>Referral Information</CardTitle>
+            <Button onClick={() => navigate("/registration/referral/add")}>
+              Add Referral
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 items-center">
