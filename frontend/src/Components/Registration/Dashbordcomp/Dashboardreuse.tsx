@@ -52,8 +52,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
-export const description =
-  "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
+import { DatePickerWithRange } from "@/components/ui/dateRangepicker";
+import { DateRangePicker } from "@nextui-org/date-picker";
 
 export default function Dashboard({
   breadcrumbs = [],
@@ -147,17 +147,28 @@ export default function Dashboard({
         </header>
 
         {/* Main Content */}
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 mt-4">
           <Tabs defaultValue="all">
             <div className="flex items-center">
-              <TabsList className="bg-accent/60">
-                {tableColumns?.tabs?.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value}>
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
+              <TabsList className="bg-accent/60 pb-2 drop-shadow-none">
+                <div className="flex w-full flex-wrap md:flex-nowrap gap-4 pb-2 drop-shadow-none">
+                  <DateRangePicker
+                    visibleMonths={2}
+                    variant="underlined"
+                    label="Date Range"
+                    className="w-full bg-white drop-shadow-none "
+                  />
+                </div>{" "}
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
+                {/* <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
+                  <DateRangePicker
+                    visibleMonths={2}
+                    variant="underlined"
+                    label="Date Range"
+                    className="w-full"
+                  />
+                </div>{" "} */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 gap-1">
@@ -181,7 +192,6 @@ export default function Dashboard({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-               
                 {/* <Button size="sm" className="h-8 gap-1" onClick={onAddProduct}>
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -208,7 +218,7 @@ export default function Dashboard({
                             {header.label}
                           </TableHead>
                         ))}
-                        <TableHead>Services</TableHead>
+                        <TableHead>Tests</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -250,7 +260,7 @@ export default function Dashboard({
                                 {expandedRows.includes(row._id)
                                   ? "Hide"
                                   : "Show"}{" "}
-                                Services
+                                Tests
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -260,8 +270,8 @@ export default function Dashboard({
                                 colSpan={tableColumns.headers.length + 1}
                               >
                                 <div className="p-4 bg-muted rounded-md">
-                                  <h4 className="text-sm font-semibold mb-2">
-                                    Services
+                                  <h4 className="text-sm font-semibold mb-2 ml-3">
+                                    Tests
                                   </h4>
                                   {/* Nested Services Table */}
                                   <Table className="mb-4">
@@ -269,40 +279,39 @@ export default function Dashboard({
                                       <TableRow>
                                         <TableHead>Service Name</TableHead>
                                         <TableHead>Description</TableHead>
-                                        <TableHead>Price ($)</TableHead>
                                         <TableHead>Urgent</TableHead>
+                                        <TableHead>Price ($)</TableHead>
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                      {row?.services?.map((service) => (
+                                      {row?.Tests?.map((service) => (
                                         <TableRow key={service._id}>
                                           <TableCell>{service.name}</TableCell>
                                           <TableCell>
                                             {service.description}
                                           </TableCell>
-                                          <TableCell>
-                                            &#x20b9;{service.price}
-                                          </TableCell>
+
                                           <TableCell>
                                             {service.urgent}
+                                          </TableCell>
+                                          <TableCell>
+                                            &#x20b9;{service.price}
                                           </TableCell>
                                         </TableRow>
                                       ))}
                                     </TableBody>
                                     <TableFooter>
                                       <TableRow>
-                                        <TableCell colSpan={2}>
+                                        <TableCell colSpan={3}>
                                           <strong>Total</strong>
                                         </TableCell>
                                         <TableCell>
                                           &#x20b9;{" "}
-                                          {row?.services
-                                            ?.reduce(
-                                              (total, service) =>
-                                                total + service.price,
-                                              0
-                                            )
-                                            .toFixed(2)}
+                                          {row?.Tests?.reduce(
+                                            (total, service) =>
+                                              total + service.price,
+                                            0
+                                          ).toFixed(2)}
                                         </TableCell>
                                       </TableRow>
                                     </TableFooter>

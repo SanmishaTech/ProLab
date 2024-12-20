@@ -163,10 +163,7 @@ const Servicescontroller = {
       const patients = await Registration.find({ userId: usertobefound })
         .populate("patientId")
         .populate("referral")
-        .populate({
-          path: "services",
-          populate: { path: "serviceId" }, // Populate the serviceId inside services
-        });
+        .populate({ path: "tests", populate: { path: "tests" } });
 
       res.status(200).json(patients);
     } catch (error) {

@@ -101,37 +101,42 @@ export default function RegistrationsPage() {
 
   // Map the API data to match the Dashboard component's expected tableData format
   const mappedTableData = data?.map((item) => {
-    const services = item?.services || [];
+    const Tests = item?.tests || [];
     const paidAmount = item?.paymentMode?.paidAmount || 0;
 
     // Calculate the total service price based on each service's populated details.
-    const totalServicePrice = services.reduce((acc, service) => {
-      const servicePrice = service?.serviceId?.price || 0; // Replace 'price' with the actual field name for service price
-      return acc + servicePrice;
-    }, 0);
+    // const totalServicePrice = services.reduce((acc, service) => {
+    //   const servicePrice = service?.serviceId?.price || 0; // Replace 'price' with the actual field name for service price
+    //   return acc + servicePrice;
+    // }, 0);
 
     // Calculate balance amount based on total service price and paid amount.
-    const balanceAmount =
-      totalServicePrice - paidAmount > 0 ? totalServicePrice - paidAmount : 0;
-    console.log("Services", services);
+    // const balanceAmount =
+    //   totalServicePrice - paidAmount > 0 ? totalServicePrice - paidAmount : 0;
+    var TotalPaid = 0;
+
+    item?.paymentMode.map((payment) => {
+      TotalPaid += payment.paidAmount;
+    });
+    // console.log("Services", services);
     const Age = new Date(item?.patientId?.age)?.toLocaleDateString();
     const SubmissionDate = new Date(item?.completionDate)?.toLocaleDateString();
     return {
       _id: item?._id,
-      patientName: item?.patientId?.name || "Patient Name Not Found",
+      patientName: item?.patientId?.firstName || "Patient Name Not Found",
       patientAge: Age || "No age mentioned",
       gender: item?.patientId?.gender || "No gender mentioned",
-      phone: item?.patientId?.phone || "No phone Mentioned",
-      balanceAmount: balanceAmount || 0, // Calculate balance amount
-      paymentMode: paidAmount || "Payment not provided",
+      phone: item?.patientId?.mobile || "No phone Mentioned",
+      // balanceAmount: balanceAmount || 0, // Calculate balance amount
+      paymentMode: TotalPaid || "Payment not provided",
       // referralName: item?.completionDays || "Due date not provided",
       // referralName: item?.referral?.name || "N/A",
       dueDate: SubmissionDate || "Due date not provided",
-      services: services.map((service) => ({
-        name: service?.serviceId?.name,
-        description: service?.serviceId?.description,
-        price: service?.serviceId?.price || 0,
-        urgent: service?.urgent ? "Yes" : "No",
+      Tests: Tests.map((test) => ({
+        name: test?.tests?.name,
+        description: test?.tests?.paymentMode?.paidAmount,
+        urgent: test?.urgent ? "Yes" : "No",
+        price: test?.tests?.price || 0,
       })), // Display service details (name, price, urgent status)
     };
   });

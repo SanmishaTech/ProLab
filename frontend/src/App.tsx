@@ -29,44 +29,12 @@ import { Icons } from "@/Dashboard/Icon";
 import { Editor } from "@/Components/Editor/Editor";
 import Navbar from "@/Navbar/Navbarcomp";
 import { navItems } from "@/Config/data";
-import { createInvoice } from "./Components/Registration/InvoiceGenerator/CreateInvoice";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  useEffect(() => {
-    const invoice = {
-      shipping: {
-        name: "John Doe",
-        address: "1234 Main Street",
-        city: "San Francisco",
-        state: "CA",
-        country: "US",
-        postal_code: 94111,
-      },
-      items: [
-        {
-          item: "TC 100",
-          description: "Toner Cartridge",
-          quantity: 2,
-          amount: 6000,
-        },
-        {
-          item: "USB_EXT",
-          description: "USB Cable Extender",
-          quantity: 1,
-          amount: 2000,
-        },
-      ],
-      subtotal: 8000,
-      paid: 0,
-      invoice_nr: 1234,
-    };
-
-    createInvoice(invoice, "invoice.pdf");
-  }, []);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
