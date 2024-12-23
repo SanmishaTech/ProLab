@@ -138,6 +138,7 @@ export default function RegistrationsPage() {
         urgent: test?.urgent ? "Yes" : "No",
         price: test?.tests?.price || 0,
       })), // Display service details (name, price, urgent status)
+      createdAt: item?.createdAt,
     };
   });
 

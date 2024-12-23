@@ -60,6 +60,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import InvoiceTemplate from './InvoiceTemplate';
+import PaymentDetailsTemplate from './PaymentDetailsTemplate';
+import type { BlobProvider } from '@react-pdf/renderer';
 
 interface Item {
   id: string;
@@ -72,12 +76,40 @@ interface Item {
   urgentduration: number;
 }
 
+interface Test {
+  _id: string;
+  name: string;
+  tat: string;
+  urgentTime: string;
+  outsourced: boolean;
+  price: number;
+  abbrivation?: string;
+}
+
+interface Discount {
+  _id: string;
+  value: string;
+  description: string;
+}
+
+interface Associate {
+  _id: string;
+  firstName: string;
+}
+
 interface OrderProps {
   setOrderComp: (comp: any) => void;
   topComp: {
     patientId: string;
     referralId: string;
-    // ... other fields if any
+    referral?: {
+      primaryRefferedBy: string;
+      secondaryRefferedBy: string;
+      billedTo: string;
+      corporateCustomer: string;
+      clinicHistory: string;
+      medicationHistory: string;
+    };
   };
 }
 
@@ -85,31 +117,31 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
   console.log("This is topComp", topComp);
   const navigate = useNavigate();
   const [items, setItems] = useState<Item[]>([]);
-  const [paymentMode, setPaymentMode] = useState("Cash");
-  const [upiNumber, setUpiNumber] = useState("");
-  const [referenceNumber, setReferenceNumber] = useState(""); // For CC/DC
-  const [paidAmount, setPaidAmount] = useState("");
+  const [paymentMode, setPaymentMode] = useState<string>("Cash");
+  const [upiNumber, setUpiNumber] = useState<string>("");
+  const [referenceNumber, setReferenceNumber] = useState<string>("");
+  const [paidAmount, setPaidAmount] = useState<string>("");
   const user = localStorage.getItem("user");
   const User = user ? JSON.parse(user) : null;
-  const [bottomSection, setBottomSection] = useState([]);
-  const [filteredData, setFilteredData] = useState<any[]>([]); // State for filtered data
-  const [filterValue, setFilterValue] = useState<string>(""); // Store selected filter value
+  const [bottomSection, setBottomSection] = useState<Test | null>(null);
+  const [filteredData, setFilteredData] = useState<Test[]>([]);
+  const [filterValue, setFilterValue] = useState<string>("");
   const [config, setConfig] = useState<any>(null);
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [AddTestTable, setAddTestTable] = useState([]);
+  const [data, setData] = useState<Test[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [AddTestTable, setAddTestTable] = useState<Test[]>([]);
   const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
-  const [discounts, setDiscounts] = useState([]);
-  const [discountarray, setdiscountarray] = useState([]);
-  const [discountType, setDiscountType] = useState("");
-  const [calculatedprice, setcalculatedprice] = useState(0);
-  const [subtotalPrice, setSubtotalPrice] = useState(0);
-  const [associates, setAssociates] = useState([]);
-  const [homevisit, setHomevisit] = useState(0);
-  const [homevisitPricetotal, setHomevisitPricetotal] = useState(0);
-  const [homevisitcharge, sethomevisitcharge] = useState("");
-  const [paymentmodeprice, setpaymentmodeprice] = useState(false);
-  const [paymentDeliverymode, setPaymentDeliverymode] = useState([]);
+  const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [discountarray, setdiscountarray] = useState<string>("");
+  const [discountType, setDiscountType] = useState<string>("");
+  const [calculatedprice, setCalculatedprice] = useState<number>(0);
+  const [subtotalPrice, setSubtotalPrice] = useState<number>(0);
+  const [associates, setAssociates] = useState<Associate[]>([]);
+  const [homevisit, setHomevisit] = useState<number>(0);
+  const [homevisitPricetotal, setHomevisitPricetotal] = useState<number>(0);
+  const [homevisitcharge, sethomevisitcharge] = useState<string>("");
+  const [paymentmodeprice, setPaymentmodeprice] = useState<number>(0);
+  const [paymentDeliverymode, setPaymentDeliverymode] = useState<string[]>([]);
 
   const frameworksList = [
     { value: "sms", label: "Sms" },
@@ -306,103 +338,159 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
   }, [User?._id]);
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData =
-    AddTestTable &&
-    AddTestTable?.map((item) => {
-      console.log("This is item", item);
-      return {
-        _id: item?._id,
-        one: item?.abbrivation || "First Name not provided",
-        two: item?.name || "Middle Name not provided",
-        three: item?.lastName || "Last Name not provided",
-        four: item?.mobile || "Mobile not provided",
-        five: item?.Outsourced || "Outsourced not provided",
-        six: item?.price || "Price not provided",
-        delete: `/patientmaster/delete/${item?._id}`,
-        action: "actions", // Placeholder for action buttons
-        // Additional fields can be added here
-      };
-    });
+  const mappedTableData = AddTestTable?.map((item: Test) => ({
+    _id: item._id,
+    one: item.abbrivation || "",
+    two: item.name,
+    three: item.tat,
+    four: item.urgentTime,
+    five: item.outsourced,
+    six: item.price,
+    delete: `/patientmaster/delete/${item._id}`,
+    action: "actions",
+  }));
 
   useEffect(() => {
-    console.log("This is bottomSection", bottomSection);
-    if (!bottomSection || bottomSection.length < 0) return;
-    if (bottomSection.length === 0) return;
-    console.log("p020", AddTestTable);
-    if (AddTestTable?.length === 0) {
+    if (!bottomSection) return;
+    if (AddTestTable.length === 0) {
       setAddTestTable([bottomSection]);
       return;
     }
-    console.log("This is AddTestTable", bottomSection);
-    if (AddTestTable.map((item) => item._id).includes(bottomSection._id)) {
+    if (AddTestTable.some(item => item._id === bottomSection._id)) {
       return;
     }
     setAddTestTable([...AddTestTable, bottomSection]);
   }, [bottomSection]);
 
   const onRegisterClick = async () => {
-    //sending data to backend with defined schema
-    if (topComp?.length < 1) {
-      toast.error("Please add at least one Patient or Refferal to the order.");
+    if (!topComp?.patientId) {
+      toast.error("Please add at least one Patient or Referral to the order.");
       return;
     }
-    if (AddTestTable?.length < 1) {
+    if (AddTestTable.length === 0) {
       toast.error("Please add at least one Test to the order.");
       return;
     }
 
-    const data = {
-      patientId: topComp?.patientId,
-      referral: {
-        primaryRefferal: topComp?.referral?.primaryRefferedBy,
-        secondaryRefferal: topComp?.referral?.secondaryRefferedBy,
-        billedTo: topComp?.referral?.billedTo,
-        coporateCustomer: topComp?.referral?.corporateCustomer,
-        clinicHistory: topComp?.referral?.clinicHistory,
-        medicationHistory: topComp?.referral?.medicationHistory,
-      },
-      tests: AddTestTable?.map((items) => {
-        return {
-          tests: items?._id,
-          tat: items?.tat,
-          urgentTime: items?.urgentTime,
-          outsourced: items?.outsourced,
-          price: items?.price,
-        };
-      }),
-      totaltestprice: calculatedprice,
-      discount: {
-        discountapplied: discounts?.find((item) => item.value === discountType)
-          ?._id,
-        dicountReason: "",
-        discountValue: discountType,
-      },
-      priceAfterDiscount: subtotalPrice,
-      homevisit: {
-        homevisitAssignedto: associates?.find(
-          (item) => item.firstName === homevisitcharge
-        )?._id,
-        visitCharges: homevisit,
-      },
-      priceafterhomevisit: homevisitPricetotal,
-      paymentMode: {
-        paymentMode: paymentMode,
-        paidAmount: paymentmodeprice,
-      },
-      totalBalance: homevisitPricetotal - paymentmodeprice,
-      paymentDeliveryMode: {
-        paymentDeliveryMode: selectedFrameworks,
-      },
-      userId: User?._id,
-    };
-    console.log("This is data", data);
+    try {
+      const data = {
+        patientId: topComp.patientId,
+        referral: {
+          primaryRefferal: topComp.referral?.primaryRefferedBy,
+          secondaryRefferal: topComp.referral?.secondaryRefferedBy,
+          billedTo: topComp.referral?.billedTo,
+          coporateCustomer: topComp.referral?.corporateCustomer,
+          clinicHistory: topComp.referral?.clinicHistory,
+          medicationHistory: topComp.referral?.medicationHistory,
+        },
+        tests: AddTestTable.map((items) => ({
+          tests: items._id,
+          tat: items.tat,
+          urgentTime: items.urgentTime,
+          outsourced: items.outsourced,
+          price: items.price,
+        })),
+        totaltestprice: calculatedprice,
+        discount: {
+          discountapplied: discounts?.find((item) => item.value === discountType)?._id,
+          dicountReason: "",
+          discountValue: discountType,
+        },
+        priceAfterDiscount: subtotalPrice,
+        homevisit: {
+          homevisitAssignedto: associates?.find(
+            (item) => item.firstName === homevisitcharge
+          )?._id,
+          visitCharges: Number(homevisit) || 0,
+        },
+        priceafterhomevisit: Number(homevisitPricetotal) || 0,
+        paymentMode: {
+          paymentMode: paymentMode,
+          paidAmount: Number(paymentmodeprice) || 0,
+        },
+        totalBalance: Number(homevisitPricetotal) - Number(paymentmodeprice) || 0,
+        paymentDeliveryMode: {
+          paymentDeliveryMode: selectedFrameworks,
+        },
+        userId: User?._id,
+        staffName: User?.username,
+        paymentDate: new Date().toISOString(),
+      };
 
-    //save the data to the database
-    await axios.post("/api/registration", data).then((res) => {
-      console.log("ppapppppp", res.data);
-      toast.success("Registration created successfully");
+      // Save registration
+      const response = await axios.post("/api/registration", data);
+      console.log("Registration response:", response.data);
+
+      // Prepare data for invoice PDF
+      const invoiceData = {
+        invoiceNumber: `INV-${new Date().getFullYear()}-${response.data._id}`,
+        patient: {
+          name: response.data.patient?.name || '',
+          phone: response.data.patient?.phone || ''
+        },
+        paymentMode: paymentMode,
+        staffName: User?.username || '',
+        services: AddTestTable.map(test => ({
+          name: test.name,
+          tat: test.tat || 'Standard',
+          urgent: Boolean(test.urgentTime),
+          price: Number(test.price) || 0,
+          total: Number(test.price) || 0
+        })),
+        subtotal: calculatedprice,
+        discount: calculatedprice - subtotalPrice,
+        discountName: discounts?.find((item) => item.value === discountType)?.description || 'No Discount',
+        afterDiscount: subtotalPrice,
+        homeVisitCharges: Number(homevisit) || 0,
+        totalAmount: Number(homevisitPricetotal) || 0,
+        amountPaid: Number(paymentmodeprice) || 0,
+        balanceDue: Number(homevisitPricetotal) - Number(paymentmodeprice) || 0
+      };
+
+      // Generate and download PDFs
+      const invoicePdf = (
+        <PDFDownloadLink
+          document={<InvoiceTemplate data={invoiceData} />}
+          fileName={`invoice-${response.data._id}.pdf`}
+        >
+          {({ loading }) => (
+            <Button disabled={loading}>
+              {loading ? 'Generating Invoice...' : 'Download Invoice'}
+            </Button>
+          )}
+        </PDFDownloadLink>
+      );
+
+      const paymentDetailsPdf = (
+        <PDFDownloadLink
+          document={<PaymentDetailsTemplate data={invoiceData} />}
+          fileName={`payment-details-${invoiceData.invoiceNumber}.pdf`}
+        >
+          {({ loading }: { loading: boolean }) => (
+            <Button variant="link" disabled={loading} className="text-blue-600 hover:text-blue-800">
+              {loading ? 'Preparing Details...' : '💰 Download Payment Details'}
+            </Button>
+          )}
+        </PDFDownloadLink>
+      );
+
+      // Show success message with PDF download links
+      toast.success(
+        <div className="flex flex-col gap-2">
+          <div className="font-semibold">Registration successful!</div>
+          <div className="text-sm text-gray-600">Invoice #: {invoiceData.invoiceNumber}</div>
+          <div className="flex flex-col gap-1">
+            {invoicePdf}
+            {paymentDetailsPdf}
+          </div>
+        </div>
+      );
+
       navigate("/registrationlist");
-    });
+    } catch (error: any) {
+      console.error("Error in registration:", error);
+      toast.error(error.response?.data?.error || "Failed to submit registration.");
+    }
   };
 
   return (
@@ -426,7 +514,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
               setAddTestTable={setAddTestTable}
               AddTestTable={AddTestTable}
               tableData={mappedTableData}
-              setcalculatedprice={setcalculatedprice}
+              setcalculatedprice={setCalculatedprice}
             />
           </ScrollArea>
           {/* Discount  */}
@@ -598,13 +686,10 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
                       <div className="flex  gap-2">
                         <Select
                           value={paymentMode}
-                          onValueChange={(value) => setPaymentMode(value)}
+                          onValueChange={setPaymentMode}
                         >
-                          <SelectTrigger
-                            id="paymentMode"
-                            aria-label="Select payment mode"
-                          >
-                            <SelectValue placeholder="Select Mode" />
+                          <SelectTrigger>
+                            <SelectValue>{paymentMode || 'Select payment mode'}</SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="cash">Cash</SelectItem>
@@ -621,7 +706,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
                         type="number"
                         className="max-w-sm"
                         value={paymentmodeprice}
-                        onChange={(e) => setpaymentmodeprice(e.target.value)}
+                        onChange={(e) => setPaymentmodeprice(e.target.value)}
                       />
                     </TableCell>
                   </TableRow>

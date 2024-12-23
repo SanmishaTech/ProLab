@@ -7,6 +7,8 @@ import {
   MoreHorizontal,
   ListFilter,
 } from "lucide-react";
+import { DateRangePicker } from "@nextui-org/date-picker";
+import type { DateValue, RangeValue } from "react-aria";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -52,39 +54,140 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
-import { DatePickerWithRange } from "@/components/ui/dateRangepicker";
-import { DateRangePicker } from "@nextui-org/date-picker";
+
+interface Test {
+  _id: string;
+  name: string;
+  description: string;
+  urgent: string;
+  price: number;
+}
+
+interface TableData {
+  _id: string;
+  patientName: string;
+  patientAge: number;
+  dueDate: string;
+  createdAt: string;
+  gender: string;
+  phone: string;
+  referralName: string;
+  paymentMode: number;
+  Tests: Test[];
+}
+
+interface TableColumn {
+  key: string;
+  label: string;
+  hiddenOn?: string;
+}
+
+interface DateRange {
+  startDate: DateValue | null;
+  endDate: DateValue | null;
+}
+
+interface DashboardProps {
+  breadcrumbs?: Array<{
+    href?: string;
+    label: string;
+  }>;
+  searchPlaceholder?: string;
+  userAvatar?: string;
+  tableColumns: {
+    title?: string;
+    description?: string;
+    headers: TableColumn[];
+    filters?: Array<{
+      label: string;
+      value: string;
+      checked: boolean;
+    }>;
+    pagination: {
+      from: number;
+      to: number;
+      total: number;
+    };
+  };
+  tableData: TableData[];
+  onAddProduct?: () => void;
+  onExport?: () => void;
+  onFilterChange?: (value: string) => void;
+  onProductAction?: () => void;
+}
 
 export default function Dashboard({
   breadcrumbs = [],
-  searchPlaceholder = "Search...",
+  searchPlaceholder = "Search patient name...",
   userAvatar = "/placeholder-user.jpg",
-  tableColumns = {},
+  tableColumns,
   tableData = [],
   onAddProduct = () => {},
   onExport = () => {},
   onFilterChange = () => {},
   onProductAction = () => {},
-}) {
+}: DashboardProps) {
   const navigate = useNavigate();
-  // State to manage expanded rows (array of _id)
-  const [expandedRows, setExpandedRows] = useState([]);
+  const [expandedRows, setExpandedRows] = useState<string[]>([]);
+  const [filteredData, setFilteredData] = useState<TableData[]>(tableData);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [dateRange, setDateRange] = useState<DateRange>({
+    startDate: null,
+    endDate: null,
+  });
 
-  // Handler to toggle row expansion with debug logs
-  const toggleRow = (rowId) => {
+  React.useEffect(() => {
+    let filtered = [...tableData];
+
+    // Apply name search filter
+    if (searchQuery) {
+      filtered = filtered.filter((row) =>
+        row.patientName.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply date range filter based on createdAt
+    if (dateRange.startDate && dateRange.endDate) {
+      filtered = filtered.filter((row) => {
+        console.log("ROw, ", row);
+        if (!row.createdAt) return true; // Skip filtering if createdAt is not available
+        const rowDate = new Date(row.createdAt);
+        const startDate = new Date(dateRange.startDate.toString());
+        const endDate = new Date(dateRange.endDate.toString());
+        // Set the time to start of day for start date and end of day for end date
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+        return rowDate >= startDate && rowDate <= endDate;
+      });
+    }
+
+    setFilteredData(filtered);
+  }, [searchQuery, dateRange, tableData]);
+
+  const handleDateRangeChange = (value: RangeValue<DateValue> | null) => {
+    if (!value) {
+      setDateRange({ startDate: null, endDate: null });
+      return;
+    }
+
+    setDateRange({
+      startDate: value.start,
+      endDate: value.end,
+    });
+  };
+
+  const toggleRow = (rowId: string) => {
     setExpandedRows((prev) => {
       if (prev.includes(rowId)) {
-        console.log(`Collapsing row with _id: ${rowId}`);
         return prev.filter((id) => id !== rowId);
       } else {
-        console.log(`Expanding row with _id: ${rowId}`);
         return [...prev, rowId];
       }
     });
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col ">
+    <div className="flex min-h-screen w-full flex-col">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:px-6">
         {/* Header */}
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -109,6 +212,8 @@ export default function Dashboard({
               type="search"
               placeholder={searchPlaceholder}
               className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <DropdownMenu>
@@ -156,19 +261,21 @@ export default function Dashboard({
                     visibleMonths={2}
                     variant="underlined"
                     label="Date Range"
-                    className="w-full bg-white drop-shadow-none "
+                    className="w-full bg-white drop-shadow-none"
+                    onChange={handleDateRangeChange}
+                    value={dateRange.startDate && dateRange.endDate ? {
+                      start: dateRange.startDate,
+                      end: dateRange.endDate
+                    } : null}
                   />
-                </div>{" "}
+                </div>
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
-                {/* <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
-                  <DateRangePicker
-                    visibleMonths={2}
-                    variant="underlined"
-                    label="Date Range"
-                    className="w-full"
-                  />
-                </div>{" "} */}
+                {filteredData.length !== tableData.length && (
+                  <Badge variant="secondary">
+                    Showing {filteredData.length} of {tableData.length} records
+                  </Badge>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 gap-1">
@@ -192,12 +299,6 @@ export default function Dashboard({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                {/* <Button size="sm" className="h-8 gap-1" onClick={onAddProduct}>
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add Product
-                  </span>
-                </Button> */}
               </div>
             </div>
             <TabsContent value="all">
@@ -222,33 +323,43 @@ export default function Dashboard({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {tableData?.map((row) => (
+                      {filteredData.map((row: TableData) => (
                         <React.Fragment key={row._id}>
                           <TableRow>
-                            {tableColumns?.headers?.map((header, index) => (
-                              <TableCell
-                                key={index}
-                                className={
-                                  header.hiddenOn ? header.hiddenOn : ""
+                            {tableColumns.headers.map((header, index) => {
+                              const getCellContent = (): string => {
+                                const value = row[header.key as keyof TableData];
+                                switch (header.key) {
+                                  case "patientName":
+                                    return row.patientName;
+                                  case "dueDate":
+                                    return row.dueDate;
+                                  case "patientAge":
+                                    return row.patientAge.toString();
+                                  case "gender":
+                                    return row.gender;
+                                  case "phone":
+                                    return row.phone;
+                                  case "referralName":
+                                    return row.referralName;
+                                  case "paymentMode":
+                                    return `₹${row.paymentMode}`;
+                                  default:
+                                    return typeof value === 'string' || typeof value === 'number' 
+                                      ? value.toString() 
+                                      : '';
                                 }
-                              >
-                                {header.key === "patientName"
-                                  ? row.patientName
-                                  : header.key === "dueDate"
-                                  ? row.dueDate
-                                  : header.key === "patientAge"
-                                  ? row.patientAge
-                                  : header.key === "gender"
-                                  ? row.gender
-                                  : header.key === "phone"
-                                  ? row.phone
-                                  : header.key === "referralName"
-                                  ? row.referralName
-                                  : header.key === "paymentMode"
-                                  ? `₹${row.paymentMode}`
-                                  : row[header.key]}
-                              </TableCell>
-                            ))}
+                              };
+
+                              return (
+                                <TableCell
+                                  key={index}
+                                  className={header.hiddenOn ?? ""}
+                                >
+                                  {getCellContent()}
+                                </TableCell>
+                              );
+                            })}
                             <TableCell>
                               <Button
                                 variant="ghost"
@@ -257,46 +368,31 @@ export default function Dashboard({
                                 aria-expanded={expandedRows.includes(row._id)}
                                 aria-controls={`services-${row._id}`}
                               >
-                                {expandedRows.includes(row._id)
-                                  ? "Hide"
-                                  : "Show"}{" "}
-                                Tests
+                                {expandedRows.includes(row._id) ? "Hide" : "Show"} Tests
                               </Button>
                             </TableCell>
                           </TableRow>
                           {expandedRows.includes(row._id) && (
                             <TableRow>
-                              <TableCell
-                                colSpan={tableColumns.headers.length + 1}
-                              >
+                              <TableCell colSpan={tableColumns.headers.length + 1}>
                                 <div className="p-4 bg-muted rounded-md">
-                                  <h4 className="text-sm font-semibold mb-2 ml-3">
-                                    Tests
-                                  </h4>
-                                  {/* Nested Services Table */}
+                                  <h4 className="text-sm font-semibold mb-2 ml-3">Tests</h4>
                                   <Table className="mb-4">
                                     <TableHeader>
                                       <TableRow>
                                         <TableHead>Service Name</TableHead>
                                         <TableHead>Description</TableHead>
                                         <TableHead>Urgent</TableHead>
-                                        <TableHead>Price ($)</TableHead>
+                                        <TableHead>Price (₹)</TableHead>
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                      {row?.Tests?.map((service) => (
+                                      {row.Tests?.map((service: Test) => (
                                         <TableRow key={service._id}>
                                           <TableCell>{service.name}</TableCell>
-                                          <TableCell>
-                                            {service.description}
-                                          </TableCell>
-
-                                          <TableCell>
-                                            {service.urgent}
-                                          </TableCell>
-                                          <TableCell>
-                                            &#x20b9;{service.price}
-                                          </TableCell>
+                                          <TableCell>{service.description}</TableCell>
+                                          <TableCell>{service.urgent}</TableCell>
+                                          <TableCell>₹{service.price}</TableCell>
                                         </TableRow>
                                       ))}
                                     </TableBody>
@@ -306,9 +402,9 @@ export default function Dashboard({
                                           <strong>Total</strong>
                                         </TableCell>
                                         <TableCell>
-                                          &#x20b9;{" "}
-                                          {row?.Tests?.reduce(
-                                            (total, service) =>
+                                          ₹{" "}
+                                          {row.Tests?.reduce(
+                                            (total: number, service: Test) =>
                                               total + service.price,
                                             0
                                           ).toFixed(2)}

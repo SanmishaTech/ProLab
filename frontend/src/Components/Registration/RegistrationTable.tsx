@@ -480,203 +480,218 @@ export function RegistrationComponent() {
                                     {report.paymentMode}
                                   </TableCell>
                                   <TableCell>
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button
-                                          aria-haspopup="true"
-                                          size="icon"
-                                          variant="ghost"
-                                        >
-                                          <MoreHorizontal className="h-4 w-4" />
-                                          <span className="sr-only">
-                                            Toggle menu
-                                          </span>
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>
-                                          Actions
-                                        </DropdownMenuLabel>
-                                        <DropdownMenuItem>
-                                          {/* Edit Dialog */}
-                                          <Dialog>
-                                            <DialogTrigger asChild>
-                                              <span
-                                                onClick={() =>
-                                                  setCurrentReport(report)
-                                                }
-                                                className="block w-full"
-                                              >
-                                                Edit
-                                              </span>
-                                            </DialogTrigger>
-                                            <DialogContent>
-                                              <DialogHeader>
-                                                <DialogTitle>
-                                                  Edit Report
-                                                </DialogTitle>
-                                                <DialogDescription>
-                                                  Update the details of the lab
-                                                  report.
-                                                </DialogDescription>
-                                              </DialogHeader>
-                                              {currentReport && (
-                                                <form
-                                                  onSubmit={handleSubmit(
-                                                    (data) =>
-                                                      updateReportMutation.mutate(
-                                                        {
-                                                          id: currentReport._id,
-                                                          updatedReport: data,
-                                                        }
-                                                      )
-                                                  )}
-                                                  className="space-y-4"
-                                                >
-                                                  <div>
-                                                    <label className="block text-sm font-medium">
-                                                      Name
-                                                    </label>
-                                                    <Input
-                                                      {...register("name", {
-                                                        required: true,
-                                                      })}
-                                                      placeholder="Service Title"
-                                                      defaultValue={
-                                                        currentReport.name
-                                                      }
-                                                    />
-                                                  </div>
-                                                  <div>
-                                                    <label className="block text-sm font-medium">
-                                                      Description
-                                                    </label>
-                                                    <Input
-                                                      {...register(
-                                                        "description",
-                                                        {
-                                                          required: false,
-                                                        }
-                                                      )}
-                                                      placeholder="Service Description"
-                                                      defaultValue={
-                                                        currentReport.description
-                                                      }
-                                                    />
-                                                  </div>
-                                                  <div>
-                                                    <label className="block text-sm font-medium">
-                                                      Status
-                                                    </label>
-                                                    <select
-                                                      {...register("status", {
-                                                        required: true,
-                                                      })}
-                                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                      defaultValue={
-                                                        currentReport.status
-                                                      }
-                                                    >
-                                                      <option>Pending</option>
-                                                      <option>
-                                                        In Progress
-                                                      </option>
-                                                      <option>Completed</option>
-                                                    </select>
-                                                  </div>
-                                                  <div>
-                                                    <label className="block text-sm font-medium">
-                                                      Created By
-                                                    </label>
-                                                    <Input
-                                                      {...register(
-                                                        "createdBy",
-                                                        {
-                                                          required: true,
-                                                        }
-                                                      )}
-                                                      placeholder="Author Name"
-                                                      defaultValue={
-                                                        currentReport.createdBy
-                                                      }
-                                                    />
-                                                  </div>
-                                                  <DialogFooter>
-                                                    <Button
-                                                      type="submit"
-                                                      disabled={
-                                                        updateReportMutation.isLoading
-                                                      }
-                                                    >
-                                                      {updateReportMutation.isLoading
-                                                        ? "Updating..."
-                                                        : "Save Changes"}
-                                                    </Button>
-                                                    <DialogTrigger asChild>
-                                                      <Button variant="ghost">
-                                                        Cancel
-                                                      </Button>
-                                                    </DialogTrigger>
-                                                  </DialogFooter>
-                                                </form>
-                                              )}
-                                            </DialogContent>
-                                          </Dialog>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem>
-                                          {/* Delete Confirmation Dialog */}
-                                          <Dialog>
-                                            <DialogTrigger asChild>
-                                              <span
-                                                onClick={() =>
-                                                  setCurrentReport(report)
-                                                }
-                                                className="block w-full"
-                                              >
-                                                Delete
-                                              </span>
-                                            </DialogTrigger>
-                                            <DialogContent>
-                                              <DialogHeader>
-                                                <DialogTitle>
-                                                  Delete Report
-                                                </DialogTitle>
-                                                <DialogDescription>
-                                                  Are you sure you want to
-                                                  delete{" "}
-                                                  {currentReport &&
-                                                    currentReport.name}
-                                                  ? This action cannot be
-                                                  undone.
-                                                </DialogDescription>
-                                              </DialogHeader>
-                                              <DialogFooter>
-                                                <Button
-                                                  variant="destructive"
+                                    <div className="flex gap-2">
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button
+                                            aria-haspopup="true"
+                                            size="icon"
+                                            variant="ghost"
+                                          >
+                                            <MoreHorizontal className="h-4 w-4" />
+                                            <span className="sr-only">
+                                              Toggle menu
+                                            </span>
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                          <DropdownMenuLabel>
+                                            Actions
+                                          </DropdownMenuLabel>
+                                          <DropdownMenuItem>
+                                            {/* Edit Dialog */}
+                                            <Dialog>
+                                              <DialogTrigger asChild>
+                                                <span
                                                   onClick={() =>
-                                                    deleteReportMutation.mutate(
-                                                      currentReport._id
-                                                    )
+                                                    setCurrentReport(report)
                                                   }
-                                                  disabled={
-                                                    deleteReportMutation.isLoading
-                                                  }
+                                                  className="block w-full"
                                                 >
-                                                  {deleteReportMutation.isLoading
-                                                    ? "Deleting..."
-                                                    : "Delete"}
-                                                </Button>
-                                                <DialogTrigger asChild>
-                                                  <Button variant="ghost">
-                                                    Cancel
+                                                  Edit
+                                                </span>
+                                              </DialogTrigger>
+                                              <DialogContent>
+                                                <DialogHeader>
+                                                  <DialogTitle>
+                                                    Edit Report
+                                                  </DialogTitle>
+                                                  <DialogDescription>
+                                                    Update the details of the lab
+                                                    report.
+                                                  </DialogDescription>
+                                                </DialogHeader>
+                                                {currentReport && (
+                                                  <form
+                                                    onSubmit={handleSubmit(
+                                                      (data) =>
+                                                        updateReportMutation.mutate(
+                                                          {
+                                                            id: currentReport._id,
+                                                            updatedReport: data,
+                                                          }
+                                                        )
+                                                    )}
+                                                    className="space-y-4"
+                                                  >
+                                                    <div>
+                                                      <label className="block text-sm font-medium">
+                                                        Name
+                                                      </label>
+                                                      <Input
+                                                        {...register("name", {
+                                                          required: true,
+                                                        })}
+                                                        placeholder="Service Title"
+                                                        defaultValue={
+                                                          currentReport.name
+                                                        }
+                                                      />
+                                                    </div>
+                                                    <div>
+                                                      <label className="block text-sm font-medium">
+                                                        Description
+                                                      </label>
+                                                      <Input
+                                                        {...register(
+                                                          "description",
+                                                          {
+                                                            required: false,
+                                                          }
+                                                        )}
+                                                        placeholder="Service Description"
+                                                        defaultValue={
+                                                          currentReport.description
+                                                        }
+                                                      />
+                                                    </div>
+                                                    <div>
+                                                      <label className="block text-sm font-medium">
+                                                        Status
+                                                      </label>
+                                                      <select
+                                                        {...register("status", {
+                                                          required: true,
+                                                        })}
+                                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                        defaultValue={
+                                                          currentReport.status
+                                                        }
+                                                      >
+                                                        <option>Pending</option>
+                                                        <option>
+                                                          In Progress
+                                                        </option>
+                                                        <option>Completed</option>
+                                                      </select>
+                                                    </div>
+                                                    <div>
+                                                      <label className="block text-sm font-medium">
+                                                        Created By
+                                                      </label>
+                                                      <Input
+                                                        {...register(
+                                                          "createdBy",
+                                                          {
+                                                            required: true,
+                                                          }
+                                                        )}
+                                                        placeholder="Author Name"
+                                                        defaultValue={
+                                                          currentReport.createdBy
+                                                        }
+                                                      />
+                                                    </div>
+                                                    <DialogFooter>
+                                                      <Button
+                                                        type="submit"
+                                                        disabled={
+                                                          updateReportMutation.isLoading
+                                                        }
+                                                      >
+                                                        {updateReportMutation.isLoading
+                                                          ? "Updating..."
+                                                          : "Save Changes"}
+                                                      </Button>
+                                                      <DialogTrigger asChild>
+                                                        <Button variant="ghost">
+                                                          Cancel
+                                                        </Button>
+                                                      </DialogTrigger>
+                                                    </DialogFooter>
+                                                  </form>
+                                                )}
+                                              </DialogContent>
+                                            </Dialog>
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem>
+                                            {/* Delete Confirmation Dialog */}
+                                            <Dialog>
+                                              <DialogTrigger asChild>
+                                                <span
+                                                  onClick={() =>
+                                                    setCurrentReport(report)
+                                                  }
+                                                  className="block w-full"
+                                                >
+                                                  Delete
+                                                </span>
+                                              </DialogTrigger>
+                                              <DialogContent>
+                                                <DialogHeader>
+                                                  <DialogTitle>
+                                                    Delete Report
+                                                  </DialogTitle>
+                                                  <DialogDescription>
+                                                    Are you sure you want to
+                                                    delete{" "}
+                                                    {currentReport &&
+                                                      currentReport.name}
+                                                    ? This action cannot be
+                                                    undone.
+                                                  </DialogDescription>
+                                                </DialogHeader>
+                                                <DialogFooter>
+                                                  <Button
+                                                    variant="destructive"
+                                                    onClick={() =>
+                                                      deleteReportMutation.mutate(
+                                                        currentReport._id
+                                                      )
+                                                    }
+                                                    disabled={
+                                                      deleteReportMutation.isLoading
+                                                    }
+                                                  >
+                                                    {deleteReportMutation.isLoading
+                                                      ? "Deleting..."
+                                                      : "Delete"}
                                                   </Button>
-                                                </DialogTrigger>
-                                              </DialogFooter>
-                                            </DialogContent>
-                                          </Dialog>
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
+                                                  <DialogTrigger asChild>
+                                                    <Button variant="ghost">
+                                                      Cancel
+                                                    </Button>
+                                                  </DialogTrigger>
+                                                </DialogFooter>
+                                              </DialogContent>
+                                            </Dialog>
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem>
+                                            <Button
+                                              variant="ghost"
+                                              size="icon"
+                                              onClick={() =>
+                                                navigate(`/registration/payment/${report._id}`)
+                                              }
+                                              className="text-blue-600 hover:text-blue-800"
+                                            >
+                                              💰
+                                              <span className="sr-only">Payment</span>
+                                            </Button>
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </div>
                                   </TableCell>
                                 </TableRow>
 
