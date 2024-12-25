@@ -50,6 +50,7 @@ import Autocomplete from "@/Components/Autocomplete/Autocomplete";
 import CollectionMaster from "@/Components/CollectionMaster/Registertable";
 import CollectionAdd from "@/Components/CollectionMaster/TestCard";
 import DashboardEditTest from "@/Components/CollectionMaster/Edittestcard";
+import SampleCollection from "@/Components/SampleCollection/Registertable";
 
 const Dashboard = () => {
   const location = useLocation();
@@ -133,6 +134,7 @@ const Dashboard = () => {
           <PatientTestCard />
         )}
         {location.pathname === "/registration/referral/add" && <TestCard />}
+        {location.pathname === "/samplecollection" && <SampleCollection />}
       </main>
     </div>
   );

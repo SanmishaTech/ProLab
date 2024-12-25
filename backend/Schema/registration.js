@@ -34,6 +34,16 @@ const referralschema = new mongoose.Schema({
     default: null,
   },
 });
+const collectionCenter = new mongoose.Schema({
+  collectionCenterName: {
+    type: String,
+    default: "Impact Dignostics",
+  },
+  collectionTime: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
 const testSchema = new mongoose.Schema({
   tests: {
@@ -163,6 +173,7 @@ const registrationSchema = new mongoose.Schema(
       required: true,
     },
     paymentHistory: [paymentHistorySchema],
+    collectionCenter: [collectionCenter],
   },
   { timestamps: true }
 );

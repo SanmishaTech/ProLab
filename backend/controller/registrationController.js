@@ -150,14 +150,11 @@ const Servicescontroller = {
   getAllservices: async (req, res, next) => {
     try {
       console.log("All registration");
-      const patients = await Registration.find();
-      // .populate("patientId")
-      // .populate("referral")
-      // .populate("services");
-      // .populate({
-      //   path: "services",
-      //   populate: { path: "services" },
-      // });
+      const patients = await Registration.find()
+        .populate("patientId")
+        .populate("referral")
+        .populate("services");
+
       console.log(patients);
 
       res.status(200).json(patients);
@@ -169,10 +166,10 @@ const Servicescontroller = {
     try {
       const userId = req.params.userId;
       const usertobefound = new mongoose.Types.ObjectId(userId);
-      const patients = await Registration.find({ userId: usertobefound });
-      // .populate("patientId")
-      // .populate("referral");
-      // .populate({ path: "tests", populate: { path: "tests" } });
+      const patients = await Registration.find({ userId: usertobefound })
+        .populate("patientId")
+        .populate("referral")
+        .populate({ path: "tests", populate: { path: "tests" } });
 
       console.log("This is patients", patients);
 

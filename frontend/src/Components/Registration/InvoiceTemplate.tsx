@@ -138,7 +138,7 @@ const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => (
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.companyInfo}>
-          <Image src="/frontend/src/images/logo.png" />
+          <Image src="/logo.png" />
           <Text style={styles.companyName}>ProLabs Diagnostics</Text>
         </View>
         <View>

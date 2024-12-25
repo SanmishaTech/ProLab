@@ -29,7 +29,7 @@ import { Icons } from "@/Dashboard/Icon";
 import { Editor } from "@/Components/Editor/Editor";
 import Navbar from "@/Navbar/Navbarcomp";
 import { navItems } from "@/Config/data";
-import PaymentDetails from './Components/Registration/PaymentDetails';
+import PaymentDetails from "./Components/Registration/PaymentDetails";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -148,6 +148,7 @@ function App() {
         <Route path="/collectionmaster/edit/:id" element={<Dashboard />} />
         <Route path="/registration/patient/add" element={<Dashboard />} />
         <Route path="/registration/referral/add" element={<Dashboard />} />
+        <Route path="/samplecollection" element={<Dashboard />} />
         <Route path="/registration/payment/:id" element={<PaymentDetails />} />
       </Routes>
     </>

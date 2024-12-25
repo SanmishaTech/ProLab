@@ -31,21 +31,17 @@ export default function RegistrationsPage() {
         { label: "Dashboard", href: "/dashboard" },
         { label: "Registrations" },
       ],
-      searchPlaceholder: "Search registrations...",
+      searchPlaceholder: "Search Sample Collection...",
       userAvatar: "/path-to-avatar.jpg",
       tableColumns: {
-        title: "Registrations",
-        description: "Manage patient registrations and view their details.",
+        title: "Sample Collection",
+        description: "Manage  Sample Collection and view their details.",
         headers: [
-          { label: "Name", key: "patientName" },
-          { label: "Age", key: "patientAge" },
-          { label: "Gender", key: "gender" },
-          { label: "Phone", key: "phone" },
-          { label: "Amount due", key: "balanceAmount" },
-          { label: "Paid Amount", key: "paymentMode" },
-          // { label: "Report Due", key: "referralName" },
-          { label: "Report Due Date", key: "dueDate" },
-          // { label: "Referral", key: "referralName" },
+          { label: "SID", key: "sid" },
+          { label: "Patient Name", key: "patientName" },
+          { label: "Registration Date", key: "regDate" },
+          { label: "Tests", key: "tests" },
+          { label: "Action", key: "actions" },
         ],
         tabs: [
           { label: "All", value: "all" },
@@ -118,28 +114,24 @@ export default function RegistrationsPage() {
     item?.paymentMode.map((payment) => {
       TotalPaid += payment.paidAmount;
     });
+
+    console.log("Services", item);
     // console.log("Services", services);
     const Age = new Date(item?.patientId?.age)?.toLocaleDateString();
     const SubmissionDate = new Date(item?.completionDate)?.toLocaleDateString();
     console.log(item);
     return {
       _id: item?._id,
-      patientName: item?.patientId?.firstName || "Patient Name Not Found",
-      patientAge: Age || "No age mentioned",
-      gender: item?.patientId?.gender || "No gender mentioned",
-      phone: item?.patientId?.mobile || "No phone Mentioned",
-      // balanceAmount: balanceAmount || 0, // Calculate balance amount
-      paymentMode: TotalPaid || "Payment not provided",
-      // referralName: item?.completionDays || "Due date not provided",
-      // referralName: item?.referral?.name || "N/A",
-      dueDate: SubmissionDate || "Due date not provided",
-      Tests: Tests.map((test) => ({
+      sid: item?._id || "Patient Name Not Found",
+      patientName: item?.patientId?.firstName || "No name mentioned",
+      regDate:
+        new Date(item?.createdAt)?.toLocaleDateString() || "No date mentioned",
+      tests: Tests.map((test) => ({
         name: test?.tests?.name,
         description: test?.tests?.paymentMode?.paidAmount,
         urgent: test?.urgent ? "Yes" : "No",
         price: test?.tests?.price || 0,
-      })), // Display service details (name, price, urgent status)
-      createdAt: item?.createdAt,
+      })),
     };
   });
 
