@@ -263,10 +263,14 @@ export default function Dashboard({
                     label="Date Range"
                     className="w-full bg-white drop-shadow-none"
                     onChange={handleDateRangeChange}
-                    value={dateRange.startDate && dateRange.endDate ? {
-                      start: dateRange.startDate,
-                      end: dateRange.endDate
-                    } : null}
+                    value={
+                      dateRange.startDate && dateRange.endDate
+                        ? {
+                            start: dateRange.startDate,
+                            end: dateRange.endDate,
+                          }
+                        : null
+                    }
                   />
                 </div>
               </TabsList>
@@ -328,7 +332,8 @@ export default function Dashboard({
                           <TableRow>
                             {tableColumns.headers.map((header, index) => {
                               const getCellContent = (): string => {
-                                const value = row[header.key as keyof TableData];
+                                const value =
+                                  row[header.key as keyof TableData];
                                 switch (header.key) {
                                   case "patientName":
                                     return row.patientName;
@@ -345,9 +350,10 @@ export default function Dashboard({
                                   case "paymentMode":
                                     return `₹${row.paymentMode}`;
                                   default:
-                                    return typeof value === 'string' || typeof value === 'number' 
-                                      ? value.toString() 
-                                      : '';
+                                    return typeof value === "string" ||
+                                      typeof value === "number"
+                                      ? value.toString()
+                                      : "";
                                 }
                               };
 
@@ -368,15 +374,22 @@ export default function Dashboard({
                                 aria-expanded={expandedRows.includes(row._id)}
                                 aria-controls={`services-${row._id}`}
                               >
-                                {expandedRows.includes(row._id) ? "Hide" : "Show"} Tests
+                                {expandedRows.includes(row._id)
+                                  ? "Hide"
+                                  : "Show"}{" "}
+                                Tests
                               </Button>
                             </TableCell>
                           </TableRow>
                           {expandedRows.includes(row._id) && (
                             <TableRow>
-                              <TableCell colSpan={tableColumns.headers.length + 1}>
+                              <TableCell
+                                colSpan={tableColumns.headers.length + 1}
+                              >
                                 <div className="p-4 bg-muted rounded-md">
-                                  <h4 className="text-sm font-semibold mb-2 ml-3">Tests</h4>
+                                  <h4 className="text-sm font-semibold mb-2 ml-3">
+                                    Tests
+                                  </h4>
                                   <Table className="mb-4">
                                     <TableHeader>
                                       <TableRow>
@@ -390,9 +403,15 @@ export default function Dashboard({
                                       {row.Tests?.map((service: Test) => (
                                         <TableRow key={service._id}>
                                           <TableCell>{service.name}</TableCell>
-                                          <TableCell>{service.description}</TableCell>
-                                          <TableCell>{service.urgent}</TableCell>
-                                          <TableCell>₹{service.price}</TableCell>
+                                          <TableCell>
+                                            {service.description}
+                                          </TableCell>
+                                          <TableCell>
+                                            {service.urgent}
+                                          </TableCell>
+                                          <TableCell>
+                                            ₹{service.price}
+                                          </TableCell>
                                         </TableRow>
                                       ))}
                                     </TableBody>
