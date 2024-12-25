@@ -153,14 +153,15 @@ interface PaymentDetailsProps {
 }
 
 const PaymentDetailsTemplate: React.FC<PaymentDetailsProps> = ({ data }) => {
+  console.log("DAta for pdf", data);
   const calculateTotals = () => {
-    const subtotal = data.services.reduce(
+    const subtotal = data?.services?.reduce(
       (sum, service) => sum + service?.total,
       0
     );
     const tax = subtotal * 0.085;
     const total = subtotal + tax;
-    const balance = total - data.paymentDetails?.amount;
+    const balance = total - data?.paymentDetails?.amount;
     return { subtotal, tax, total, balance };
   };
 
@@ -207,7 +208,7 @@ const PaymentDetailsTemplate: React.FC<PaymentDetailsProps> = ({ data }) => {
               <Text style={styles?.col3}>Price</Text>
               <Text style={styles?.col4}>Total</Text>
             </View>
-            {data.services.map((service, index) => (
+            {data?.services?.map((service, index) => (
               <View key={index} style={styles?.tableRow}>
                 <Text style={styles?.col1}>{service?.description}</Text>
                 <Text style={styles?.col2}>{service?.quantity}</Text>
@@ -238,34 +239,34 @@ const PaymentDetailsTemplate: React.FC<PaymentDetailsProps> = ({ data }) => {
           <View style={styles?.totalRow}>
             <Text style={styles?.totalLabel}>Amount Paid:</Text>
             <Text style={styles?.totalValue}>
-              ₹{data.paymentDetails.amount.toFixed(2)}
+              ₹{data?.paymentDetails?.amount.toFixed(2)}
             </Text>
           </View>
-          <View style={[styles.totalRow, styles.grandTotal]}>
-            <Text style={styles.totalLabel}>Balance Due:</Text>
-            <Text style={styles.totalValue}>₹{balance.toFixed(2)}</Text>
+          <View style={[styles?.totalRow, styles?.grandTotal]}>
+            <Text style={styles?.totalLabel}>Balance Due:</Text>
+            <Text style={styles?.totalValue}>₹{balance?.toFixed(2)}</Text>
           </View>
         </View>
 
         {/* Payment Details */}
-        <View style={styles.paymentSection}>
-          <Text style={styles.paymentTitle}>Payment Information</Text>
-          <View style={styles.row}>
-            <Text style={styles.label}>Payment Mode:</Text>
-            <Text style={styles.value}>{data.paymentDetails.mode}</Text>
+        <View style={styles?.paymentSection}>
+          <Text style={styles?.paymentTitle}>Payment Information</Text>
+          <View style={styles?.row}>
+            <Text style={styles?.label}>Payment Mode:</Text>
+            <Text style={styles?.value}>{data?.paymentDetails?.mode}</Text>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Payment Date:</Text>
-            <Text style={styles.value}>{data.paymentDetails.date}</Text>
+          <View style={styles?.row}>
+            <Text style={styles?.label}>Payment Date:</Text>
+            <Text style={styles?.value}>{data?.paymentDetails?.date}</Text>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Staff Name:</Text>
-            <Text style={styles.value}>{data.paymentDetails.staffName}</Text>
+          <View style={styles?.row}>
+            <Text style={styles?.label}>Staff Name:</Text>
+            <Text style={styles?.value}>{data?.paymentDetails?.staffName}</Text>
           </View>
         </View>
 
         {/* Footer */}
-        <View style={styles.footer}>
+        <View style={styles?.footer}>
           <Text>
             This is a computer-generated document. No signature is required.
           </Text>

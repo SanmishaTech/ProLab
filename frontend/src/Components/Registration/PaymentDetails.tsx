@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 import {
   Card,
   CardContent,
@@ -70,7 +70,7 @@ const PaymentDetails = () => {
 
   const fetchRegistrationDetails = async () => {
     try {
-      const response = await axios.get(`/api/registration/${id}`);
+      const response = await axios.get(`/api/registration/reference/${id}`);
       setRegistration(response.data);
       setLoading(false);
     } catch (error) {
@@ -94,14 +94,14 @@ const PaymentDetails = () => {
         paymentDate: new Date().toISOString(),
         staffName: User?.username,
         paymentDetails,
-        upiNumber: paymentMode === 'UPI' ? upiNumber : undefined,
-        referenceNumber: paymentMode === 'Card' ? referenceNumber : undefined
+        upiNumber: paymentMode === "UPI" ? upiNumber : undefined,
+        referenceNumber: paymentMode === "Card" ? referenceNumber : undefined,
       };
 
-      await axios.post('/api/registration/payment', paymentData);
+      await axios.post("/api/registration/payment", paymentData);
       toast.success("Payment added successfully");
       fetchRegistrationDetails(); // Refresh the data
-      
+
       // Reset form
       setPaidAmount("");
       setPaymentDetails("");
@@ -121,7 +121,7 @@ const PaymentDetails = () => {
     return <div>Registration not found</div>;
   }
 
-  const totalPaid = registration.paymentHistory.reduce(
+  const totalPaid = registration?.paymentHistory?.reduce(
     (sum, payment) => sum + payment.paidAmount,
     0
   );
@@ -134,22 +134,25 @@ const PaymentDetails = () => {
         <CardHeader>
           <CardTitle>Payment Details</CardTitle>
           <CardDescription>
-            Registration ID: {registration._id}
+            Registration ID: {registration?._id}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
               <h3 className="font-semibold mb-2">Patient Information</h3>
-              <p>Name: {registration.patient.name}</p>
-              <p>Phone: {registration.patient.phone}</p>
+              {console.log("This is registration", registration)}
+              <p>Name: {registration?.patientId?.firstName}</p>
+              <p>Phone: {registration?.patientId?.mobile}</p>
             </div>
             <div>
               <h3 className="font-semibold mb-2">Amount Information</h3>
-              <p>Total Amount: ₹{registration.priceafterhomevisit.toFixed(2)}</p>
-              <p>Total Paid: ₹{totalPaid.toFixed(2)}</p>
+              <p>
+                Total Amount: ₹{registration?.priceafterhomevisit?.toFixed(2)}
+              </p>
+              <p>Total Paid: ₹{totalPaid?.toFixed(2)}</p>
               <p className="font-semibold text-blue-600">
-                Balance: ₹{remainingBalance.toFixed(2)}
+                Balance: ₹{remainingBalance?.toFixed(2)}
               </p>
             </div>
           </div>
@@ -168,15 +171,15 @@ const PaymentDetails = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {registration.paymentHistory.map((payment) => (
-                  <TableRow key={payment._id}>
+                {registration?.paymentHistory?.map((payment) => (
+                  <TableRow key={payment?._id}>
                     <TableCell>
-                      {new Date(payment.paymentDate).toLocaleDateString()}
+                      {new Date(payment?.paymentDate).toLocaleDateString()}
                     </TableCell>
-                    <TableCell>{payment.paymentMode}</TableCell>
-                    <TableCell>₹{payment.paidAmount.toFixed(2)}</TableCell>
-                    <TableCell>{payment.staffName}</TableCell>
-                    <TableCell>{payment.paymentDetails || '-'}</TableCell>
+                    <TableCell>{payment?.paymentMode}</TableCell>
+                    <TableCell>₹{payment?.paidAmount.toFixed(2)}</TableCell>
+                    <TableCell>{payment?.staffName}</TableCell>
+                    <TableCell>{payment?.paymentDetails || "-"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -189,10 +192,7 @@ const PaymentDetails = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Payment Mode</Label>
-                <Select
-                  value={paymentMode}
-                  onValueChange={setPaymentMode}
-                >
+                <Select value={paymentMode} onValueChange={setPaymentMode}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select payment mode" />
                   </SelectTrigger>
@@ -215,7 +215,7 @@ const PaymentDetails = () => {
                 />
               </div>
 
-              {paymentMode === 'UPI' && (
+              {paymentMode === "UPI" && (
                 <div className="space-y-2">
                   <Label>UPI Number</Label>
                   <Input
@@ -226,7 +226,7 @@ const PaymentDetails = () => {
                 </div>
               )}
 
-              {paymentMode === 'Card' && (
+              {paymentMode === "Card" && (
                 <div className="space-y-2">
                   <Label>Reference Number</Label>
                   <Input
@@ -261,4 +261,4 @@ const PaymentDetails = () => {
   );
 };
 
-export default PaymentDetails; 
+export default PaymentDetails;

@@ -1,5 +1,13 @@
-import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import React from "react";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+} from "@react-pdf/renderer";
+import logo from "@/images/logo.png";
 
 interface Service {
   name: string;
@@ -34,8 +42,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   header: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between',
+    flexDirection: "row" as const,
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   companyInfo: {
@@ -43,20 +51,20 @@ const styles = StyleSheet.create({
   },
   companyName: {
     fontSize: 24,
-    color: '#1a56db',
+    color: "#1a56db",
     marginBottom: 8,
   },
   companyDetails: {
-    color: '#666',
+    color: "#666",
     fontSize: 10,
   },
   invoiceTitle: {
     fontSize: 24,
-    textAlign: 'right' as const,
+    textAlign: "right" as const,
   },
   invoiceDetails: {
-    textAlign: 'right' as const,
-    color: '#666',
+    textAlign: "right" as const,
+    color: "#666",
     fontSize: 10,
   },
   section: {
@@ -64,61 +72,62 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   sectionTitle: {
-    backgroundColor: '#f3f6ff',
+    backgroundColor: "#f3f6ff",
     padding: 8,
     marginBottom: 10,
-    color: '#1a56db',
+    color: "#1a56db",
     fontSize: 14,
   },
   table: {
-    width: '100%',
+    width: "100%",
     marginBottom: 10,
   },
   tableRow: {
-    flexDirection: 'row' as const,
+    flexDirection: "row" as const,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
     minHeight: 25,
-    alignItems: 'center',
+    alignItems: "center",
   },
   tableHeader: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
   },
   tableCell: {
     flex: 1,
     padding: 5,
+    textAlign: "center" as const,
   },
   totalRow: {
-    flexDirection: 'row' as const,
-    justifyContent: 'flex-end',
+    flexDirection: "row" as const,
+    justifyContent: "flex-end",
     marginTop: 5,
   },
   totalLabel: {
     width: 150,
-    textAlign: 'right' as const,
+    textAlign: "right" as const,
     paddingRight: 10,
   },
   totalValue: {
     width: 100,
-    textAlign: 'right' as const,
+    textAlign: "right" as const,
   },
   signatureSection: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between',
+    flexDirection: "row" as const,
+    justifyContent: "space-between",
     marginTop: 50,
     paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: "#eee",
   },
   signatureLine: {
     borderTopWidth: 1,
-    borderTopColor: '#000',
+    borderTopColor: "#000",
     width: 200,
     marginTop: 40,
   },
   signatureText: {
     fontSize: 10,
-    textAlign: 'center' as const,
+    textAlign: "center" as const,
     marginTop: 5,
   },
 });
@@ -129,32 +138,33 @@ const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => (
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.companyInfo}>
+          <Image src="/frontend/src/images/logo.png" />
           <Text style={styles.companyName}>ProLabs Diagnostics</Text>
-          <Text style={styles.companyDetails}>123 Healthcare Street</Text>
-          <Text style={styles.companyDetails}>Mumbai, Maharashtra</Text>
-          <Text style={styles.companyDetails}>info@prolabs.com</Text>
-          <Text style={styles.companyDetails}>+91 1234567890</Text>
         </View>
         <View>
           <Text style={styles.invoiceTitle}>INVOICE</Text>
-          <Text style={styles.invoiceDetails}>Invoice #: {data.invoiceNumber}</Text>
-          <Text style={styles.invoiceDetails}>Date: {new Date().toLocaleDateString()}</Text>
+          <Text style={styles.invoiceDetails}>
+            Invoice #: {data.invoiceNumber}
+          </Text>
+          <Text style={styles.invoiceDetails}>
+            Date: {new Date().toLocaleDateString()}
+          </Text>
         </View>
       </View>
 
       {/* Bill To Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Bill To</Text>
-        <Text>{data.patient?.name || ''}</Text>
-        <Text>{data.patient?.phone || ''}</Text>
-      </View>
-
-      {/* Payment Details */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Payment Details</Text>
-        <Text>Mode: {data.paymentMode || ''}</Text>
-        <Text>Date: {new Date().toLocaleDateString()}</Text>
-        <Text>Staff: {data.staffName || ''}</Text>
+        <Text style={styles.sectionTitle}>Invoice Details</Text>
+        <Text style={{ marginLeft: 10 }}>
+          Patient Name: {data.patient?.name || ""}
+        </Text>
+        <Text style={{ marginLeft: 10 }}>
+          Age/Sex: {data?.patient?.age || ""}/ {data.patient?.gender || ""}
+        </Text>
+        <Text style={{ marginLeft: 10 }}>
+          Phone: {data?.patient?.phone || ""}
+        </Text>
+        <Text style={{ marginLeft: 10 }}>Referral: {data?.referral || ""}</Text>
       </View>
 
       {/* Test Details */}
@@ -168,11 +178,13 @@ const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => (
             <Text style={styles.tableCell}>Price</Text>
             <Text style={styles.tableCell}>Total</Text>
           </View>
-          {data.services?.map((service, index) => (
+          {data?.services?.map((service, index) => (
             <View key={index} style={styles.tableRow}>
               <Text style={styles.tableCell}>{service.name}</Text>
-              <Text style={styles.tableCell}>{service.tat || 'Standard'}</Text>
-              <Text style={styles.tableCell}>{service.urgent ? 'Yes' : 'No'}</Text>
+              <Text style={styles.tableCell}>{service.tat || "Standard"}</Text>
+              <Text style={styles.tableCell}>
+                {service.urgent ? "Yes" : "No"}
+              </Text>
               <Text style={styles.tableCell}>₹{service.price.toFixed(2)}</Text>
               <Text style={styles.tableCell}>₹{service.total.toFixed(2)}</Text>
             </View>
@@ -190,11 +202,15 @@ const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => (
         </View>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>After Discount:</Text>
-          <Text style={styles.totalValue}>₹{data.afterDiscount.toFixed(2)}</Text>
+          <Text style={styles.totalValue}>
+            ₹{data.afterDiscount.toFixed(2)}
+          </Text>
         </View>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Home Visit Charges:</Text>
-          <Text style={styles.totalValue}>₹{data.homeVisitCharges.toFixed(2)}</Text>
+          <Text style={styles.totalValue}>
+            ₹{data.homeVisitCharges.toFixed(2)}
+          </Text>
         </View>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total Amount:</Text>
@@ -208,6 +224,16 @@ const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => (
           <Text style={styles.totalLabel}>Balance Due:</Text>
           <Text style={styles.totalValue}>₹{data.balanceDue.toFixed(2)}</Text>
         </View>
+      </View>
+
+      {/* Payment Details */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Payment Details</Text>
+        <Text style={{ marginLeft: 10 }}>Mode: {data.paymentMode || ""}</Text>
+        <Text style={{ marginLeft: 10 }}>
+          Date: {new Date().toLocaleDateString()}
+        </Text>
+        <Text style={{ marginLeft: 10 }}>Staff: {data.staffName || ""}</Text>
       </View>
 
       {/* Signature Section */}
@@ -225,4 +251,4 @@ const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => (
   </Document>
 );
 
-export default InvoiceTemplate; 
+export default InvoiceTemplate;

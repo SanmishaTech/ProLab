@@ -60,10 +60,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import InvoiceTemplate from './InvoiceTemplate';
-import PaymentDetailsTemplate from './PaymentDetailsTemplate';
-import type { BlobProvider } from '@react-pdf/renderer';
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import InvoiceTemplate from "./InvoiceTemplate";
+import PaymentDetailsTemplate from "./PaymentDetailsTemplate";
+import type { BlobProvider } from "@react-pdf/renderer";
 
 interface Item {
   id: string;
@@ -356,7 +356,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
       setAddTestTable([bottomSection]);
       return;
     }
-    if (AddTestTable.some(item => item._id === bottomSection._id)) {
+    if (AddTestTable.some((item) => item._id === bottomSection._id)) {
       return;
     }
     setAddTestTable([...AddTestTable, bottomSection]);
@@ -392,7 +392,9 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
         })),
         totaltestprice: calculatedprice,
         discount: {
-          discountapplied: discounts?.find((item) => item.value === discountType)?._id,
+          discountapplied: discounts?.find(
+            (item) => item.value === discountType
+          )?._id,
           dicountReason: "",
           discountValue: discountType,
         },
@@ -408,7 +410,8 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
           paymentMode: paymentMode,
           paidAmount: Number(paymentmodeprice) || 0,
         },
-        totalBalance: Number(homevisitPricetotal) - Number(paymentmodeprice) || 0,
+        totalBalance:
+          Number(homevisitPricetotal) - Number(paymentmodeprice) || 0,
         paymentDeliveryMode: {
           paymentDeliveryMode: selectedFrameworks,
         },
@@ -425,27 +428,33 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
       const invoiceData = {
         invoiceNumber: `INV-${new Date().getFullYear()}-${response.data._id}`,
         patient: {
-          name: response.data.patient?.name || '',
-          phone: response.data.patient?.phone || ''
+          name: response.data.patientId?.firstName || "",
+          age: response.data.patientId?.age || "",
+          gender: response.data.patientId?.gender || "",
+          phone: response.data.patientId?.mobile || "",
         },
+        referral: response.data.referral?.primaryRefferal?.firstName || "",
         paymentMode: paymentMode,
-        staffName: User?.username || '',
-        services: AddTestTable.map(test => ({
+        staffName: User?.username || "",
+        services: AddTestTable.map((test) => ({
           name: test.name,
-          tat: test.tat || 'Standard',
+          tat: test.tat || "Standard",
           urgent: Boolean(test.urgentTime),
           price: Number(test.price) || 0,
-          total: Number(test.price) || 0
+          total: Number(test.price) || 0,
         })),
         subtotal: calculatedprice,
         discount: calculatedprice - subtotalPrice,
-        discountName: discounts?.find((item) => item.value === discountType)?.description || 'No Discount',
+        discountName:
+          discounts?.find((item) => item.value === discountType)?.description ||
+          "No Discount",
         afterDiscount: subtotalPrice,
         homeVisitCharges: Number(homevisit) || 0,
         totalAmount: Number(homevisitPricetotal) || 0,
         amountPaid: Number(paymentmodeprice) || 0,
-        balanceDue: Number(homevisitPricetotal) - Number(paymentmodeprice) || 0
+        balanceDue: Number(homevisitPricetotal) - Number(paymentmodeprice) || 0,
       };
+      console.log("Invoice Data", invoiceData);
 
       // Generate and download PDFs
       const invoicePdf = (
@@ -455,7 +464,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
         >
           {({ loading }) => (
             <Button disabled={loading}>
-              {loading ? 'Generating Invoice...' : 'Download Invoice'}
+              {loading ? "Generating Invoice..." : "Download Invoice"}
             </Button>
           )}
         </PDFDownloadLink>
@@ -467,8 +476,12 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
           fileName={`payment-details-${invoiceData.invoiceNumber}.pdf`}
         >
           {({ loading }: { loading: boolean }) => (
-            <Button variant="link" disabled={loading} className="text-blue-600 hover:text-blue-800">
-              {loading ? 'Preparing Details...' : '💰 Download Payment Details'}
+            <Button
+              variant="link"
+              disabled={loading}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              {loading ? "Preparing Details..." : "💰 Download Payment Details"}
             </Button>
           )}
         </PDFDownloadLink>
@@ -478,7 +491,9 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
       toast.success(
         <div className="flex flex-col gap-2">
           <div className="font-semibold">Registration successful!</div>
-          <div className="text-sm text-gray-600">Invoice #: {invoiceData.invoiceNumber}</div>
+          <div className="text-sm text-gray-600">
+            Invoice #: {invoiceData.invoiceNumber}
+          </div>
           <div className="flex flex-col gap-1">
             {invoicePdf}
             {paymentDetailsPdf}
@@ -489,7 +504,9 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
       navigate("/registrationlist");
     } catch (error: any) {
       console.error("Error in registration:", error);
-      toast.error(error.response?.data?.error || "Failed to submit registration.");
+      toast.error(
+        error.response?.data?.error || "Failed to submit registration."
+      );
     }
   };
 
@@ -689,7 +706,9 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
                           onValueChange={setPaymentMode}
                         >
                           <SelectTrigger>
-                            <SelectValue>{paymentMode || 'Select payment mode'}</SelectValue>
+                            <SelectValue>
+                              {paymentMode || "Select payment mode"}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="cash">Cash</SelectItem>

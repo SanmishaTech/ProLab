@@ -110,6 +110,23 @@ const paymentDeliverySchema = new mongoose.Schema({
     },
   ],
 });
+const paymentHistorySchema = new mongoose.Schema({
+  paymentMode: {
+    type: String,
+  },
+  paidAmount: {
+    type: Number,
+  },
+  paymentDate: {
+    type: String,
+  },
+  staffName: {
+    type: String,
+  },
+  paymentDetails: {
+    type: String,
+  },
+});
 
 const registrationSchema = new mongoose.Schema(
   {
@@ -145,6 +162,7 @@ const registrationSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    paymentHistory: [paymentHistorySchema],
   },
   { timestamps: true }
 );

@@ -127,11 +127,20 @@ const Servicescontroller = {
       });
 
       await newRegistration.save();
+      const populatedRegistration = await Registration.findById(
+        newRegistration._id
+      )
+        .populate("patientId") // Replace with the actual field name in your schema
+        .populate("userId") // Add other fields to populate as necessary
+        .populate("tests") // Populate `tests` if it references another model
+        .populate({
+          path: "referral",
+          populate: {
+            path: "primaryRefferal",
+          },
+        });
 
-      res.status(201).json({
-        message: "Registration created successfully",
-        registration: newRegistration,
-      });
+      res.status(201).json(populatedRegistration);
     } catch (error) {
       console.error("Error creating registration:", error);
       res.status(500).json({ error: error.message });
@@ -160,10 +169,12 @@ const Servicescontroller = {
     try {
       const userId = req.params.userId;
       const usertobefound = new mongoose.Types.ObjectId(userId);
-      const patients = await Registration.find({ userId: usertobefound })
-        .populate("patientId")
-        .populate("referral")
-        .populate({ path: "tests", populate: { path: "tests" } });
+      const patients = await Registration.find({ userId: usertobefound });
+      // .populate("patientId")
+      // .populate("referral");
+      // .populate({ path: "tests", populate: { path: "tests" } });
+
+      console.log("This is patients", patients);
 
       res.status(200).json(patients);
     } catch (error) {
@@ -173,8 +184,39 @@ const Servicescontroller = {
   getServicesbyId: async (req, res, next) => {
     try {
       const referenceId = req.params.referenceId;
-      const reference = await Reference.findById(referenceId);
+      const reference = await Registration.findById(referenceId)
+        .populate("patientId")
+        .populate("referral")
+        .populate({ path: "tests", populate: { path: "tests" } });
       res.status(200).json(reference);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+  createpayment: async (req, res, next) => {
+    try {
+      const {
+        paymentMode,
+        paidAmount,
+        paymentDate,
+        staffName,
+        upiNumber,
+        referenceNumber,
+      } = req.body;
+      const newService = new Payment({
+        paymentMode,
+        paidAmount,
+        paymentDate,
+        staffName,
+        upiNumber,
+        referenceNumber,
+      });
+      const newServics = await newService.save();
+
+      res.json({
+        message: "Payment created successfully",
+        service: newServics,
+      });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -184,7 +226,7 @@ const Servicescontroller = {
       const referenceId = req.params.referenceId;
       const { name } = req.body;
 
-      const newService = await Reference.findByIdAndUpdate(
+      const newService = await Registration.findByIdAndUpdate(
         referenceId,
         {
           name,
