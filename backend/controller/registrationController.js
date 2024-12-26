@@ -169,7 +169,15 @@ const Servicescontroller = {
       const patients = await Registration.find({ userId: usertobefound })
         .populate("patientId")
         .populate("referral")
-        .populate({ path: "tests", populate: { path: "tests" } });
+        .populate({
+          path: "tests",
+          populate: {
+            path: "tests",
+            populate: {
+              path: "department",
+            },
+          },
+        });
 
       console.log("This is patients", patients);
 
@@ -184,7 +192,15 @@ const Servicescontroller = {
       const reference = await Registration.findById(referenceId)
         .populate("patientId")
         .populate("referral")
-        .populate({ path: "tests", populate: { path: "tests" } });
+        .populate({
+          path: "tests",
+          populate: {
+            path: "tests",
+            populate: {
+              path: "department",
+            },
+          },
+        });
       res.status(200).json(reference);
     } catch (error) {
       res.status(500).json({ error: error.message });

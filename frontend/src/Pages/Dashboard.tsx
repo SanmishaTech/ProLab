@@ -51,6 +51,8 @@ import CollectionMaster from "@/Components/CollectionMaster/Registertable";
 import CollectionAdd from "@/Components/CollectionMaster/TestCard";
 import DashboardEditTest from "@/Components/CollectionMaster/Edittestcard";
 import SampleCollection from "@/Components/SampleCollection/Registertable";
+import Innnerfile from "@/Components/SampleCollection/Innersamplecollection";
+import Workinghours from "@/Components/Workinghours/Workinghours";
 
 const Dashboard = () => {
   const location = useLocation();
@@ -135,6 +137,11 @@ const Dashboard = () => {
         )}
         {location.pathname === "/registration/referral/add" && <TestCard />}
         {location.pathname === "/samplecollection" && <SampleCollection />}
+        {location.pathname === "/workhours" && <Workinghours />}
+
+        {/\/samplecollection\/collect\/\d+/.test(location.pathname) && (
+          <Innnerfile />
+        )}
       </main>
     </div>
   );

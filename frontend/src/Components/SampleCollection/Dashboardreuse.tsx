@@ -346,7 +346,17 @@ export default function Dashboard({
                                       .join(", ");
 
                                   case "actions":
-                                    return <Button>Select</Button>;
+                                    return (
+                                      <Button
+                                        onClick={() =>
+                                          navigate(
+                                            `/samplecollection/collect/${row._id}`
+                                          )
+                                        }
+                                      >
+                                        Select
+                                      </Button>
+                                    );
 
                                   default:
                                     return typeof value === "string" ||

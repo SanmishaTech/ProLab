@@ -30,6 +30,7 @@ import { Editor } from "@/Components/Editor/Editor";
 import Navbar from "@/Navbar/Navbarcomp";
 import { navItems } from "@/Config/data";
 import PaymentDetails from "./Components/Registration/PaymentDetails";
+import Innnerfile from "@/Components/SampleCollection/Innersamplecollection";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -149,6 +150,8 @@ function App() {
         <Route path="/registration/patient/add" element={<Dashboard />} />
         <Route path="/registration/referral/add" element={<Dashboard />} />
         <Route path="/samplecollection" element={<Dashboard />} />
+        <Route path="/workhours" element={<Dashboard />} />
+        <Route path="/samplecollection/collect/:id" element={<Dashboard />} />
         <Route path="/registration/payment/:id" element={<PaymentDetails />} />
       </Routes>
     </>
