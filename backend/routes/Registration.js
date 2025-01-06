@@ -7,6 +7,7 @@ router.get("/allregistration/:userId", Registration.getServices);
 router.get("/reference/:referenceId", Registration.getServicesbyId);
 router.put("/update/:referenceId", Registration.updateThreads);
 router.post("/payment", Registration.createpayment);
+router.post("/calculate-completion", Registration.calculateCompletionTime);
 // router.delete("/delete/:serviceId", Servicescontroller.deleteThread);
 
 module.exports = router;

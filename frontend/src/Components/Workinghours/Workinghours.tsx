@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Card,
   CardContent,
@@ -19,6 +20,7 @@ import {
 import { TimeInput } from "@nextui-org/react";
 import { Time } from "@internationalized/date";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 const data = [
   "Monday",
@@ -31,14 +33,35 @@ const data = [
 ];
 
 const Workinghours = () => {
+  const user = localStorage.getItem("user");
+  const User = JSON.parse(user || "{}");
   const [workingHours, setWorkingHours] = useState(
     data.map((day) => ({
-      day,
+      day: day.toLowerCase(),
       nonWorkingDay: false,
-      time: { from: new Time(9, 0), to: new Time(17, 0) },
-      break: { from: new Time(12, 0), to: new Time(13, 0) },
+      workingHours: { from: "09:00", to: "17:00" },
+      break: { from: "13:00", to: "14:00" }
     }))
   );
+
+  useEffect(() => {
+    // Fetch working hours when component mounts
+    const fetchWorkingHours = async () => {
+      try {
+        const response = await axios.get(`/api/workinghours/${User?._id}`);
+        if (response.data?.schedule) {
+          setWorkingHours(response.data.schedule);
+        }
+      } catch (error) {
+        console.error("Error fetching working hours:", error);
+        toast.error("Failed to load working hours");
+      }
+    };
+
+    if (User?._id) {
+      fetchWorkingHours();
+    }
+  }, [User?._id]);
 
   const handleInputChange = (index, field, subField, value) => {
     setWorkingHours((prev) => {
@@ -52,24 +75,31 @@ const Workinghours = () => {
     });
   };
 
-  const handleSubmit = () => {
-    // Prepare the state data for submission
-    const payload = workingHours.map((entry) => ({
-      day: entry.day,
-      nonWorkingDay: entry.nonWorkingDay,
-      timeFrom: entry.time.from.toString(),
-      timeTo: entry.time.to.toString(),
-      breakFrom: entry.break.from.toString(),
-      breakTo: entry.break.to.toString(),
-    }));
+  const handleSubmit = async () => {
+    try {
+      // Prepare the state data for submission
+      const payload = {
+        userId: User?._id,
+        schedule: workingHours.map((entry) => ({
+          day: entry.day,
+          nonWorkingDay: entry.nonWorkingDay,
+          workingHours: {
+            from: entry.workingHours.from,
+            to: entry.workingHours.to
+          },
+          break: {
+            from: entry.break.from,
+            to: entry.break.to
+          }
+        }))
+      };
 
-    console.log("Payload to send to backend:", payload);
-    // Here, you can replace the console.log with an actual API call, e.g.,
-    // fetch('/api/working-hours', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(payload),
-    // });
+      await axios.post("/api/workinghours", payload);
+      toast.success("Working hours updated successfully");
+    } catch (error) {
+      console.error("Error saving working hours:", error);
+      toast.error("Failed to save working hours");
+    }
   };
 
   return (
@@ -115,12 +145,6 @@ const Workinghours = () => {
                   <Checkbox
                     checked={entry.nonWorkingDay}
                     onChange={(e) => {
-                      console.log(
-                        "Checkbox toggled for",
-                        entry.day,
-                        ":",
-                        e.target.checked
-                      );
                       handleInputChange(
                         index,
                         "nonWorkingDay",
@@ -134,17 +158,17 @@ const Workinghours = () => {
                 <TableCell colSpan={1} className="border-r-2 text-center">
                   <div className="flex justify-evenly gap-4 text-left ">
                     <TimeInput
-                      value={entry.time.from}
+                      value={entry.workingHours.from}
                       label="Start Time"
                       onChange={(value) =>
-                        handleInputChange(index, "time", "from", value)
+                        handleInputChange(index, "workingHours", "from", value)
                       }
                     />
                     <TimeInput
-                      value={entry.time.to}
+                      value={entry.workingHours.to}
                       label="End Time"
                       onChange={(value) =>
-                        handleInputChange(index, "time", "to", value)
+                        handleInputChange(index, "workingHours", "to", value)
                       }
                     />
                   </div>
@@ -177,7 +201,7 @@ const Workinghours = () => {
           onClick={handleSubmit}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          Submit
+          Save Working Hours
         </button>
       </CardFooter>
     </Card>

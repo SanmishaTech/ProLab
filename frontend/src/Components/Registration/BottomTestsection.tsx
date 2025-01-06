@@ -205,41 +205,74 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     calculateDiscount();
   }, [discountType, calculatedprice]);
 
-  // Function to toggle urgency
-  const toggleUrgent = (id: string) => {
-    setItems(
-      items.map((item) =>
-        item.id === id ? { ...item, urgent: !item.urgent } : item
-      )
-    );
+  // Function to calculate completion time for a test
+  const calculateTestCompletionTime = async (test, isUrgent) => {
+    try {
+      // Get working hours
+      const workingHoursResponse = await axios.get(`/api/workinghours/${User?._id}`);
+      const workingHours = workingHoursResponse.data;
+
+      // Get holidays
+      const holidaysResponse = await axios.get('/api/holiday');
+      const holidays = holidaysResponse.data;
+
+      // Calculate completion time
+      const response = await axios.post('/api/registration/calculate-completion', {
+        startTime: new Date(),
+        duration: isUrgent ? test.urgentTime : test.tat,
+        workingHours,
+        holidays
+      });
+
+      return response.data.completionDate;
+    } catch (error) {
+      console.error('Error calculating completion time:', error);
+      return null;
+    }
+  };
+
+  // Function to handle test selection
+  const handleTestSelect = async (test) => {
+    const isUrgent = false; // You can add UI to toggle this
+    const completionTime = await calculateTestCompletionTime(test, isUrgent);
+
+    setItems(prev => [...prev, {
+      ...test,
+      urgent: isUrgent,
+      startTime: new Date(),
+      expectedCompletionTime: completionTime
+    }]);
+  };
+
+  // Function to toggle urgent status
+  const toggleUrgent = async (index) => {
+    const test = items[index];
+    const newUrgent = !test.urgent;
+    const completionTime = await calculateTestCompletionTime(test, newUrgent);
+
+    setItems(prev => {
+      const updated = [...prev];
+      updated[index] = {
+        ...test,
+        urgent: newUrgent,
+        expectedCompletionTime: completionTime
+      };
+      return updated;
+    });
   };
 
   // Function to calculate subtotal
   const calculateSubtotal = () => {
-    console.log("this is a item in calcuate", items);
     return items.reduce((total, item) => {
-      console.log("this is a item in reduce", total);
       const pricePerUnit = item.urgent ? item.urgentPrice : item.price;
       const itemTotal = Number(pricePerUnit) * Number(item.quantity);
       return total + (isNaN(itemTotal) ? 0 : itemTotal);
     }, 0);
   };
 
-  // const shipping = 5; // Adjust as needed
-  // const tax = Math.round(calculateSubtotal() * 0.08 * 100) / 100;
-  const total = calculateSubtotal();
-
-  // Function to calculate completionDays
-  const calculateCompletionDays = () => {
-    const durations = items.map((item) =>
-      item.urgent ? item.urgentDuration : item.durationInDays
-    );
-    return durations.length ? Math.max(...durations) : 0;
-  };
-
   const handleSubmit = async () => {
     if (items.length === 0) {
-      toast.error("Please add at least one service to the order.");
+      toast.error("Please add at least one test to the order.");
       return;
     }
 
@@ -260,29 +293,40 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
       return;
     }
 
-    // Prepare services with urgency flags
-    const servicesWithUrgency = items.map((item) => ({
-      serviceId: item.id,
-      urgent: item.urgent,
-    }));
-
     try {
+      // Prepare tests with TAT information
+      const testsWithTAT = items.map(item => ({
+        tests: item.id,
+        tat: item.urgent ? item.urgentTime : item.tat,
+        urgent: item.urgent,
+        price: item.urgent ? item.urgentPrice : item.price,
+        startTime: new Date(),
+        expectedCompletionTime: item.expectedCompletionTime
+      }));
+
       const response = await axios.post("/api/registration", {
         patientId: topComp?.patientId,
         referral: topComp?.referralId,
-        services: servicesWithUrgency,
+        tests: testsWithTAT,
+        totaltestprice: calculateSubtotal(),
+        discount,
+        priceAfterDiscount,
+        homevisit,
+        priceafterhomevisit,
         paymentMode: {
           paymentMode: paymentMode,
           paidAmount: numericPaidAmount,
         },
+        totalBalance,
+        paymentDeliveryMode,
         userId: User?._id,
-        // Remove completionDays as it's calculated on the backend
+        registrationTime: new Date()
       });
 
       console.log(response.data);
       toast.success("Registration created successfully!");
       navigate("/registrationlist");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error submitting registration:", error);
       toast.error(
         error.response?.data?.error || "Failed to submit registration."

@@ -50,18 +50,18 @@ const testSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "TestMaster",
   },
-
-  tat: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "TatMaster",
-      required: true,
-      default: null,
-    },
-  ],
+  tat: {
+    type: Number,  // Hours needed for the test
+    required: true,
+    default: 24
+  },
+  urgent: {
+    type: Boolean,
+    default: false
+  },
   urgentTime: {
-    type: Date,
-    default: null,
+    type: Number,  // Hours needed for urgent processing
+    default: null
   },
   outsourced: {
     type: Boolean,
@@ -71,6 +71,14 @@ const testSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  startTime: {
+    type: Date,
+    default: Date.now
+  },
+  expectedCompletionTime: {
+    type: Date,
+    required: true
+  }
 });
 
 const discountschema = new mongoose.Schema({
@@ -174,6 +182,19 @@ const registrationSchema = new mongoose.Schema(
     },
     paymentHistory: [paymentHistorySchema],
     collectionCenter: [collectionCenter],
+    registrationTime: {
+      type: Date,
+      default: Date.now
+    },
+    maxCompletionTime: {
+      type: Date,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'in_progress', 'completed', 'delayed'],
+      default: 'pending'
+    }
   },
   { timestamps: true }
 );

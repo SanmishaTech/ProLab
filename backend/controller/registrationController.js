@@ -2,8 +2,9 @@ const Registration = require("../Schema/registration");
 const mongoose = require("mongoose");
 const Service = require("../Schema/services");
 const Holiday = require("../Schema/holiday");
+const WorkingHours = require("../Schema/workinghours");
 const { HolidayIndex } = require("../congif");
-// Utility function to add days to a date
+
 // Utility function to add days to a date
 const addDays = (date, days) => {
   const result = new Date(date);
@@ -29,7 +30,7 @@ const isWeekend = (date) => {
     console.log("This is a holiday day");
     bol = true;
   }
-  return bol; // Sunday = 0, Saturday = 6
+  return bol;
 };
 
 // Utility function to check if a date is a holiday
@@ -41,42 +42,65 @@ const isHoliday = (date, holidays) => {
   );
 };
 
+// Utility function to get working hours for a day
+const getWorkingHours = async (userId, dayOfWeek) => {
+  const workingHours = await WorkingHours.findOne({ userId });
+  if (!workingHours) {
+    // Return default working hours
+    return {
+      nonWorkingDay: dayOfWeek === "sunday",
+      workingHours: { from: "09:00", to: "17:00" },
+      break: { from: "13:00", to: "14:00" }
+    };
+  }
+
+  const schedule = workingHours.schedule.find(s => s.day === dayOfWeek);
+  return schedule;
+};
+
+// Utility function to calculate hours between times accounting for breaks
+const calculateWorkingHours = (startTime, endTime, breakTime) => {
+  const [startHour, startMinute] = startTime.split(":").map(Number);
+  const [endHour, endMinute] = endTime.split(":").map(Number);
+  const [breakStartHour, breakStartMinute] = breakTime.from.split(":").map(Number);
+  const [breakEndHour, breakEndMinute] = breakTime.to.split(":").map(Number);
+
+  let totalMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+  const breakMinutes = (breakEndHour * 60 + breakEndMinute) - (breakStartHour * 60 + breakStartMinute);
+
+  // If work spans break time, subtract break duration
+  if (startHour < breakStartHour && endHour > breakEndHour) {
+    totalMinutes -= breakMinutes;
+  }
+
+  return totalMinutes / 60; // Convert to hours
+};
+
 // **Final Revised calculateCompletionDate Function**
-const calculateCompletionDate = (startDate, maxDuration, holidays) => {
+const calculateCompletionDate = async (startDate, maxDuration, holidays, userId) => {
   let workingDaysCounted = 0;
   let currentDate = addDays(startDate, 1); // Start from tomorrow
   let totalDaysAdded = 0;
+  let remainingHours = maxDuration;
 
   console.log("Starting Completion Date Calculation");
   console.log("Start Date:", startDate.toISOString().split("T")[0]);
-  console.log("Max Duration (Working Days):", maxDuration);
+  console.log("Max Duration (Hours):", maxDuration);
 
-  while (workingDaysCounted < maxDuration) {
-    console.log("Evaluating date:", currentDate.toISOString().split("T")[0]);
+  while (remainingHours > 0) {
+    const dayOfWeek = currentDate.toLocaleDateString('en-US', { weekday: 'monday' }).toLowerCase();
+    const daySchedule = await getWorkingHours(userId, dayOfWeek);
 
-    if (!isWeekend(currentDate) && !isHoliday(currentDate, holidays)) {
-      // It's a working day
-      workingDaysCounted += 1;
-      console.log(
-        "Working day counted:",
-        currentDate.toISOString().split("T")[0],
-        "- Total Working Days Counted:",
-        workingDaysCounted
+    if (!daySchedule.nonWorkingDay && !isHoliday(currentDate, holidays)) {
+      // Calculate working hours for this day
+      const hoursToday = calculateWorkingHours(
+        daySchedule.workingHours.from,
+        daySchedule.workingHours.to,
+        daySchedule.break
       );
-    } else {
-      if (isWeekend(currentDate)) {
-        console.log(
-          "Weekend skipped:",
-          currentDate.toISOString().split("T")[0]
-        );
-      }
-      if (isHoliday(currentDate, holidays)) {
-        console.log(
-          "Holiday skipped:",
-          currentDate.toISOString().split("T")[0]
-        );
-      }
-      // Non-working day; do not count
+
+      remainingHours -= hoursToday;
+      workingDaysCounted += 1;
     }
 
     // Move to the next day
@@ -93,6 +117,24 @@ const calculateCompletionDate = (startDate, maxDuration, holidays) => {
 };
 
 const Servicescontroller = {
+  calculateCompletionTime: async (req, res) => {
+    try {
+      const { startTime, duration, workingHours, holidays } = req.body;
+
+      const { completionDate, totalCompletionDays } = await calculateCompletionDate(
+        new Date(startTime),
+        duration,
+        holidays,
+        workingHours.userId
+      );
+
+      res.status(200).json({ completionDate, totalCompletionDays });
+    } catch (error) {
+      console.error("Error calculating completion time:", error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
   createThread: async (req, res, next) => {
     try {
       const {
@@ -110,11 +152,31 @@ const Servicescontroller = {
         userId,
       } = req.body;
 
-      // Create the new registration with the calculated completionDays
+      // Get holidays
+      const holidays = await Holiday.find();
+
+      // Calculate max duration from tests
+      const maxDuration = tests.reduce((max, test) => {
+        const duration = test.urgent ? test.urgentTime : test.tat;
+        return Math.max(max, duration);
+      }, 0);
+
+      // Calculate completion date using working hours
+      const { completionDate, totalCompletionDays } = await calculateCompletionDate(
+        new Date(),
+        maxDuration,
+        holidays,
+        userId
+      );
+
+      // Create the new registration with the calculated completion date
       const newRegistration = new Registration({
         patientId,
         referral,
-        tests,
+        tests: tests.map(test => ({
+          ...test,
+          expectedCompletionTime: test.expectedCompletionTime || completionDate
+        })),
         totaltestprice,
         discount,
         priceAfterDiscount,
@@ -124,15 +186,16 @@ const Servicescontroller = {
         totalBalance,
         paymentDeliveryMode,
         userId,
+        maxCompletionTime: completionDate
       });
 
       await newRegistration.save();
       const populatedRegistration = await Registration.findById(
         newRegistration._id
       )
-        .populate("patientId") // Replace with the actual field name in your schema
-        .populate("userId") // Add other fields to populate as necessary
-        .populate("tests") // Populate `tests` if it references another model
+        .populate("patientId")
+        .populate("userId")
+        .populate("tests")
         .populate({
           path: "referral",
           populate: {
