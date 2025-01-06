@@ -188,6 +188,17 @@ const Servicescontroller = {
         userId,
         maxCompletionTime: completionDate
       });
+      const collectionCenter = [
+        {
+          collectionCenterName: "Impact Dignostics",
+          collectionTime: new Date(),
+        },
+      ];
+
+      newRegistration.updateOne(
+        { $set: { collectionCenter: collectionCenter } },
+        { new: true }
+      );
 
       await newRegistration.save();
       const populatedRegistration = await Registration.findById(
@@ -264,6 +275,7 @@ const Servicescontroller = {
             },
           },
         });
+
       res.status(200).json(reference);
     } catch (error) {
       res.status(500).json({ error: error.message });

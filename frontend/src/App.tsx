@@ -150,6 +150,8 @@ function App() {
         <Route path="/registration/patient/add" element={<Dashboard />} />
         <Route path="/registration/referral/add" element={<Dashboard />} />
         <Route path="/samplecollection" element={<Dashboard />} />
+        <Route path="/accession" element={<Dashboard />} />
+        <Route path="/accession/verification" element={<Dashboard />} />
         <Route path="/workhours" element={<Dashboard />} />
         <Route path="/samplecollection/collect/:id" element={<Dashboard />} />
         <Route path="/registration/payment/:id" element={<PaymentDetails />} />

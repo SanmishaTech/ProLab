@@ -24,13 +24,10 @@ import { now, getLocalTimeZone } from "@internationalized/date";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
-const alltests = new Map();
-
 const Innersamplecollection = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedTests, setSelectedTests] = useState([]);
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
   const { id } = useParams<{ id: string }>();
@@ -79,34 +76,7 @@ const Innersamplecollection = () => {
         updated[index][field] = value;
       }
 
-      const dateObj = updated[index].dateTime;
-
-      const formattedDate = new Date(
-        dateObj.year,
-        dateObj.month - 1, // JavaScript months are 0-based
-        dateObj.day,
-        dateObj.hour,
-        dateObj.minute
-      );
-
-      // Format as ISO 8601
-      const isoString = formattedDate.toISOString();
-
-      // Format as Human-Readable
-      const humanReadable =
-        `${String(dateObj.day).padStart(2, "0")}/${String(
-          dateObj.month
-        ).padStart(2, "0")}/${dateObj.year} ` +
-        `${String(dateObj.hour).padStart(2, "0")}:${String(dateObj.minute)}`;
-
-      console.log("ISO 8601:", isoString);
-      console.log("Human-Readable:", humanReadable);
-      setData((prev) => {
-        const updatedData = [...prev];
-        console.log("Updated data:", updatedData[index]);
-        updatedData[index].dateTime = humanReadable;
-        return updatedData;
-      });
+      console.log("Updated workingHours:", updated);
       return updated;
     });
   };
@@ -139,7 +109,7 @@ const Innersamplecollection = () => {
         const invoices = Array.isArray(response?.data)
           ? response.data.flatMap((item) =>
               item?.tests?.map((test) => ({
-                invoice: item?.tests?._id,
+                invoice: item?._id,
                 department: test?.tests?.department?.name || "N/A",
                 sid: item?.sid || "N/A",
                 patientName: item?.patientId?.firstName || "N/A",
@@ -156,7 +126,7 @@ const Innersamplecollection = () => {
             )
           : Object.keys(response?.data || {}).length
           ? response?.data?.tests?.map((test) => ({
-              invoice: test?.tests?._id,
+              invoice: response.data?._id,
               department: test?.tests?.department?.name || "N/A",
               sid: response.data?.sid || "N/A",
               patientName: response.data?.patientId?.firstName || "N/A",
@@ -173,14 +143,7 @@ const Innersamplecollection = () => {
             }))
           : [];
         console.log("Invoices:", invoices);
-        console.log("response.data?.test?.tests", response.data);
-        response.data?.tests?.map((test) => {
-          console.log("test", test);
-          alltests.set(test?.tests._id, test?.tests);
-          console.log("alltests", alltests);
-        });
 
-        console.log("alltests:", alltests);
         setData(invoices);
 
         setLoading(false);
@@ -197,23 +160,6 @@ const Innersamplecollection = () => {
     return text.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
-  const handlesubmit = () => {
-    const selectedTestsWithData = selectedTests.map(
-      ({ invoiceId, dateTime }) => {
-        const test = alltests.get(invoiceId);
-        return {
-          ...test,
-          collectionDateTime: dateTime,
-        };
-      }
-    );
-
-    console.log("Selected tests with datetime:", selectedTestsWithData);
-    // Here you can send selectedTestsWithData to your backend
-  };
-  useEffect(() => {
-    console.log("sometdata", data);
-  }, [data]);
   return (
     <Card className="m-4 mt-20">
       <CardHeader>
@@ -222,23 +168,10 @@ const Innersamplecollection = () => {
       </CardHeader>
       <CardContent>
         <Table>
+          <TableCaption>A list of your recent invoices.</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">
-                <Checkbox
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      const allTests = data.map((item) => ({
-                        invoiceId: item.invoice,
-                        dateTime: item.dateTime || new Date().toISOString(),
-                      }));
-                      setSelectedTests(allTests);
-                    } else {
-                      setSelectedTests([]);
-                    }
-                  }}
-                />
-              </TableHead>
+              <TableHead className="w-[100px]">checkbox</TableHead>
               <TableHead className="w-[100px]">Department</TableHead>
               <TableHead>Sid</TableHead>
               <TableHead>Patient Name</TableHead>
@@ -256,29 +189,7 @@ const Innersamplecollection = () => {
             {data.map((invoice, index) => (
               <TableRow key={`${invoice.invoice}_${index}`}>
                 <TableCell className="font-medium">
-                  <Checkbox
-                    checked={selectedTests.some(
-                      (item) => item.invoiceId === invoice.invoice
-                    )}
-                    onCheckedChange={(checked) => {
-                      setSelectedTests((prev) => {
-                        if (checked) {
-                          return [
-                            ...prev,
-                            {
-                              invoiceId: invoice.invoice,
-                              dateTime:
-                                invoice.dateTime || new Date().toISOString(),
-                            },
-                          ];
-                        } else {
-                          return prev.filter(
-                            (item) => item.invoiceId !== invoice.invoice
-                          );
-                        }
-                      });
-                    }}
-                  />
+                  <Checkbox />
                 </TableCell>
                 <TableCell className="font-medium">
                   {capitalizeText(invoice?.department)}
@@ -301,81 +212,14 @@ const Innersamplecollection = () => {
                       label="Event Date"
                       variant="bordered"
                       onChange={(value) => {
-                        console.log(value);
-
-                        try {
-                          const {
-                            year,
-                            month,
-                            day,
-                            hour,
-                            minute,
-                            second,
-                            millisecond,
-                            offset,
-                          } = value;
-
-                          // Create a date with the provided details (local time)
-                          const localDate = new Date(
-                            year,
-                            month - 1,
-                            day,
-                            hour,
-                            minute,
-                            second,
-                            millisecond
-                          );
-
-                          // Adjust for the timezone offset (convert to UTC)
-                          const utcDate = new Date(
-                            localDate.getTime() - offset
-                          );
-
-                          // Convert to ISO 8601 format
-                          const isoDateTime = utcDate.toISOString();
-
-                          console.log(isoDateTime); // Log the ISO date string
-
-                          // Update state
-                          setSelectedTests((prev) =>
-                            prev.map((item) => {
-                              if (item.invoiceId === invoice.invoice) {
-                                return { ...item, dateTime: isoDateTime };
-                              }
-                              return item;
-                            })
-                          );
-                        } catch (error) {
-                          console.error("Invalid date format:", value, error);
-                        }
+                        console.log("Date changed:", value);
+                        handleInputChange(index, invoice.test, value);
                       }}
                     />
                   </div>
                 </TableCell>
                 <TableCell className="font-medium">
-                  <Button
-                    onClick={() => {
-                      // Add this test to selectedTests if not already selected
-                      setSelectedTests((prev) => {
-                        const isSelected = prev.some(
-                          (item) => item.invoiceId === invoice.invoice
-                        );
-                        if (!isSelected) {
-                          return [
-                            ...prev,
-                            {
-                              invoiceId: invoice.invoice,
-                              dateTime:
-                                invoice.dateTime || new Date().toISOString(),
-                            },
-                          ];
-                        }
-                        return prev;
-                      });
-                    }}
-                  >
-                    Collect
-                  </Button>
+                  <Button>Accept</Button>
                 </TableCell>
                 <TableCell>{capitalizeText(invoice?.barcode)}</TableCell>
                 <TableCell>{invoice?.rejectionReason}</TableCell>
@@ -393,14 +237,7 @@ const Innersamplecollection = () => {
           </TableFooter>
         </Table>
       </CardContent>
-      <CardFooter className="flex justify-end">
-        <Button
-          onClick={handlesubmit}
-          className=" text-white px-4 py-2 rounded flex justify-end"
-        >
-          Collect
-        </Button>
-      </CardFooter>
+      <CardFooter></CardFooter>
     </Card>
   );
 };

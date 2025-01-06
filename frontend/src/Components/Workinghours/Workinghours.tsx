@@ -40,9 +40,16 @@ const Workinghours = () => {
       day: day.toLowerCase(),
       nonWorkingDay: false,
       workingHours: { from: "09:00", to: "17:00" },
-      break: { from: "13:00", to: "14:00" }
+      break: { from: "13:00", to: "14:00" },
     }))
   );
+  const [nonwrokingdays, setNonwrokingdays] = useState([]);
+
+  const addnonworkingday = (day) => {
+    setNonwrokingdays(
+      nonwrokingdays.includes(day) ? nonwrokingdays : [...nonwrokingdays, day]
+    );
+  };
 
   useEffect(() => {
     // Fetch working hours when component mounts
@@ -85,13 +92,13 @@ const Workinghours = () => {
           nonWorkingDay: entry.nonWorkingDay,
           workingHours: {
             from: entry.workingHours.from,
-            to: entry.workingHours.to
+            to: entry.workingHours.to,
           },
           break: {
             from: entry.break.from,
-            to: entry.break.to
-          }
-        }))
+            to: entry.break.to,
+          },
+        })),
       };
 
       await axios.post("/api/workinghours", payload);
@@ -176,6 +183,7 @@ const Workinghours = () => {
                 <TableCell className="text-center">
                   <div className="flex justify-evenly gap-4 text-left ">
                     <TimeInput
+                      isDisabled={entry.nonWorkingDay}
                       value={entry.break.from}
                       label="Start Time"
                       onChange={(value) =>
@@ -183,6 +191,7 @@ const Workinghours = () => {
                       }
                     />
                     <TimeInput
+                      isDisabled={entry.nonWorkingDay}
                       value={entry.break.to}
                       label="End Time"
                       onChange={(value) =>
