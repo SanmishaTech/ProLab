@@ -31,6 +31,33 @@ export const navItems: NavItem[] = [
     ],
   },
   {
+    title: "Lab Management",
+    href: "/lab",
+    icon: "layers",
+    children: [
+      {
+        title: "Registration",
+        href: "/registration",
+        icon: "notepadText",
+      },
+      {
+        title: "Registration List",
+        href: "/registrationlist",
+        icon: "layers",
+      },
+      {
+        title: "Sample Collection",
+        href: "/samplecollection",
+        icon: "notepadText",
+      },
+      {
+        title: "Accession",
+        href: "/accession",
+        icon: "notepadText",
+      },
+    ],
+  },
+  {
     title: "Test Related Master",
     href: "/testmaster",
     icon: "layers",
@@ -94,28 +121,6 @@ export const navItems: NavItem[] = [
       },
     ],
   },
-  {
-    title: "Lab Management",
-    href: "/lab",
-    icon: "layers",
-    children: [
-      {
-        title: "Registration",
-        href: "/registration",
-        icon: "notepadText",
-      },
-      {
-        title: "Registration List",
-        href: "/registrationlist",
-        icon: "layers",
-      },
-      {
-        title: "Sample Collection",
-        href: "/samplecollection",
-        icon: "samplecollection",
-      },
-      }
-  }
 
   {
     title: "Lab Setup",
