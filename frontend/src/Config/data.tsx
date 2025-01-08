@@ -94,6 +94,28 @@ export const navItems: NavItem[] = [
       },
     ],
   },
+  {
+    title: "Lab Management",
+    href: "/lab",
+    icon: "layers",
+    children: [
+      {
+        title: "Registration",
+        href: "/registration",
+        icon: "notepadText",
+      },
+      {
+        title: "Registration List",
+        href: "/registrationlist",
+        icon: "layers",
+      },
+      {
+        title: "Sample Collection",
+        href: "/samplecollection",
+        icon: "samplecollection",
+      },
+      }
+  }
 
   {
     title: "Lab Setup",

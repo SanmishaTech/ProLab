@@ -39,10 +39,11 @@ const Workinghours = () => {
     data.map((day) => ({
       day: day.toLowerCase(),
       nonWorkingDay: false,
-      workingHours: { from: "09:00", to: "17:00" },
-      break: { from: "13:00", to: "14:00" },
+      workingHours: { from: new Time(9, 0), to: new Time(17, 0) },
+      break: { from: new Time(13, 0), to: new Time(14, 0) },
     }))
   );
+
   const [nonwrokingdays, setNonwrokingdays] = useState([]);
 
   const addnonworkingday = (day) => {
@@ -57,7 +58,31 @@ const Workinghours = () => {
       try {
         const response = await axios.get(`/api/workinghours/${User?._id}`);
         if (response.data?.schedule) {
-          setWorkingHours(response.data.schedule);
+          setWorkingHours(
+            response.data.schedule.map((entry) => ({
+              ...entry,
+              workingHours: {
+                from: new Time(
+                  entry.workingHours.from.split(":")[0],
+                  entry.workingHours.from.split(":")[1]
+                ),
+                to: new Time(
+                  entry.workingHours.to.split(":")[0],
+                  entry.workingHours.to.split(":")[1]
+                ),
+              },
+              break: {
+                from: new Time(
+                  entry.break.from.split(":")[0],
+                  entry.break.from.split(":")[1]
+                ),
+                to: new Time(
+                  entry.break.to.split(":")[0],
+                  entry.break.to.split(":")[1]
+                ),
+              },
+            }))
+          );
         }
       } catch (error) {
         console.error("Error fetching working hours:", error);
@@ -71,10 +96,14 @@ const Workinghours = () => {
   }, [User?._id]);
 
   const handleInputChange = (index, field, subField, value) => {
+    console.log(value);
     setWorkingHours((prev) => {
       const updated = [...prev];
       if (subField) {
-        updated[index][field][subField] = value;
+        updated[index][field][subField] =
+          value instanceof Time
+            ? value
+            : new Time(value.split(":")[0], value.split(":")[1]);
       } else {
         updated[index][field] = value;
       }
@@ -91,12 +120,12 @@ const Workinghours = () => {
           day: entry.day,
           nonWorkingDay: entry.nonWorkingDay,
           workingHours: {
-            from: entry.workingHours.from,
-            to: entry.workingHours.to,
+            from: entry.workingHours.from.toString(),
+            to: entry.workingHours.to.toString(),
           },
           break: {
-            from: entry.break.from,
-            to: entry.break.to,
+            from: entry.break.from.toString(),
+            to: entry.break.to.toString(),
           },
         })),
       };
@@ -151,13 +180,9 @@ const Workinghours = () => {
                 <TableCell className="border-r-2 text-center">
                   <Checkbox
                     checked={entry.nonWorkingDay}
-                    onChange={(e) => {
-                      handleInputChange(
-                        index,
-                        "nonWorkingDay",
-                        null,
-                        e.target.checked
-                      );
+                    onCheckedChange={(e) => {
+                      console.log(e);
+                      handleInputChange(index, "nonWorkingDay", null, e);
                     }}
                   />
                 </TableCell>

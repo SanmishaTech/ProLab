@@ -14,7 +14,8 @@ interface Suggestion {
 // Mock API function
 const fetchSuggestions = async (
   query: string,
-  userId: string
+  userId: string,
+  setAlldata: React.Dispatch<React.SetStateAction<Suggestion[]>>
 ): Promise<Suggestion[]> => {
   // Simulating API delay
   // await new Promise((resolve) => setTimeout(resolve, 300));
@@ -32,8 +33,9 @@ const fetchSuggestions = async (
   //   { id: "10", name: "Gatsby" },
   // ];
   const response = await axios.get(`/api/testmaster/search/${query}/${userId}`);
+  setAlldata(response?.data);
 
-  return response?.data?.filter((item) =>
+  return response?.data?.tests?.filter((item) =>
     item?.name?.toLowerCase()?.includes(query.toLowerCase())
   );
 };
@@ -45,6 +47,7 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
   const [selectedValue, setSelectedValue] = React.useState<Suggestion | null>(
     null
   );
+  const [alldata, setAlldata] = React.useState([]);
   const [suggestions, setSuggestions] = React.useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = React.useState(-1);
@@ -61,7 +64,11 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
     if (value.length > 0) {
       setIsLoading(true);
       try {
-        const fetchedSuggestions = await fetchSuggestions(value, User?._id);
+        const fetchedSuggestions = await fetchSuggestions(
+          value,
+          User?._id,
+          setAlldata
+        );
         setSuggestions(fetchedSuggestions);
         setShowSuggestions(true);
         setActiveSuggestionIndex(-1);
@@ -83,24 +90,32 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
     setInputValue(`${suggestion.name}`);
     setSelectedValue(suggestion);
     setShowSuggestions(false);
+    console.log("This is alldata", alldata);
 
     // Update the patient form with all necessary fields
-    setPatientForm({
-      _id: suggestion._id,
-      name: suggestion.name,
-      userId: User?._id,
-      code: suggestion.code,
-      abbrivation: suggestion.abbrivation,
-      specimen: suggestion.specimen,
-      prerquisite: suggestion.prerquisite,
-      price: suggestion.price,
-      department: suggestion.department,
-      profile: suggestion.profile,
-      isFormTest: suggestion.isFormTest,
-      sortOrder: suggestion.sortOrder,
-      machineInterface: suggestion.machineInterface,
-      isSinglePageReport: suggestion.isSinglePageReport,
-    });
+    // setPatientForm({
+    //   _id: suggestion._id,
+    //   name: suggestion.name,
+    //   userId: User?._id,
+    //   code: suggestion.code,
+    //   abbrivation: suggestion.abbrivation,
+    //   specimen: suggestion.specimen,
+    //   prerquisite: suggestion.prerquisite,
+    //   price: suggestion.price,
+    //   department: suggestion.department,
+    //   profile: suggestion.profile,
+    //   isFormTest: suggestion.isFormTest,
+    //   sortOrder: suggestion.sortOrder,
+    //   machineInterface: suggestion.machineInterface,
+    //   isSinglePageReport: suggestion.isSinglePageReport,
+    // });
+    const details = {
+      ...alldata?.tests[0],
+      ...alldata?.tat[0],
+      calculatedTat: alldata?.calculatedTat,
+    };
+    console.log("This is details", details);
+    setPatientForm(details);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

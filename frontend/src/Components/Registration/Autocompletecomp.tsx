@@ -102,6 +102,7 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
       age: suggestion.age.toString(),
       mobile: suggestion.mobile,
       gender: suggestion.gender,
+      calculatedtat: suggestion?.calculatedTat,
     });
   };
 
@@ -140,9 +141,9 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
     };
   }, []);
 
-  React.useEffect(() => {
-    console.log(selectedValue);
-  }, [selectedValue]);
+  // React.useEffect(() => {
+  //   console.log(selectedValue);
+  // }, [selectedValue]);
   return (
     <div className="relative w-full max-w-sm">
       <Input

@@ -2,6 +2,7 @@ const Department = require("../Schema/testMaster");
 const User = require("../Schema/userSchema");
 const Tatmaster = require("../Schema/tatmaster");
 const mongoose = require("mongoose");
+const WorkingHours = require("../Schema/workinghours");
 
 const Servicescontroller = {
   createThread: async (req, res, next) => {
@@ -150,6 +151,7 @@ const Servicescontroller = {
     try {
       const name = req.params.name;
       const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
 
       // Use mongoose to find user first if necessary
       const userwithid = await User.findById(userId);
@@ -175,7 +177,34 @@ const Servicescontroller = {
       ];
 
       const patient = await Department.aggregate(agg);
-      res.status(200).json(patient);
+
+      let tat;
+      if (patient[0]?.name) {
+        tat = await Tatmaster.find({
+          userId: usertobefound,
+          selectTest: patient[0]?._id,
+        });
+      }
+      const workinghours = await WorkingHours.find({
+        userId: usertobefound,
+      });
+      let calculatedTat;
+      if (tat && workinghours.length > 0) {
+        const startTime = new Date();
+        const duration = tat[0]?.hoursNeeded || 0;
+        const endTime = new Date(
+          startTime.getTime() + duration * 60 * 60 * 1000
+        );
+        calculatedTat = endTime;
+      }
+
+      console.log("This is tat", calculatedTat);
+      const combinebothdata = {
+        tests: patient,
+        tat: tat,
+        calculatedTat: calculatedTat,
+      };
+      res.status(200).json(combinebothdata);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

@@ -31,6 +31,7 @@ import Navbar from "@/Navbar/Navbarcomp";
 import { navItems } from "@/Config/data";
 import PaymentDetails from "./Components/Registration/PaymentDetails";
 import Innnerfile from "@/Components/SampleCollection/Innersamplecollection";
+import { coerce } from "zod";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

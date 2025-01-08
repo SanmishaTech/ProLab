@@ -143,6 +143,10 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
   const [paymentmodeprice, setPaymentmodeprice] = useState<number>(0);
   const [paymentDeliverymode, setPaymentDeliverymode] = useState<string[]>([]);
 
+  useEffect(() => {
+    console.log("This is AddTestTable", AddTestTable);
+  }, [AddTestTable]);
+
   const frameworksList = [
     { value: "sms", label: "Sms" },
     { value: "whatsapp", label: "Whatsapp" },
@@ -209,24 +213,29 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
   const calculateTestCompletionTime = async (test, isUrgent) => {
     try {
       // Get working hours
-      const workingHoursResponse = await axios.get(`/api/workinghours/${User?._id}`);
+      const workingHoursResponse = await axios.get(
+        `/api/workinghours/${User?._id}`
+      );
       const workingHours = workingHoursResponse.data;
 
       // Get holidays
-      const holidaysResponse = await axios.get('/api/holiday');
+      const holidaysResponse = await axios.get("/api/holiday");
       const holidays = holidaysResponse.data;
 
       // Calculate completion time
-      const response = await axios.post('/api/registration/calculate-completion', {
-        startTime: new Date(),
-        duration: isUrgent ? test.urgentTime : test.tat,
-        workingHours,
-        holidays
-      });
+      const response = await axios.post(
+        "/api/registration/calculate-completion",
+        {
+          startTime: new Date(),
+          duration: isUrgent ? test.urgentTime : test.tat,
+          workingHours,
+          holidays,
+        }
+      );
 
       return response.data.completionDate;
     } catch (error) {
-      console.error('Error calculating completion time:', error);
+      console.error("Error calculating completion time:", error);
       return null;
     }
   };
@@ -236,12 +245,15 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     const isUrgent = false; // You can add UI to toggle this
     const completionTime = await calculateTestCompletionTime(test, isUrgent);
 
-    setItems(prev => [...prev, {
-      ...test,
-      urgent: isUrgent,
-      startTime: new Date(),
-      expectedCompletionTime: completionTime
-    }]);
+    setItems((prev) => [
+      ...prev,
+      {
+        ...test,
+        urgent: isUrgent,
+        startTime: new Date(),
+        expectedCompletionTime: completionTime,
+      },
+    ]);
   };
 
   // Function to toggle urgent status
@@ -250,12 +262,12 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     const newUrgent = !test.urgent;
     const completionTime = await calculateTestCompletionTime(test, newUrgent);
 
-    setItems(prev => {
+    setItems((prev) => {
       const updated = [...prev];
       updated[index] = {
         ...test,
         urgent: newUrgent,
-        expectedCompletionTime: completionTime
+        expectedCompletionTime: completionTime,
       };
       return updated;
     });
@@ -295,13 +307,13 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
 
     try {
       // Prepare tests with TAT information
-      const testsWithTAT = items.map(item => ({
+      const testsWithTAT = items.map((item) => ({
         tests: item.id,
         tat: item.urgent ? item.urgentTime : item.tat,
         urgent: item.urgent,
         price: item.urgent ? item.urgentPrice : item.price,
         startTime: new Date(),
-        expectedCompletionTime: item.expectedCompletionTime
+        expectedCompletionTime: item.expectedCompletionTime,
       }));
 
       const response = await axios.post("/api/registration", {
@@ -320,7 +332,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
         totalBalance,
         paymentDeliveryMode,
         userId: User?._id,
-        registrationTime: new Date()
+        registrationTime: new Date(),
       });
 
       console.log(response.data);
@@ -381,13 +393,46 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     });
   }, [User?._id]);
 
+  useEffect(() => {
+    console.log("This is AddTestTable", AddTestTable);
+  }, [AddTestTable]);
+
   // Map the API data to match the Dashboard component's expected tableData format
   const mappedTableData = AddTestTable?.map((item: Test) => ({
     _id: item._id,
     one: item.abbrivation || "",
     two: item.name,
-    three: item.tat,
-    four: item.urgentTime,
+    three: item.hoursNeeded,
+    four: (() => {
+      const calculatedTat = new Date(item?.calculatedTat);
+
+      // Check if the date is valid
+      if (isNaN(calculatedTat)) {
+        return "";
+      }
+
+      const now = new Date();
+      const isToday = calculatedTat.toDateString() === now.toDateString(); // Check if the date is today
+
+      const optionsForDateTime = {
+        weekday: "long", // Example: Monday
+        year: "numeric", // Example: 2025
+        month: "long", // Example: January
+        day: "numeric", // Example: 8
+        hour: "2-digit", // Example: 02
+        minute: "2-digit", // Example: 32
+      };
+
+      const optionsForTime = {
+        hour: "2-digit",
+        minute: "2-digit",
+      };
+
+      // Display only time for today, otherwise display date and time
+      return isToday
+        ? calculatedTat.toLocaleTimeString(undefined, optionsForTime)
+        : calculatedTat.toLocaleString(undefined, optionsForDateTime);
+    })(),
     five: item.outsourced,
     six: item.price,
     delete: `/patientmaster/delete/${item._id}`,
@@ -398,6 +443,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     if (!bottomSection) return;
     if (AddTestTable.length === 0) {
       setAddTestTable([bottomSection]);
+      console.log("This is value for addtesttable", bottomSection);
       return;
     }
     if (AddTestTable.some((item) => item._id === bottomSection._id)) {

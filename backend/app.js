@@ -42,6 +42,7 @@ var PrefixRoutes = require("./routes/prefixRoutes");
 var ServicePayable = require("./routes/servicePayableRoutes");
 var LabmasterRoutes = require("./routes/labmasterRoutes");
 var CollectionMaster = require("./routes/collectionMasterRoutes");
+var WorkingHours = require("./routes/workingHours");
 var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application
@@ -93,6 +94,7 @@ app.use("/api/prefix", PrefixRoutes);
 app.use("/api/service", ServicePayable);
 app.use("/api/labmaster", LabmasterRoutes);
 app.use("/api/collectionmaster", CollectionMaster);
+app.use("/api/workinghours", WorkingHours);
 
 app.use(express.static(path.join(__dirname, "./dist")));
 
