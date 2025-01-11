@@ -1,10 +1,19 @@
 // models/user.js
 const mongoose = require("mongoose");
 
-const barcodeSchema = new mongoose.Schema({
-  Registration: { type: mongoose.Schema.Types.ObjectId, ref: "Registration" },
-  Tests: [{ type: mongoose.Schema.Types.ObjectId, ref: "TestMaster" }],
+const testschema = new mongoose.Schema({
+  Tests: { type: mongoose.Schema.Types.ObjectId, ref: "TestMaster" },
+  dateTime: { type: Date, default: Date.now },
 });
 
-const Barcode = mongoose.model("Barcode", barcodeSchema);
-module.exports = Barcode;
+const sampleMasterschema = new mongoose.Schema({
+  Registration: { type: mongoose.Schema.Types.ObjectId, ref: "Registration" },
+  Tests: [testschema],
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+const SampleMasterschema = mongoose.model(
+  "Samplecollectionmaster",
+  sampleMasterschema
+);
+module.exports = SampleMasterschema;

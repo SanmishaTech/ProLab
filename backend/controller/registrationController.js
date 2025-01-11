@@ -49,12 +49,12 @@ const getWorkingHours = async (userId, dayOfWeek) => {
     // Return default working hours
     return {
       nonWorkingDay: dayOfWeek === "sunday",
-      workingHours: { from: "09:00", to: "17:00" },
-      break: { from: "13:00", to: "14:00" }
+      workingHours: { from: "09:00", to: "19:00" },
+      break: { from: "18:00", to: "19:00" },
     };
   }
 
-  const schedule = workingHours.schedule.find(s => s.day === dayOfWeek);
+  const schedule = workingHours.schedule.find((s) => s.day === dayOfWeek);
   return schedule;
 };
 
@@ -62,11 +62,16 @@ const getWorkingHours = async (userId, dayOfWeek) => {
 const calculateWorkingHours = (startTime, endTime, breakTime) => {
   const [startHour, startMinute] = startTime.split(":").map(Number);
   const [endHour, endMinute] = endTime.split(":").map(Number);
-  const [breakStartHour, breakStartMinute] = breakTime.from.split(":").map(Number);
+  const [breakStartHour, breakStartMinute] = breakTime.from
+    .split(":")
+    .map(Number);
   const [breakEndHour, breakEndMinute] = breakTime.to.split(":").map(Number);
 
-  let totalMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
-  const breakMinutes = (breakEndHour * 60 + breakEndMinute) - (breakStartHour * 60 + breakStartMinute);
+  let totalMinutes = endHour * 60 + endMinute - (startHour * 60 + startMinute);
+  const breakMinutes =
+    breakEndHour * 60 +
+    breakEndMinute -
+    (breakStartHour * 60 + breakStartMinute);
 
   // If work spans break time, subtract break duration
   if (startHour < breakStartHour && endHour > breakEndHour) {
@@ -77,7 +82,12 @@ const calculateWorkingHours = (startTime, endTime, breakTime) => {
 };
 
 // **Final Revised calculateCompletionDate Function**
-const calculateCompletionDate = async (startDate, maxDuration, holidays, userId) => {
+const calculateCompletionDate = async (
+  startDate,
+  maxDuration,
+  holidays,
+  userId
+) => {
   let workingDaysCounted = 0;
   let currentDate = addDays(startDate, 1); // Start from tomorrow
   let totalDaysAdded = 0;
@@ -88,7 +98,9 @@ const calculateCompletionDate = async (startDate, maxDuration, holidays, userId)
   console.log("Max Duration (Hours):", maxDuration);
 
   while (remainingHours > 0) {
-    const dayOfWeek = currentDate.toLocaleDateString('en-US', { weekday: 'monday' }).toLowerCase();
+    const dayOfWeek = currentDate
+      .toLocaleDateString("en-US", { weekday: "saturday" })
+      .toLowerCase();
     const daySchedule = await getWorkingHours(userId, dayOfWeek);
 
     if (!daySchedule.nonWorkingDay && !isHoliday(currentDate, holidays)) {
@@ -121,12 +133,13 @@ const Servicescontroller = {
     try {
       const { startTime, duration, workingHours, holidays } = req.body;
 
-      const { completionDate, totalCompletionDays } = await calculateCompletionDate(
-        new Date(startTime),
-        duration,
-        holidays,
-        workingHours.userId
-      );
+      const { completionDate, totalCompletionDays } =
+        await calculateCompletionDate(
+          new Date(startTime),
+          duration,
+          holidays,
+          workingHours.userId
+        );
 
       res.status(200).json({ completionDate, totalCompletionDays });
     } catch (error) {
@@ -162,20 +175,21 @@ const Servicescontroller = {
       }, 0);
 
       // Calculate completion date using working hours
-      const { completionDate, totalCompletionDays } = await calculateCompletionDate(
-        new Date(),
-        maxDuration,
-        holidays,
-        userId
-      );
+      const { completionDate, totalCompletionDays } =
+        await calculateCompletionDate(
+          new Date(),
+          maxDuration,
+          holidays,
+          userId
+        );
 
       // Create the new registration with the calculated completion date
       const newRegistration = new Registration({
         patientId,
         referral,
-        tests: tests.map(test => ({
+        tests: tests.map((test) => ({
           ...test,
-          expectedCompletionTime: test.expectedCompletionTime || completionDate
+          expectedCompletionTime: test.expectedCompletionTime || completionDate,
         })),
         totaltestprice,
         discount,
@@ -186,7 +200,7 @@ const Servicescontroller = {
         totalBalance,
         paymentDeliveryMode,
         userId,
-        maxCompletionTime: completionDate
+        maxCompletionTime: completionDate,
       });
       const collectionCenter = [
         {

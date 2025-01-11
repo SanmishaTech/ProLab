@@ -278,6 +278,33 @@ const Innersamplecollection = () => {
     console.log("sometdata", data);
   }, [data]);
 
+  const handleUpdatingdata = useCallback(
+    (newData) => {
+      console.log("sample data in handleupdateZ", sampledata);
+      console.log("newData", newData);
+      if (sampledata.length === 0) return newData;
+
+      const new_data = newData?.filter(
+        (invoice) =>
+          !sampledata[0]?.Tests?.some(
+            (sampledataTest) => sampledataTest.Tests?._id === invoice.invoice
+          )
+      );
+      console.log("newData", new_data);
+      return new_data;
+    },
+    [sampledata]
+  );
+
+  const filteredData = useMemo(
+    () => handleUpdatingdata(data),
+    [data, sampledata]
+  );
+
+  useEffect(() => {
+    console.log("filteredData", filteredData);
+  }, [filteredData]);
+
   return (
     <Card className="m-4 mt-20">
       <CardHeader>
