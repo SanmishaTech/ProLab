@@ -212,7 +212,7 @@ export default function Dashboard({
                             type="checkbox"
                             id="useBoldFonts"
                             name="useBoldFonts"
-                            checked={formData.useBoldFonts || false}
+                            checked={formData?.useBoldFonts || false}
                             onChange={handleCheckboxChange}
                           />
                           <label
@@ -227,7 +227,7 @@ export default function Dashboard({
                             type="checkbox"
                             id="useUnderline"
                             name="useUnderline"
-                            checked={formData.useUnderline || false}
+                            checked={formData?.useUnderline || false}
                             onChange={handleCheckboxChange}
                           />
                           <label
@@ -243,7 +243,7 @@ export default function Dashboard({
                             type="checkbox"
                             id="highLowValues"
                             name="highLowValues"
-                            checked={formData.highLowValues || false}
+                            checked={formData?.highLowValues || false}
                             onChange={handleCheckboxChange}
                           />
                           <label
@@ -265,10 +265,12 @@ export default function Dashboard({
                           type="color"
                           id="backgroundColor"
                           name="backgroundColor"
-                          value={formData.backgroundColor}
+                          value={formData?.backgroundColor}
                           onChange={handleColorChange}
                         />
-                        <span className="ml-2">{formData.backgroundColor}</span>
+                        <span className="ml-2">
+                          {formData?.backgroundColor}
+                        </span>
                       </div>
                     </div>
                   </CardContent>

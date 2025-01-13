@@ -272,7 +272,6 @@ const Innersamplecollection = () => {
     });
 
     console.log("Selected tests with datetime:", selectedTestsWithData);
-    // Here you can send selectedTestsWithData to your backend
   };
   useEffect(() => {
     console.log("sometdata", data);

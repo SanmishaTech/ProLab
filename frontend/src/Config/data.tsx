@@ -45,16 +45,16 @@ export const navItems: NavItem[] = [
         href: "/registrationlist",
         icon: "layers",
       },
-      {
-        title: "Sample Collection",
-        href: "/samplecollection",
-        icon: "notepadText",
-      },
-      {
-        title: "Accession",
-        href: "/accession",
-        icon: "notepadText",
-      },
+      // {
+      //   title: "Sample Collection",
+      //   href: "/samplecollection",
+      //   icon: "notepadText",
+      // },
+      // {
+      //   title: "Accession",
+      //   href: "/accession",
+      //   icon: "notepadText",
+      // },
     ],
   },
   {
@@ -180,11 +180,7 @@ export const navItems: NavItem[] = [
       },
     ],
   },
-  {
-    title: "Registration",
-    href: "/registration",
-    icon: "notepadText",
-  },
+
   {
     title: "Access Control",
     href: "/lab",
