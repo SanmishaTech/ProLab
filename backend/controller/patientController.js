@@ -44,6 +44,7 @@ const Servicescontroller = {
     try {
       const name = req.params.name;
       const userId = req.params.userId;
+      console.log("patient name", name);
 
       // Use mongoose to find user first if necessary
       const userwithid = await User.findById(userId);
@@ -57,7 +58,7 @@ const Servicescontroller = {
             index: "lab", // Check if 'lab' is correctly configured in your MongoDB Atlas Search
             autocomplete: {
               query: name,
-              path: "name",
+              path: "firstName",
             },
           },
         },

@@ -31,6 +31,20 @@ const isWeekend = (date) => {
   return bol;
 };
 
+function getTodaysDay() {
+  const daysOfWeek = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+  const today = new Date();
+  return daysOfWeek[today.getDay()];
+}
+
 // Utility function to check if a date is a holiday
 const isHoliday = (date, holidays) => {
   return holidays.some(
@@ -304,16 +318,25 @@ const Servicescontroller = {
           selectTest: patient[0]?._id,
         });
       }
+      const day = getTodaysDay();
       const workinghours = await WorkingHours.find({
         userId: usertobefound,
       });
-      console.log("Working hours:", workinghours[0]?.schedule);
+      console.log(
+        "Working hours:",
+        workinghours[0]?.schedule.filter((item) => item.day === day)
+      );
+      const tatfortoday = workinghours[0]?.schedule.filter(
+        (item) => item.day === day
+      );
 
       let calculatedTat;
       if (tat && workinghours.length > 0) {
         const startTime = new Date();
         const duration = tat[0]?.hoursNeeded || 0;
-        const breakHours = workinghours[0]?.break;
+        const breakHours = tatfortoday[0]?.break;
+        const breakHoursFrom = breakHours?.from.split(":").map(Number);
+        const breakHoursTo = breakHours?.to.split(":").map(Number);
 
         // Calculate the initial end time
         let endTime = new Date(startTime.getTime() + duration * 60 * 60 * 1000);
@@ -324,9 +347,16 @@ const Servicescontroller = {
         console.log("Break Hours:", breakHours);
 
         // If break hours are defined, adjust TAT for breaks that fall within the test duration
-        if (breakHours && breakHours.start && breakHours.end) {
-          const breakStart = new Date(breakHours.start);
-          const breakEnd = new Date(breakHours.end);
+        if (breakHoursFrom && breakHoursTo) {
+          const breakStart = new Date(startTime);
+          breakStart.setHours(
+            breakHoursFrom[0],
+            breakHoursFrom[1],
+            breakHoursFrom[2]
+          );
+
+          const breakEnd = new Date(startTime);
+          breakEnd.setHours(breakHoursTo[0], breakHoursTo[1], breakHoursTo[2]);
 
           console.log("Break Start:", breakStart);
           console.log("Break End:", breakEnd);

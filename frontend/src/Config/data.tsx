@@ -58,6 +58,11 @@ export const navItems: NavItem[] = [
     ],
   },
   {
+    title: "Working Hours",
+    href: "/workhours",
+    icon: "link2",
+  },
+  {
     title: "Test Related Master",
     href: "/testmaster",
     icon: "layers",

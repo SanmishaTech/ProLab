@@ -198,6 +198,13 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
       });
   }, []);
 
+  function formatCurrency(value) {
+    if (typeof value === "number" || typeof value === "string") {
+      return `₹${value}`;
+    }
+    throw new Error("Invalid value. Please provide a number or a string.");
+  }
+
   const calculateDiscount = () => {
     // match value for discount and calculate actual discount using total amount
     const discounted = calculatedprice - Number(discountType);
@@ -402,7 +409,19 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     _id: item._id,
     one: item.abbrivation || "",
     two: item.name,
-    three: item.hoursNeeded,
+    three: (() => {
+      const now = new Date();
+      const expectedTime = new Date(item.calculatedTat);
+      console.log("expectmt , ", item.calculatedTat);
+      // Calculate TAT in milliseconds
+      const tatMs = expectedTime - now;
+
+      // Convert TAT to hours and minutes
+      const tatHours = Math.floor(tatMs / (1000 * 60 * 60));
+      const tatMinutes = Math.floor((tatMs % (1000 * 60 * 60)) / (1000 * 60));
+
+      return `${tatHours}:${tatMinutes}`;
+    })(),
     four: (() => {
       const calculatedTat = new Date(item?.calculatedTat);
 

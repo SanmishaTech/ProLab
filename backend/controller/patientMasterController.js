@@ -190,9 +190,9 @@ const patientMasterController = {
           },
         },
       ];
-      console.log(agg);
 
       const patient = await PatientMaster.aggregate(agg);
+      console.log(patient);
       res.status(200).json(patient);
     } catch (error) {
       res.status(500).json({ error: error.message });

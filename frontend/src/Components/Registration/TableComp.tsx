@@ -83,6 +83,8 @@ export default function Dashboard({
   // State to manage expanded rows (array of _id)
   const [expandedRows, setExpandedRows] = useState([]);
 
+  const formatCurrency = (value) => `₹${Number(value).toLocaleString("en-IN")}`;
+
   // Handler to toggle row expansion with debug logs
   const toggleRow = (rowId) => {
     setExpandedRows((prev) => {
