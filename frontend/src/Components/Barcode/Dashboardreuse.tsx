@@ -199,8 +199,6 @@ export default function Dashboard({
         )} */}
         {/* Main Content */}
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-
-          
           <Tabs defaultValue="all">
             <TabsContent value="all">
               <Card className="bg-accent/40">
@@ -213,14 +211,12 @@ export default function Dashboard({
                     {/* main checkoboxes */}
 
                     <div className="grid grid-cols-4 items-center gap-4">
-                      
-                     
                       <div className="col-span-3 flex items-center space-x-2">
                         <input
                           type="checkbox"
                           id="patientName"
                           name="patientName"
-                          checked={formData.patientName || false}
+                          checked={formData?.patientName || false}
                           onChange={handleCheckboxChange}
                         />
                         <label
@@ -236,7 +232,7 @@ export default function Dashboard({
                           type="checkbox"
                           id="patientId"
                           name="patientId"
-                          checked={formData.patientId || false}
+                          checked={formData?.patientId || false}
                           onChange={handleCheckboxChange}
                         />
                         <label
@@ -252,7 +248,7 @@ export default function Dashboard({
                           type="checkbox"
                           id="sid"
                           name="sid"
-                          checked={formData.sid || false}
+                          checked={formData?.sid || false}
                           onChange={handleCheckboxChange}
                         />
                         <label
@@ -268,7 +264,7 @@ export default function Dashboard({
                           type="checkbox"
                           id="dateOfAppointment"
                           name="dateOfAppointment"
-                          checked={formData.dateOfAppointment || false}
+                          checked={formData?.dateOfAppointment || false}
                           onChange={handleCheckboxChange}
                         />
                         <label
@@ -284,7 +280,7 @@ export default function Dashboard({
                           type="checkbox"
                           id="timeOfAppointment"
                           name="timeOfAppointment"
-                          checked={formData.timeOfAppointment || false}
+                          checked={formData?.timeOfAppointment || false}
                           onChange={handleCheckboxChange}
                         />
                         <label
@@ -300,7 +296,7 @@ export default function Dashboard({
                           type="checkbox"
                           id="testName"
                           name="testName"
-                          checked={formData.testName || false}
+                          checked={formData?.testName || false}
                           onChange={handleCheckboxChange}
                         />
                         <label
@@ -316,7 +312,7 @@ export default function Dashboard({
                           type="checkbox"
                           id="testAbbreviation"
                           name="testAbbreviation"
-                          checked={formData.testAbbreviation || false}
+                          checked={formData?.testAbbreviation || false}
                           onChange={handleCheckboxChange}
                         />
                         <label
@@ -327,15 +323,12 @@ export default function Dashboard({
                         </label>
                       </div>
 
-
-                      
-
                       <div className="col-span-3 flex items-center space-x-2">
                         <input
                           type="checkbox"
                           id="container"
                           name="container"
-                          checked={formData.container || false}
+                          checked={formData?.container || false}
                           onChange={handleCheckboxChange}
                         />
                         <label

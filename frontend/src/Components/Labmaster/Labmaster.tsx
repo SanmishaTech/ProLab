@@ -23,7 +23,7 @@ import axios from "axios";
 
 const Labmaster = () => {
   const [formData, setFormData] = useState({
-    firstName: "",
+    firstName: [],
     lastName: "",
     employeeCode: "",
     email: "",
@@ -78,7 +78,7 @@ const Labmaster = () => {
                 First Name:
               </p>
               <Input
-                value={formData.firstName}
+                value={formData?.firstName}
                 onChange={handleInputchange}
                 name="firstName"
               />
@@ -88,7 +88,7 @@ const Labmaster = () => {
                 Last Name:
               </p>
               <Input
-                value={formData.lastName}
+                value={formData?.lastName}
                 onChange={handleInputchange}
                 name="lastName"
               />
@@ -99,7 +99,7 @@ const Labmaster = () => {
               </p>
               <Input
                 name="employeeCode"
-                value={formData.employeeCode}
+                value={formData?.employeeCode}
                 onChange={handleInputchange}
               />
             </div>
@@ -108,7 +108,7 @@ const Labmaster = () => {
                 EmailID:
               </p>
               <Input
-                value={formData.email}
+                value={formData?.email}
                 name="email"
                 onChange={handleInputchange}
               />
@@ -118,7 +118,7 @@ const Labmaster = () => {
                 Mobile No:
               </p>
               <Input
-                value={formData.mobileNo}
+                value={formData?.mobileNo}
                 name="mobileNo"
                 onChange={handleInputchange}
               />
@@ -139,7 +139,7 @@ const Labmaster = () => {
               </p>
               <Select
                 className="w-full"
-                value={formData.country}
+                value={formData?.country}
                 onValueChange={(value) =>
                   handleInputchange({ target: { name: "country", value } })
                 }
@@ -162,7 +162,7 @@ const Labmaster = () => {
               </p>
               <Select
                 className="w-full"
-                value={formData.state}
+                value={formData?.state}
                 onValueChange={(value) =>
                   handleInputchange({ target: { name: "state", value } })
                 }
@@ -213,7 +213,7 @@ const Labmaster = () => {
               </p>
               <Select
                 className="w-full"
-                value={formData.city}
+                value={formData?.city}
                 onValueChange={(value) =>
                   handleInputchange({ target: { name: "city", value } })
                 }
@@ -236,7 +236,7 @@ const Labmaster = () => {
                 Address1 :
               </p>
               <Textarea
-                value={formData.address1}
+                value={formData?.address1}
                 name="address1"
                 onChange={handleInputchange}
               />
@@ -246,7 +246,7 @@ const Labmaster = () => {
                 Address2 :
               </p>
               <Textarea
-                value={formData.address2}
+                value={formData?.address2}
                 name="address2"
                 onChange={handleInputchange}
               />
@@ -256,7 +256,7 @@ const Labmaster = () => {
                 Pin Code:
               </p>
               <Input
-                value={formData.pinCode}
+                value={formData?.pinCode}
                 name="pinCode"
                 onChange={handleInputchange}
               />
