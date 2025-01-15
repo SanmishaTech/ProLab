@@ -183,6 +183,8 @@ const Servicescontroller = {
           userId
         );
 
+      console.log("tests", tests);
+
       // Create the new registration with the calculated completion date
       const newRegistration = new Registration({
         patientId,
@@ -202,6 +204,7 @@ const Servicescontroller = {
         userId,
         maxCompletionTime: completionDate,
       });
+      console.log("newRegistration", newRegistration);
       const collectionCenter = [
         {
           collectionCenterName: "Impact Dignostics",

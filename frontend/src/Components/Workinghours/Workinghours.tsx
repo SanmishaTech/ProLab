@@ -190,6 +190,7 @@ const Workinghours = () => {
                 <TableCell colSpan={1} className="border-r-2 text-center">
                   <div className="flex justify-evenly gap-4 text-left ">
                     <TimeInput
+                      isDisabled={entry.nonWorkingDay}
                       value={entry.workingHours.from}
                       label="Start Time"
                       onChange={(value) =>
@@ -197,6 +198,7 @@ const Workinghours = () => {
                       }
                     />
                     <TimeInput
+                      isDisabled={entry.nonWorkingDay}
                       value={entry.workingHours.to}
                       label="End Time"
                       onChange={(value) =>
