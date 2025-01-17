@@ -142,6 +142,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
   const [homevisitcharge, sethomevisitcharge] = useState<string>("");
   const [paymentmodeprice, setPaymentmodeprice] = useState<number>(0);
   const [paymentDeliverymode, setPaymentDeliverymode] = useState<string[]>([]);
+  const [calculatedtats, setCalculatedtat] = useState<string>();
 
   useEffect(() => {
     console.log("This is AddTestTable", AddTestTable);
@@ -380,6 +381,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     setConfig({
       tableColumns: {
         headers: [
+          { label: "Urgent", key: "checkbox" },
           { label: "Test Abbvr", key: "one" },
           { label: "Test Name", key: "two" },
           { label: "TAT", key: "three" },
@@ -407,22 +409,22 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
   // Map the API data to match the Dashboard component's expected tableData format
   const mappedTableData = AddTestTable?.map((item: Test) => ({
     _id: item._id,
+
     one: item.abbrivation || "",
     two: item.name,
     three: (() => {
-      const now = new Date();
-      const expectedTime = new Date(item.calculatedTat);
-      console.log("expectmt , ", item.calculatedTat);
-      // Calculate TAT in milliseconds
-      const tatMs = expectedTime - now;
+      // const now = new Date();
+      // const expectedTime = new Date(item.calculatedTat);
+      // console.log("expectmt , ", item.calculatedTat);
+      // // Calculate TAT in milliseconds
+      // const tatMs = expectedTime - now;
 
-      // Convert TAT to hours and minutes
-      const tatHours = Math.floor(tatMs / (1000 * 60 * 60));
-      const tatMinutes = Math.floor((tatMs % (1000 * 60 * 60)) / (1000 * 60));
+      // // Convert TAT to hours and minutes
+      // const tatHours = Math.floor(tatMs / (1000 * 60 * 60));
+      // const tatMinutes = Math.floor((tatMs % (1000 * 60 * 60)) / (1000 * 60));
 
-      return `${tatHours}:${tatMinutes}`;
-    })(),
-    four: (() => {
+      // return `${tatHours}:${tatMinutes}`;
+      console.log("This is calculatedTat", item?.calculatedTat);
       const calculatedTat = new Date(item?.calculatedTat);
 
       // Check if the date is valid
@@ -446,6 +448,45 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
         hour: "2-digit",
         minute: "2-digit",
       };
+
+      const time = isToday
+        ? calculatedTat.toLocaleTimeString(undefined, optionsForTime)
+        : calculatedTat.toLocaleString(undefined, optionsForDateTime);
+
+      // Display only time for today, otherwise display date and time
+      return isToday
+        ? calculatedTat.toLocaleTimeString(undefined, optionsForTime)
+        : calculatedTat.toLocaleString(undefined, optionsForDateTime);
+    })(),
+    four: (() => {
+      console.log("This is calculatedurgenttat", item?.calculatedurgenttat);
+      const calculatedTat = new Date(item?.calculatedurgenttat);
+
+      // Check if the date is valid
+      if (isNaN(calculatedTat)) {
+        return "";
+      }
+
+      const now = new Date();
+      const isToday = calculatedTat.toDateString() === now.toDateString(); // Check if the date is today
+
+      const optionsForDateTime = {
+        weekday: "long", // Example: Monday
+        year: "numeric", // Example: 2025
+        month: "long", // Example: January
+        day: "numeric", // Example: 8
+        hour: "2-digit", // Example: 02
+        minute: "2-digit", // Example: 32
+      };
+
+      const optionsForTime = {
+        hour: "2-digit",
+        minute: "2-digit",
+      };
+
+      const time = isToday
+        ? calculatedTat.toLocaleTimeString(undefined, optionsForTime)
+        : calculatedTat.toLocaleString(undefined, optionsForDateTime);
 
       // Display only time for today, otherwise display date and time
       return isToday
@@ -482,6 +523,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     }
 
     try {
+      console.log("This is AddTestTable", AddTestTable);
       const data = {
         patientId: topComp.patientId,
         referral: {
@@ -493,11 +535,12 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
           medicationHistory: topComp.referral?.medicationHistory,
         },
         tests: AddTestTable.map((items) => ({
-          tests: items._id,
+          tests: items.selectTest,
           tat: items.tat,
           urgentTime: items.urgentTime,
           outsourced: items.outsourced,
           price: items.price,
+          expectedCompletionTime: items.calculatedTat,
         })),
         totaltestprice: calculatedprice,
         discount: {
@@ -524,6 +567,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
         paymentDeliveryMode: {
           paymentDeliveryMode: selectedFrameworks,
         },
+        // maxCompletionTime: new Date(calculatedtat),
         userId: User?._id,
         staffName: User?.username,
         paymentDate: new Date().toISOString(),
@@ -558,6 +602,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
           discounts?.find((item) => item.value === discountType)?.description ||
           "No Discount",
         afterDiscount: subtotalPrice,
+
         homeVisitCharges: Number(homevisit) || 0,
         totalAmount: Number(homevisitPricetotal) || 0,
         amountPaid: Number(paymentmodeprice) || 0,

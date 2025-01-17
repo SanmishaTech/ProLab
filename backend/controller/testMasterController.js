@@ -329,17 +329,21 @@ const Servicescontroller = {
       const tatfortoday = workinghours[0]?.schedule.filter(
         (item) => item.day === day
       );
-
+      let calculatedurgenttat;
       let calculatedTat;
       if (tat && workinghours.length > 0) {
         const startTime = new Date();
         const duration = tat[0]?.hoursNeeded || 0;
+        const urgentduration = tat[0]?.urgentHours || 0;
         const breakHours = tatfortoday[0]?.break;
         const breakHoursFrom = breakHours?.from.split(":").map(Number);
         const breakHoursTo = breakHours?.to.split(":").map(Number);
 
         // Calculate the initial end time
         let endTime = new Date(startTime.getTime() + duration * 60 * 60 * 1000);
+        let endTimeUrgent = new Date(
+          startTime.getTime() + urgentduration * 60 * 60 * 1000
+        );
 
         // Log debug information
         console.log("Start Time:", startTime);
@@ -389,9 +393,56 @@ const Servicescontroller = {
           console.log("Break hours not defined or invalid.");
         }
 
+        if (breakHoursFrom && breakHoursTo) {
+          const breakStart = new Date(startTime);
+          breakStart.setHours(
+            breakHoursFrom[0],
+            breakHoursFrom[1],
+            breakHoursFrom[2]
+          );
+
+          const breakEnd = new Date(startTime);
+          breakEnd.setHours(breakHoursTo[0], breakHoursTo[1], breakHoursTo[2]);
+
+          console.log("Break Start:", breakStart);
+          console.log("Break End:", breakEnd);
+
+          // Check if the break time overlaps with the test duration
+          if (startTime <= breakEnd && endTimeUrgent >= breakStart) {
+            const overlapStart = Math.max(
+              startTime.getTime(),
+              breakStart.getTime()
+            );
+            const overlapEnd = Math.min(
+              endTimeUrgent.getTime(),
+              breakEnd.getTime()
+            );
+            const breakDuration =
+              (overlapEnd - overlapStart) / (60 * 60 * 1000); // Convert to hours
+
+            console.log("Overlap Start (ms):", overlapStart);
+            console.log("Overlap End (ms):", overlapEnd);
+            console.log("Break Duration (hours):", breakDuration);
+
+            // Add the break duration to the end time
+            if (breakDuration > 0) {
+              endTimeUrgent = new Date(
+                endTimeUrgent.getTime() + breakDuration * 60 * 60 * 1000
+              );
+              console.log("Adjusted End Time (with break):", endTimeUrgent);
+            }
+          } else {
+            console.log("No overlap between break time and test duration.");
+          }
+        } else {
+          console.log("Break hours not defined or invalid.");
+        }
+
         // Final calculated TAT
         calculatedTat = endTime;
+        calculatedurgenttat = endTimeUrgent;
         console.log("Final Calculated TAT:", calculatedTat);
+        console.log("Final Calculated urgent TAT:", calculatedurgenttat);
       }
 
       console.log("This is tat", calculatedTat);
@@ -399,6 +450,7 @@ const Servicescontroller = {
         tests: patient,
         tat: tat,
         calculatedTat: calculatedTat,
+        calculatedurgenttat: calculatedurgenttat,
       };
       res.status(200).json(combinebothdata);
     } catch (error) {

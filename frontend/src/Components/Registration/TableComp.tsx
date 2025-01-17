@@ -21,6 +21,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -75,6 +76,7 @@ export default function Dashboard({
   onProductAction = () => {},
 }) {
   console.log("This is inside the dashboard", tableData);
+  const [toggleurgent, setToggleurgent] = useState(false);
   const navigate = useNavigate();
   const [toggleedit, setToggleedit] = useState(false);
   const [editid, setEditid] = useState();
@@ -124,6 +126,10 @@ export default function Dashboard({
     console.log("Delete clicked");
     // Implement delete functionality here
   };
+
+  useEffect(() => {
+    console.log("This is AddTestTable", AddTestTable);
+  }, [AddTestTable]);
   return (
     <div className="flex  w-full flex-col ">
       <div className="flex flex-col sm:gap-4">
@@ -160,11 +166,35 @@ export default function Dashboard({
                             {tableColumns?.headers?.map((header, index) => (
                               <TableCell
                                 key={index}
-                                className={`text-right px-4 py-2 border border-gray-200 ${
-                                  header.hiddenOn || ""
-                                }`}
+                                className={`px-4 py-2 border border-gray-200 ${
+                                  header.key === "checkbox"
+                                    ? "text-center"
+                                    : "text-right"
+                                } ${header.hiddenOn || ""}`}
                               >
-                                {header.key === "one" ? (
+                                {header.key === "checkbox" ? (
+                                  <Checkbox
+                                    className="text-center"
+                                    checked={toggleurgent}
+                                    onCheckedChange={(e) => {
+                                      setToggleurgent({
+                                        ...toggleurgent,
+                                        [row._id]: e,
+                                      });
+                                      row.urgent = e;
+                                      setAddTestTable((prev) =>
+                                        prev.map((item) =>
+                                          item._id === row._id
+                                            ? {
+                                                ...item,
+                                                urgent: e,
+                                              }
+                                            : item
+                                        )
+                                      );
+                                    }}
+                                  />
+                                ) : header.key === "one" ? (
                                   <Input value={row?.one || ""} disabled />
                                 ) : header.key === "action" ? (
                                   <DropdownMenu>
@@ -195,7 +225,7 @@ export default function Dashboard({
                                 ) : header.key === "three" ? (
                                   row.three
                                 ) : header.key === "four" ? (
-                                  row.four
+                                  toggleurgent && row.four
                                 ) : header.key === "five" ? (
                                   row.five
                                 ) : header.key === "six" ? (

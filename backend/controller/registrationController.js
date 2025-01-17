@@ -148,6 +148,77 @@ const Servicescontroller = {
     }
   },
 
+  // createThread: async (req, res, next) => {
+
+  //   try {
+  //     const {
+  //       patientId,
+  //       referral,
+  //       tests,
+  //       totaltestprice,
+  //       discount,
+  //       priceAfterDiscount,
+  //       homevisit,
+  //       priceafterhomevisit,
+  //       paymentMode,
+  //       totalBalance,
+  //       paymentDeliveryMode,
+  //       userId,
+  //     } = req.body;
+
+  //     console.log("tests", JSON.stringify(tests));
+
+  //     // Create the new registration with the calculated completion date
+  //     const newRegistration = new Registration({
+  //       patientId,
+  //       referral,
+  //       tests: tests.map((test) => ({
+  //         ...test,
+  //         expectedCompletionTime: test.expectedCompletionTime,
+  //       })),
+  //       totaltestprice,
+  //       discount,
+  //       priceAfterDiscount,
+  //       homevisit,
+  //       priceafterhomevisit,
+  //       paymentMode,
+  //       totalBalance,
+  //       paymentDeliveryMode,
+  //       userId,
+  //     });
+  //     const collectionCenter = [
+  //       {
+  //         collectionCenterName: "Impact Dignostics",
+  //         collectionTime: new Date(),
+  //       },
+  //     ];
+
+  //     newRegistration.updateOne(
+  //       { $set: { collectionCenter: collectionCenter } },
+  //       { new: true }
+  //     );
+
+  //     await newRegistration.save();
+  //     const populatedRegistration = await Registration.findById(
+  //       newRegistration._id
+  //     )
+  //       .populate("patientId")
+  //       .populate("userId")
+  //       .populate("tests")
+  //       .populate({
+  //         path: "referral",
+  //         populate: {
+  //           path: "primaryRefferal",
+  //         },
+  //       });
+
+  //     res.status(201).json(populatedRegistration);
+  //   } catch (error) {
+  //     console.error("Error creating registration:", error);
+  //     res.status(500).json({ error: error.message });
+  //   }
+  // },
+
   createThread: async (req, res, next) => {
     try {
       const {
@@ -165,33 +236,45 @@ const Servicescontroller = {
         userId,
       } = req.body;
 
-      // Get holidays
-      const holidays = await Holiday.find();
+      console.log("tests", JSON.stringify(tests));
 
-      // Calculate max duration from tests
-      const maxDuration = tests.reduce((max, test) => {
-        const duration = test.urgent ? test.urgentTime : test.tat;
-        return Math.max(max, duration);
-      }, 0);
+      if (referral && Array.isArray(referral)) {
+        referral.forEach((ref) => {
+          // Set invalid or empty ObjectId fields to undefined or remove them
+          ref.primaryRefferal = mongoose.Types.ObjectId.isValid(
+            ref.primaryRefferal
+          )
+            ? ref.primaryRefferal
+            : undefined;
+          ref.secondaryRefferal = mongoose.Types.ObjectId.isValid(
+            ref.secondaryRefferal
+          )
+            ? ref.secondaryRefferal
+            : undefined;
+          ref.billedTo = mongoose.Types.ObjectId.isValid(ref.billedTo)
+            ? ref.billedTo
+            : undefined;
+          ref.coporateCustomer = mongoose.Types.ObjectId.isValid(
+            ref.coporateCustomer
+          )
+            ? ref.coporateCustomer
+            : undefined;
 
-      // Calculate completion date using working hours
-      const { completionDate, totalCompletionDays } =
-        await calculateCompletionDate(
-          new Date(),
-          maxDuration,
-          holidays,
-          userId
-        );
-
-      console.log("tests", tests);
-
+          // Remove undefined fields from the referral object
+          Object.keys(ref).forEach((key) => {
+            if (ref[key] === undefined || ref[key] === "") {
+              delete ref[key];
+            }
+          });
+        });
+      }
       // Create the new registration with the calculated completion date
       const newRegistration = new Registration({
         patientId,
         referral,
         tests: tests.map((test) => ({
           ...test,
-          expectedCompletionTime: test.expectedCompletionTime || completionDate,
+          expectedCompletionTime: test.expectedCompletionTime,
         })),
         totaltestprice,
         discount,
@@ -202,9 +285,8 @@ const Servicescontroller = {
         totalBalance,
         paymentDeliveryMode,
         userId,
-        maxCompletionTime: completionDate,
       });
-      console.log("newRegistration", newRegistration);
+
       const collectionCenter = [
         {
           collectionCenterName: "Impact Dignostics",
@@ -212,7 +294,7 @@ const Servicescontroller = {
         },
       ];
 
-      newRegistration.updateOne(
+      await newRegistration.updateOne(
         { $set: { collectionCenter: collectionCenter } },
         { new: true }
       );
@@ -262,12 +344,7 @@ const Servicescontroller = {
         .populate("referral")
         .populate({
           path: "tests",
-          populate: {
-            path: "tests",
-            populate: {
-              path: "department",
-            },
-          },
+          populate: "tests",
         });
 
       console.log("This is patients", patients);

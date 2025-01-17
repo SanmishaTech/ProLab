@@ -113,6 +113,7 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
       ...alldata?.tests[0],
       ...alldata?.tat[0],
       calculatedTat: alldata?.calculatedTat,
+      calculatedurgenttat: alldata?.calculatedurgenttat,
     };
     console.log("This is details", details);
     setPatientForm(details);

@@ -103,6 +103,7 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
       mobile: suggestion.mobile,
       gender: suggestion.gender,
       calculatedtat: suggestion?.calculatedTat,
+      calculatedurgenttat: suggestion?.calculatedurgenttat,
     });
   };
 
