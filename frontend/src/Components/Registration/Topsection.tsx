@@ -41,6 +41,7 @@ export default function PatientCard({ setTopComp }) {
   const [newReferral, setNewReferral] = useState("");
   const [selectedRefferal, setSelectedRefferal] = useState("");
   const [selectedPatient, setSelectedPatient] = useState();
+  const [cooperateCustomer, setCooperateCustomer] = useState();
   const [date, setDate] = useState(new Date());
   const [associates, setAssociates] = useState([]);
   const navigate = useNavigate();
@@ -137,7 +138,21 @@ export default function PatientCard({ setTopComp }) {
         toast.error("Failed to fetch referrals.");
       }
     };
+    const fetchCooperateCustomer = async () => {
+      try {
+        const response = await axios.get(
+          `/api/corporatemaster/allcorporates/${User?._id}`
+        );
+        console.log(response.data);
+        setCooperateCustomer(response.data);
+      } catch (error) {
+        console.error("Error fetching referrals:", error);
+        toast.error("Failed to fetch referrals.");
+      }
+    };
+
     fetchReferrals();
+    fetchCooperateCustomer();
   }, [User?._id]);
 
   const handleReferralChange = (id: string, value: string) => {
@@ -536,10 +551,10 @@ export default function PatientCard({ setTopComp }) {
                   <SelectValue placeholder="Select referral" />
                 </SelectTrigger>
                 <SelectContent>
-                  {associates &&
-                    associates.map((associate, index) => (
+                  {cooperateCustomer &&
+                    cooperateCustomer.map((associate, index) => (
                       <SelectItem key={index} value={associate?._id}>
-                        {associate?.firstName} {associate?.lastName}
+                        {associate?.corporateName}
                       </SelectItem>
                     ))}
                 </SelectContent>
