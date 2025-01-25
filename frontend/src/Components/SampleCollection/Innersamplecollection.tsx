@@ -24,20 +24,80 @@ import { now, getLocalTimeZone } from "@internationalized/date";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
-const alltests = new Map();
+interface TestItem {
+  tests?: {
+    _id: string;
+    department?: {
+      name: string;
+    };
+    name: string;
+  };
+  tat?: {
+    urgentTime: string;
+  };
+  price: number;
+  barcode?: string;
+  rejectionReason?: string;
+}
+
+interface RegistrationData {
+  tests?: TestItem[];
+  patientId?: {
+    firstName: string;
+  };
+  sid?: string;
+  collectionCenter?: Array<{
+    collectionCenterName: string;
+    collectionTime: string;
+  }>;
+}
+
+interface SampleData {
+  patientName: string;
+  test: string;
+  department: string;
+  sid: string;
+  invoice: string;
+  deliveryTime: string;
+  collectionCenter: string;
+  collectionTime: string;
+  barcode: string;
+  rejectionReason: string;
+  price: number;
+  dateTime?: string;
+}
+
+interface WorkingHour {
+  dateTime: {
+    day: number;
+    month: number;
+    year: number;
+    hour: number;
+    minute: number;
+    second: number;
+    millisecond: number;
+    timeZone: string;
+    era: string;
+  };
+  nonWorkingDay: boolean;
+  [key: string]: any;
+}
+
+const alltests = new Map<string, TestItem>();
 
 const Innersamplecollection = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<SampleData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedTests, setSelectedTests] = useState([]);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedTests, setSelectedTests] = useState<string[]>([]);
+  const [filterValue, setFilterValue] = useState("");
+  const [filteredData, setFilteredData] = useState<SampleData[]>([]);
   const user = localStorage.getItem("user");
-  const User = JSON.parse(user);
-  const [sampledata, setSampledata] = useState([]);
+  const User = user ? JSON.parse(user) : null;
+  const [sampledata, setSampledata] = useState<any[]>([]);
   const { id } = useParams<{ id: string }>();
   const [totalPrice, setTotalPrice] = useState(0);
-
-  const [workingHours, setWorkingHours] = useState([
+  const [workingHours, setWorkingHours] = useState<WorkingHour[]>([
     {
       dateTime: {
         day: new Date().getDate(),
@@ -58,25 +118,18 @@ const Innersamplecollection = () => {
     console.log("New sampledta", sampledata);
   }, [sampledata]);
 
-  const handlecollect = (invoice) => {
-    console.log("invoice passed to handlecollect:", invoice);
-
+  const handlecollect = (invoice: SampleData | SampleData[]) => {
     // Ensure invoice is an array
-    if (!Array.isArray(invoice)) {
-      invoice = [invoice];
-    }
+    const invoiceArray = Array.isArray(invoice) ? invoice : [invoice];
 
     const datatosave = {
       Registration: id,
-      Tests: invoice.map((inv) => ({
+      Tests: invoiceArray.map((inv) => ({
         Tests: inv.invoice,
         dateTime: inv.dateTime || new Date().toISOString(),
       })),
       userId: User?._id,
     };
-    //update the data to remove the tests
-
-    console.log("datatosave:", datatosave);
 
     const saveSelectedTests = async () => {
       try {
@@ -84,23 +137,15 @@ const Innersamplecollection = () => {
           .post("/api/samplecollection", datatosave)
           .then((response) => {
             setSampledata(response.data.updatedRecord);
-            console.log(
-              "response.data.updatedRecord:",
-              response.data.updatedRecord
-            );
           })
-          .then((response) => {
+          .then(() => {
             window.location.reload();
           });
-
-        console.log("response:", response);
       } catch (error) {
         console.error("Error saving selected tests:", error);
       }
     };
     saveSelectedTests();
-
-    console.log("selectedTests:", selectedTests);
   };
 
   useEffect(() => {
@@ -117,157 +162,141 @@ const Innersamplecollection = () => {
     fetchingSampleData();
   }, []);
 
-  const handleInputChange = (index, field, value) => {
+  const handleInputChange = (index: number, field: string, value: any) => {
     setWorkingHours((prev) => {
       const updated = [...prev];
 
-      // Ensure the object exists at the specified index
       if (!updated[index]) {
         console.error(`No entry found at index ${index}`);
         return prev;
       }
 
       if (field === "breakFrom" || field === "breakTo") {
-        // Format the value as 'YYYY-MM-DD HH:mm:ss'
-        const dateTime = new Date(value); // Ensure 'value' is a valid date string or object
+        const dateTime = new Date(value);
         const formattedDateTime = dateTime
           .toISOString()
           .replace("T", " ")
           .split(".")[0];
         updated[index][field] = formattedDateTime;
       } else if (field === "dateTime") {
-        updated[index][field] = {
-          ...updated[index][field], // Preserve existing properties
-          ...value, // Overwrite with new values
+        updated[index].dateTime = {
+          ...updated[index].dateTime,
+          ...value,
         };
       } else {
         updated[index][field] = value;
       }
 
       const dateObj = updated[index].dateTime;
-
       const formattedDate = new Date(
         dateObj.year,
-        dateObj.month - 1, // JavaScript months are 0-based
+        dateObj.month - 1,
         dateObj.day,
         dateObj.hour,
         dateObj.minute
       );
 
-      // Format as ISO 8601
       const isoString = formattedDate.toISOString();
-
-      // Format as Human-Readable
       const humanReadable =
         `${String(dateObj.day).padStart(2, "0")}/${String(
           dateObj.month
         ).padStart(2, "0")}/${dateObj.year} ` +
         `${String(dateObj.hour).padStart(2, "0")}:${String(dateObj.minute)}`;
 
-      console.log("ISO 8601:", isoString);
-      console.log("Human-Readable:", humanReadable);
       setData((prev) => {
         const updatedData = [...prev];
-        console.log("Updated data:", updatedData[index]);
-        updatedData[index].dateTime = humanReadable;
+        if (updatedData[index]) {
+          updatedData[index].dateTime = humanReadable;
+        }
         return updatedData;
       });
+
       return updated;
     });
   };
 
   useEffect(() => {
-    //fetching sampledata
     const fetchingSampleData = async () => {
       try {
-        const response = await axios.get(`/api/registration/reference/${id}`);
+        const response = await axios.get<RegistrationData | RegistrationData[]>(`/api/registration/reference/${id}`);
 
         if (response?.data) {
           const price = Array.isArray(response.data)
-            ? response.data.reduce((sum, item) => {
-                return (
-                  sum +
-                  (item?.tests?.reduce(
-                    (testSum, test) => testSum + (test?.price || 0),
-                    0
-                  ) || 0)
-                );
-              }, 0)
+            ? response.data.reduce((sum: number, item: RegistrationData) => {
+              return (
+                sum +
+                (item?.tests?.reduce(
+                  (testSum: number, test: TestItem) => testSum + (test?.price || 0),
+                  0
+                ) || 0)
+              );
+            }, 0)
             : response.data?.tests?.reduce(
-                (sum, test) => sum + (test?.price || 0),
-                0
-              ) || 0;
+              (sum: number, test: TestItem) => sum + (test?.price || 0),
+              0
+            ) || 0;
 
           setTotalPrice(price);
         }
 
         const invoices = Array.isArray(response?.data)
-          ? response.data.flatMap((item) =>
-              item?.tests?.map((test) => ({
-                invoice: item?.tests?._id,
-                department: test?.tests?.department?.name || "N/A",
-                sid: item?.sid || "N/A",
-                patientName: item?.patientId?.firstName || "N/A",
-                test: test?.tests?.name || "N/A",
-                deliveryTime: test?.tat?.urgentTime || "N/A",
-                collectionCenter:
-                  item?.collectionCenter?.[0]?.collectionCenterName || "N/A",
-                collectionTime:
-                  item?.collectionCenter?.[0]?.collectionTime || "N/A",
-                barcode: test?.barcode || "N/A",
-                rejectionReason: test?.rejectionReason || "N/A",
-                price: test?.price || 0,
-              }))
-            )
-          : Object.keys(response?.data || {}).length
-          ? response?.data?.tests?.map((test) => ({
-              invoice: test?.tests?._id,
+          ? response.data.flatMap((item: RegistrationData) =>
+            item?.tests?.map((test: TestItem) => ({
+              invoice: test?.tests?._id || "",
               department: test?.tests?.department?.name || "N/A",
-              sid: response.data?.sid || "N/A",
-              patientName: response.data?.patientId?.firstName || "N/A",
+              sid: item?.sid || "N/A",
+              patientName: item?.patientId?.firstName || "N/A",
               test: test?.tests?.name || "N/A",
               deliveryTime: test?.tat?.urgentTime || "N/A",
               collectionCenter:
-                response.data?.collectionCenter?.[0]?.collectionCenterName ||
-                "N/A",
+                item?.collectionCenter?.[0]?.collectionCenterName || "N/A",
               collectionTime:
-                response.data?.collectionCenter?.[0]?.collectionTime || "N/A",
+                item?.collectionCenter?.[0]?.collectionTime || "N/A",
               barcode: test?.barcode || "N/A",
               rejectionReason: test?.rejectionReason || "N/A",
               price: test?.price || 0,
-            }))
-          : [];
-        console.log("Invoices:", invoices);
-        console.log("response.data?.test?.tests", response.data);
-        response.data?.tests?.map((test) => {
-          console.log("test", test);
-          alltests.set(test?.tests._id, test?.tests);
-          console.log("alltests", alltests);
-        });
+            })) || []
+          )
+          : response.data?.tests?.map((test: TestItem) => ({
+            invoice: test?.tests?._id || "",
+            department: test?.tests?.department?.name || "N/A",
+            sid: response.data?.sid || "N/A",
+            patientName: response.data?.patientId?.firstName || "N/A",
+            test: test?.tests?.name || "N/A",
+            deliveryTime: test?.tat?.urgentTime || "N/A",
+            collectionCenter:
+              response.data?.collectionCenter?.[0]?.collectionCenterName ||
+              "N/A",
+            collectionTime:
+              response.data?.collectionCenter?.[0]?.collectionTime || "N/A",
+            barcode: test?.barcode || "N/A",
+            rejectionReason: test?.rejectionReason || "N/A",
+            price: test?.price || 0,
+          })) || [];
 
-        console.log("alltests:", alltests);
         setData(invoices);
-
+        setFilteredData(invoices);
         setLoading(false);
-      } catch (error) {
-        console.error("Error fetching registrations:", error);
-        setError(error);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "An error occurred";
+        setError(errorMessage);
         setLoading(false);
       }
     };
+
     fetchingSampleData();
   }, [id]);
 
-  function capitalizeText(text) {
+  function capitalizeText(text: string) {
     return text.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
   const handlesubmit = () => {
-    const selectedTestsWithData = selectedTests.map(({ invoice, dateTime }) => {
+    const selectedTestsWithData = selectedTests.map((invoice) => {
       const test = alltests.get(invoice);
       return {
         ...test,
-        collectionDateTime: dateTime,
+        collectionDateTime: selectedTests.find((i) => i === invoice)?.dateTime || "",
       };
     });
 
@@ -276,6 +305,23 @@ const Innersamplecollection = () => {
   useEffect(() => {
     console.log("sometdata", data);
   }, [data]);
+
+  // Add useEffect to handle filtering
+  useEffect(() => {
+    if (!data) return;
+
+    const filtered = data.filter((item) => {
+      const searchStr = filterValue.toLowerCase();
+      return (
+        item?.patientName?.toLowerCase().includes(searchStr) ||
+        item?.test?.toLowerCase().includes(searchStr) ||
+        item?.department?.toLowerCase().includes(searchStr) ||
+        item?.sid?.toLowerCase().includes(searchStr)
+      );
+    });
+
+    setFilteredData(filtered);
+  }, [data, filterValue]);
 
   return (
     <Card className="m-4 mt-20">
@@ -295,7 +341,7 @@ const Innersamplecollection = () => {
                         invoice: item.invoice,
                         dateTime: item.dateTime || new Date().toISOString(),
                       }));
-                      setSelectedTests(allTests);
+                      setSelectedTests(allTests.map((item) => item.invoice));
                     } else {
                       setSelectedTests([]);
                     }
@@ -321,23 +367,14 @@ const Innersamplecollection = () => {
                 <TableCell className="font-medium">
                   <Checkbox
                     checked={selectedTests.some(
-                      (item) => item.invoice === invoice.invoice
+                      (item) => item === invoice.invoice
                     )}
                     onCheckedChange={(checked) => {
                       setSelectedTests((prev) => {
                         if (checked) {
-                          return [
-                            ...prev,
-                            {
-                              invoice: invoice.invoice,
-                              dateTime:
-                                invoice.dateTime || new Date().toISOString(),
-                            },
-                          ];
+                          return [...prev, invoice.invoice];
                         } else {
-                          return prev.filter(
-                            (item) => item.invoice !== invoice.invoice
-                          );
+                          return prev.filter((i) => i !== invoice.invoice);
                         }
                       });
                     }}
@@ -402,8 +439,8 @@ const Innersamplecollection = () => {
                           // Update state
                           setSelectedTests((prev) =>
                             prev.map((item) => {
-                              if (item.invoice === invoice.invoice) {
-                                return { ...item, dateTime: isoDateTime };
+                              if (item === invoice.invoice) {
+                                return isoDateTime;
                               }
                               return item;
                             })

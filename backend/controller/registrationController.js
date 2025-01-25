@@ -4,6 +4,7 @@ const Service = require("../Schema/services");
 const Holiday = require("../Schema/holiday");
 const WorkingHours = require("../Schema/workinghours");
 const { HolidayIndex } = require("../congif");
+const SampleCollection = require("../Schema/samplecollectionmaster");
 
 // Utility function to add days to a date
 const addDays = (date, days) => {
@@ -313,7 +314,22 @@ const Servicescontroller = {
           },
         });
 
-      res.status(201).json(populatedRegistration);
+      // Create sample collection entry
+      const sampleCollection = new SampleCollection({
+        registrationId: newRegistration._id,
+        patientId: newRegistration.patientId,
+        tests: newRegistration.tests.map(test => ({
+          test: test.tests,
+          status: "pending"
+        })),
+        userId: newRegistration.userId
+      });
+      await sampleCollection.save();
+
+      res.status(201).json({
+        registration: populatedRegistration,
+        sampleCollection
+      });
     } catch (error) {
       console.error("Error creating registration:", error);
       res.status(500).json({ error: error.message });

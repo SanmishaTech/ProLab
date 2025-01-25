@@ -5,6 +5,8 @@ const Test = require("../Schema/testMaster");
 const Associate = require("../Schema/associatemaster");
 const fs = require("fs");
 const csv = require("csv-parser");
+const SampleCollection = require("../Schema/samplecollectionmaster");
+const Registration = require("../Schema/registration");
 
 const ServicePayableController = {
   createThread: async (req, res, next) => {
@@ -253,6 +255,100 @@ const ServicePayableController = {
         });
     } catch (error) {
       return res.status(500).json({ error: error.message });
+    }
+  },
+  createSampleCollection: async (req, res) => {
+    try {
+      const registration = await Registration.findById(req.params.registrationId);
+      if (!registration) {
+        return res.status(404).json({ error: "Registration not found" });
+      }
+
+      // Create sample collection entry for each test in registration
+      const sampleCollection = new SampleCollection({
+        registrationId: registration._id,
+        patientId: registration.patientId,
+        tests: registration.tests.map(test => ({
+          test: test.tests,
+          status: "pending"
+        })),
+        userId: req.body.userId
+      });
+
+      await sampleCollection.save();
+      res.status(201).json(sampleCollection);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+  getPendingSamples: async (req, res) => {
+    try {
+      const samples = await SampleCollection.find({
+        "tests.status": "pending"
+      })
+      .populate("registrationId")
+      .populate("patientId")
+      .populate("tests.test");
+      
+      res.json(samples);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+  collectSample: async (req, res) => {
+    try {
+      const { sampleId, testId } = req.params;
+      const sample = await SampleCollection.findById(sampleId);
+      
+      if (!sample) {
+        return res.status(404).json({ error: "Sample not found" });
+      }
+
+      const testIndex = sample.tests.findIndex(
+        test => test.test.toString() === testId
+      );
+
+      if (testIndex === -1) {
+        return res.status(404).json({ error: "Test not found in sample" });
+      }
+
+      sample.tests[testIndex].status = "collected";
+      sample.tests[testIndex].collectedAt = new Date();
+      sample.tests[testIndex].collectedBy = req.body.userId;
+
+      await sample.save();
+      res.json(sample);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+  handleRejectedSample: async (req, res) => {
+    try {
+      const { sampleId, testId } = req.params;
+      const { rejectionReason } = req.body;
+
+      const sample = await SampleCollection.findById(sampleId);
+      if (!sample) {
+        return res.status(404).json({ error: "Sample not found" });
+      }
+
+      const testIndex = sample.tests.findIndex(
+        test => test.test.toString() === testId
+      );
+
+      if (testIndex === -1) {
+        return res.status(404).json({ error: "Test not found in sample" });
+      }
+
+      sample.tests[testIndex].status = "rejected";
+      sample.tests[testIndex].rejectionReason = rejectionReason;
+      sample.tests[testIndex].collectedAt = null;
+      sample.tests[testIndex].collectedBy = null;
+
+      await sample.save();
+      res.json(sample);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
   },
 };

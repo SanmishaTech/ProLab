@@ -2,18 +2,49 @@
 const mongoose = require("mongoose");
 
 const testschema = new mongoose.Schema({
-  Tests: { type: mongoose.Schema.Types.ObjectId, ref: "TestMaster" },
-  dateTime: { type: Date, default: Date.now },
+  test: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "TestMaster",
+    required: true 
+  },
+  status: {
+    type: String,
+    enum: ["pending", "collected", "rejected"],
+    default: "pending"
+  },
+  rejectionReason: {
+    type: String,
+    default: null
+  },
+  collectedAt: {
+    type: Date,
+    default: null
+  },
+  collectedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null
+  }
 });
 
 const sampleMasterschema = new mongoose.Schema({
-  Registration: { type: mongoose.Schema.Types.ObjectId, ref: "Registration" },
-  Tests: [testschema],
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-});
+  registrationId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Registration",
+    required: true 
+  },
+  patientId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "PatientMaster",
+    required: true
+  },
+  tests: [testschema],
+  userId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "User",
+    required: true 
+  }
+}, { timestamps: true });
 
-const SampleMasterschema = mongoose.model(
-  "Samplecollectionmaster",
-  sampleMasterschema
-);
+const SampleMasterschema = mongoose.model("Samplecollectionmaster", sampleMasterschema);
 module.exports = SampleMasterschema;
