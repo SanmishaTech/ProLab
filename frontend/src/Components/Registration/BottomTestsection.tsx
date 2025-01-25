@@ -220,32 +220,89 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
   // Function to calculate completion time for a test
   const calculateTestCompletionTime = async (test, isUrgent) => {
     try {
-      // Get working hours
-      const workingHoursResponse = await axios.get(
-        `/api/workinghours/${User?._id}`
-      );
-      const workingHours = workingHoursResponse.data;
+      const [workingHoursRes, holidaysRes] = await Promise.all([
+        axios.get(`/api/workinghours/${User?._id}`),
+        axios.get("/api/holiday")
+      ]);
 
-      // Get holidays
-      const holidaysResponse = await axios.get("/api/holiday");
-      const holidays = holidaysResponse.data;
+      const workingHours = workingHoursRes.data;
+      const holidays = holidaysRes.data;
 
-      // Calculate completion time
-      const response = await axios.post(
-        "/api/registration/calculate-completion",
-        {
-          startTime: new Date(),
-          duration: isUrgent ? test.urgentTime : test.tat,
-          workingHours,
-          holidays,
+      // New TAT calculation logic
+      const calculateTAT = (durationHours) => {
+        let remaining = durationHours;
+        let currentTime = new Date();
+
+        while (remaining > 0) {
+          const dayOfWeek = currentTime.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+          const schedule = workingHours.schedule.find(s => s.day === dayOfWeek);
+
+          if (!schedule?.nonWorkingDay && !isHoliday(currentTime, holidays)) {
+            const workStart = new Date(currentTime);
+            const [startHour, startMinute] = schedule.workingHours.from.split(':').map(Number);
+            workStart.setHours(startHour, startMinute, 0, 0);
+
+            const workEnd = new Date(currentTime);
+            const [endHour, endMinute] = schedule.workingHours.to.split(':').map(Number);
+            workEnd.setHours(endHour, endMinute, 0, 0);
+
+            // Adjust for current time if same day
+            if (currentTime.getDate() === workStart.getDate()) {
+              workStart.setHours(Math.max(workStart.getHours(), currentTime.getHours()));
+              workStart.setMinutes(Math.max(workStart.getMinutes(), currentTime.getMinutes()));
+            }
+
+            // Calculate available time today
+            let availableMs = workEnd - workStart;
+            if (availableMs <= 0) {
+              currentTime.setDate(currentTime.getDate() + 1);
+              continue;
+            }
+
+            // Subtract break time if applicable
+            const breakStart = new Date(workStart);
+            const [breakFromHour, breakFromMin] = schedule.break.from.split(':').map(Number);
+            breakStart.setHours(breakFromHour, breakFromMin);
+
+            const breakEnd = new Date(workStart);
+            const [breakToHour, breakToMin] = schedule.break.to.split(':').map(Number);
+            breakEnd.setHours(breakToHour, breakToMin);
+
+            if (workStart < breakEnd && workEnd > breakStart) {
+              availableMs -= (breakEnd - breakStart);
+            }
+
+            const availableHours = availableMs / (1000 * 60 * 60);
+            const hoursToDeduct = Math.min(remaining, availableHours);
+
+            remaining -= hoursToDeduct;
+            currentTime = new Date(workStart.getTime() + (hoursToDeduct * 60 * 60 * 1000));
+          }
+
+          if (remaining > 0) {
+            // Move to next day
+            currentTime.setDate(currentTime.getDate() + 1);
+            currentTime.setHours(0, 0, 0, 0);
+          }
         }
-      );
+        return currentTime;
+      };
 
-      return response.data.completionDate;
+      const tatHours = isUrgent ? test.urgentTime : test.tat;
+      const completionTime = calculateTAT(parseFloat(tatHours));
+
+      return completionTime;
     } catch (error) {
       console.error("Error calculating completion time:", error);
       return null;
     }
+  };
+
+  // Helper function to check holidays
+  const isHoliday = (date, holidays) => {
+    return holidays.some(holiday =>
+      new Date(holiday.date).toDateString() === date.toDateString()
+    );
   };
 
   // Function to handle test selection
@@ -529,8 +586,8 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
         referral: {
           primaryRefferal: topComp.referral?.primaryRefferedBy,
           secondaryRefferal: topComp.referral?.secondaryRefferedBy,
-          billedTo: topComp.referral?.billedTo,
-          coporateCustomer: topComp.referral?.corporateCustomer,
+          billedTo: topComp.referral?.billedTo || undefined,
+          corporateCustomer: topComp.referral?.corporateCustomer || undefined,
           clinicHistory: topComp.referral?.clinicHistory,
           medicationHistory: topComp.referral?.medicationHistory,
         },
