@@ -66,8 +66,8 @@ const AddItem: React.FC<AddItemProps> = ({
     const fetcheditdetails = async () => {
       const response = await axios.get(`/api/${editfetch}`).then((res) => {
         console.log(res.data);
+        setFormData(res.data);
       });
-      setFormData(response.data);
     };
     fetcheditdetails();
   }, []);

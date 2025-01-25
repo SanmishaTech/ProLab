@@ -53,9 +53,11 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
     setLoading(true);
     try {
       formData.userId = User?._id;
-      await axios.post(`/api/machinemaster`, formData);
-      onAdd(formData); // Notify parent component
-      setFormData({});
+      await axios.post(`/api/machinemaster`, formData).then((res) => {
+        console.log("Machine created successfully", res.data);
+        setFormData(res.data.service);
+        window.location.reload();
+      });
       setHandleopen(false);
       setError("");
     } catch (err) {

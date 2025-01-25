@@ -222,11 +222,12 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     try {
       const [workingHoursRes, holidaysRes] = await Promise.all([
         axios.get(`/api/workinghours/${User?._id}`),
-        axios.get("/api/holiday")
+        axios.get(`/api/holiday/allholiday/${User?._id}`),
       ]);
 
       const workingHours = workingHoursRes.data;
       const holidays = holidaysRes.data;
+      console.log("This is Holidays", holidays);
 
       // New TAT calculation logic
       const calculateTAT = (durationHours) => {
@@ -234,22 +235,34 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
         let currentTime = new Date();
 
         while (remaining > 0) {
-          const dayOfWeek = currentTime.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-          const schedule = workingHours.schedule.find(s => s.day === dayOfWeek);
+          const dayOfWeek = currentTime
+            .toLocaleDateString("en-US", { weekday: "long" })
+            .toLowerCase();
+          const schedule = workingHours.schedule.find(
+            (s) => s.day === dayOfWeek
+          );
 
           if (!schedule?.nonWorkingDay && !isHoliday(currentTime, holidays)) {
             const workStart = new Date(currentTime);
-            const [startHour, startMinute] = schedule.workingHours.from.split(':').map(Number);
+            const [startHour, startMinute] = schedule.workingHours.from
+              .split(":")
+              .map(Number);
             workStart.setHours(startHour, startMinute, 0, 0);
 
             const workEnd = new Date(currentTime);
-            const [endHour, endMinute] = schedule.workingHours.to.split(':').map(Number);
+            const [endHour, endMinute] = schedule.workingHours.to
+              .split(":")
+              .map(Number);
             workEnd.setHours(endHour, endMinute, 0, 0);
 
             // Adjust for current time if same day
             if (currentTime.getDate() === workStart.getDate()) {
-              workStart.setHours(Math.max(workStart.getHours(), currentTime.getHours()));
-              workStart.setMinutes(Math.max(workStart.getMinutes(), currentTime.getMinutes()));
+              workStart.setHours(
+                Math.max(workStart.getHours(), currentTime.getHours())
+              );
+              workStart.setMinutes(
+                Math.max(workStart.getMinutes(), currentTime.getMinutes())
+              );
             }
 
             // Calculate available time today
@@ -261,22 +274,28 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
 
             // Subtract break time if applicable
             const breakStart = new Date(workStart);
-            const [breakFromHour, breakFromMin] = schedule.break.from.split(':').map(Number);
+            const [breakFromHour, breakFromMin] = schedule.break.from
+              .split(":")
+              .map(Number);
             breakStart.setHours(breakFromHour, breakFromMin);
 
             const breakEnd = new Date(workStart);
-            const [breakToHour, breakToMin] = schedule.break.to.split(':').map(Number);
+            const [breakToHour, breakToMin] = schedule.break.to
+              .split(":")
+              .map(Number);
             breakEnd.setHours(breakToHour, breakToMin);
 
             if (workStart < breakEnd && workEnd > breakStart) {
-              availableMs -= (breakEnd - breakStart);
+              availableMs -= breakEnd - breakStart;
             }
 
             const availableHours = availableMs / (1000 * 60 * 60);
             const hoursToDeduct = Math.min(remaining, availableHours);
 
             remaining -= hoursToDeduct;
-            currentTime = new Date(workStart.getTime() + (hoursToDeduct * 60 * 60 * 1000));
+            currentTime = new Date(
+              workStart.getTime() + hoursToDeduct * 60 * 60 * 1000
+            );
           }
 
           if (remaining > 0) {
@@ -300,8 +319,8 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
 
   // Helper function to check holidays
   const isHoliday = (date, holidays) => {
-    return holidays.some(holiday =>
-      new Date(holiday.date).toDateString() === date.toDateString()
+    return holidays.some(
+      (holiday) => new Date(holiday.date).toDateString() === date.toDateString()
     );
   };
 

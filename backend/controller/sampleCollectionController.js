@@ -1,51 +1,41 @@
-const ServicePayable = require("../Schema/samplecollectionmaster");
+const SampleCollection = require("../Schema/samplecollectionmaster");
 const User = require("../Schema/userSchema");
 const mongoose = require("mongoose");
 const Test = require("../Schema/testMaster");
 const Associate = require("../Schema/associatemaster");
 const fs = require("fs");
 const csv = require("csv-parser");
-const SampleCollection = require("../Schema/samplecollectionmaster");
 const Registration = require("../Schema/registration");
 
-const ServicePayableController = {
+const SampleCollectionController = {
   createThread: async (req, res, next) => {
     try {
       const { Registration, Tests, userId } = req.body;
       const registrationtobefound = new mongoose.Types.ObjectId(Registration);
 
-      const findExistingrecords = await ServicePayable.findOne({
+      const findExistingrecords = await SampleCollection.findOne({
         Registration: registrationtobefound,
       });
 
       if (findExistingrecords) {
-        const existingTests = findExistingrecords.Tests || [];
+        const existingTests = findExistingrecords.tests || [];
 
-        // Merge unique tests if `Tests` is provided and not empty
-
-        //lets make sur tests are unique
+        // Ensure tests are unique
         const newTests = Tests.filter(
-          (test) => !existingTests.includes(test) // Filter out duplicates
+          (test) =>
+            !existingTests.some(
+              (existingTest) => existingTest.test.toString() === test.test
+            ) // Match by test ObjectId
         );
-        updatedTests = [...existingTests, ...newTests];
-        // let updatedTests = existingTests;
-        // if (Array.isArray(Tests) && Tests.length > 0) {
-        //   const newTests = Tests.filter(
-        //     (test) => !existingTests.includes(test) // Filter out duplicates
-        //   );
-        //   updatedTests = [...existingTests, ...newTests];
-        // }
+        const updatedTests = [...existingTests, ...newTests];
 
         const updateData = {
-          Registration,
+          registrationId: Registration,
           userId,
+          tests: updatedTests,
         };
 
-        if (updatedTests !== existingTests) {
-          updateData.Tests = updatedTests; // Only update Tests if there are changes
-        }
-
-        const updateRecord = await ServicePayable.findByIdAndUpdate(
+        const updateRecord = await SampleCollection.findByIdAndUpdate(
           findExistingrecords._id,
           updateData,
           { new: true }
@@ -54,43 +44,44 @@ const ServicePayableController = {
         if (!updateRecord) {
           return res.status(404).json({ message: "Service not found." });
         }
-        //populate the new service
-        const updatedRecond = await ServicePayable.findById(
+
+        // Populate the updated record
+        const updatedRecord = await SampleCollection.findById(
           updateRecord._id
         ).populate({
-          path: "Tests",
+          path: "tests",
           populate: {
-            path: "Tests",
+            path: "test",
           },
         });
 
         return res.json({
           message: "Service updated successfully.",
-          updatedRecord: updatedRecond,
+          updatedRecord,
         });
       }
 
       // Create a new record if none exists
-      const newService = new ServicePayable({
-        Registration,
-        Tests,
+      const newService = new SampleCollection({
+        registrationId: Registration,
+        tests: Tests,
         userId,
       });
-      const newServics = await newService.save();
+      const newServiceSaved = await newService.save();
 
-      //populate the new service
-      const updatedRecond = await ServicePayable.findById(
-        newServics._id
+      // Populate the new record
+      const updatedRecord = await SampleCollection.findById(
+        newServiceSaved._id
       ).populate({
-        path: "Tests",
+        path: "tests",
         populate: {
-          path: "Tests",
+          path: "test",
         },
       });
 
       return res.json({
         message: "Patient record created successfully",
-        updatedRecord: updatedRecond,
+        updatedRecord,
       });
     } catch (error) {
       return res.status(500).json({ error: error.message });
@@ -99,21 +90,23 @@ const ServicePayableController = {
 
   getServices: async (req, res, next) => {
     try {
-      const { userId, Registration } = req.params;
+      const { userId, RegistrationId } = req.params;
       const usertobefound = new mongoose.Types.ObjectId(userId);
       console.log(usertobefound);
 
-      const servicePayable = await ServicePayable.find({
+      const registration = await Registration.findById(RegistrationId);
+      console.log("This is registration", registration);
+
+      const servicePayable = await SampleCollection.find({
         userId: usertobefound,
-      })
-        .populate("Registration")
-        .populate({
-          path: "Tests",
-          populate: {
-            path: "Tests",
-          },
-        });
-      console.log("servicePayable", servicePayable);
+      }).populate({
+        path: "tests",
+        populate: {
+          path: "test",
+        },
+      });
+
+      console.log("SampleCollection", servicePayable);
       return res.status(200).json(servicePayable);
     } catch (error) {
       return res.status(500).json({ error: error.message });
@@ -122,7 +115,7 @@ const ServicePayableController = {
   getServicesbyId: async (req, res, next) => {
     try {
       const patientId = req.params.referenceId;
-      const services = await ServicePayable.findById(patientId)
+      const services = await SampleCollection.findById(patientId)
         .populate({
           path: "associate",
         })
@@ -140,7 +133,7 @@ const ServicePayableController = {
       const patientId = req.params.associateId;
       const { associate, test, value, userId } = req.body;
 
-      const newService = await ServicePayable.findByIdAndUpdate(
+      const newService = await SampleCollection.findByIdAndUpdate(
         patientId,
         {
           associate,
@@ -162,7 +155,7 @@ const ServicePayableController = {
   deleteThread: async (req, res, next) => {
     try {
       const patientId = req.params.specimenId;
-      const newService = await ServicePayable.findByIdAndDelete(patientId);
+      const newService = await SampleCollection.findByIdAndDelete(patientId);
       if (!newService) {
         return res.status(404).json({ message: "Service not found." });
       }
@@ -201,7 +194,7 @@ const ServicePayableController = {
                   return null;
                 }
 
-                const existingRecord = await ServicePayable.findOne({
+                const existingRecord = await SampleCollection.findOne({
                   associate: associate._id,
                   test: test._id,
                   userId: userId?._id,
@@ -209,7 +202,7 @@ const ServicePayableController = {
 
                 if (existingRecord) {
                   // Update existing record
-                  await ServicePayable.findOneAndUpdate(
+                  await SampleCollection.findOneAndUpdate(
                     {
                       associate: associate._id,
                       test: test._id,
@@ -237,7 +230,7 @@ const ServicePayableController = {
 
             if (validData.length > 0) {
               // Insert new records
-              await ServicePayable.insertMany(validData);
+              await SampleCollection.insertMany(validData);
             }
 
             // Clean up: delete the uploaded file
@@ -259,7 +252,9 @@ const ServicePayableController = {
   },
   createSampleCollection: async (req, res) => {
     try {
-      const registration = await Registration.findById(req.params.registrationId);
+      const registration = await Registration.findById(
+        req.params.registrationId
+      );
       if (!registration) {
         return res.status(404).json({ error: "Registration not found" });
       }
@@ -268,11 +263,11 @@ const ServicePayableController = {
       const sampleCollection = new SampleCollection({
         registrationId: registration._id,
         patientId: registration.patientId,
-        tests: registration.tests.map(test => ({
+        tests: registration.tests.map((test) => ({
           test: test.tests,
-          status: "pending"
+          status: "pending",
         })),
-        userId: req.body.userId
+        userId: req.body.userId,
       });
 
       await sampleCollection.save();
@@ -284,12 +279,12 @@ const ServicePayableController = {
   getPendingSamples: async (req, res) => {
     try {
       const samples = await SampleCollection.find({
-        "tests.status": "pending"
+        "tests.status": "pending",
       })
-      .populate("registrationId")
-      .populate("patientId")
-      .populate("tests.test");
-      
+        .populate("registrationId")
+        .populate("patientId")
+        .populate("tests.test");
+
       res.json(samples);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -299,13 +294,13 @@ const ServicePayableController = {
     try {
       const { sampleId, testId } = req.params;
       const sample = await SampleCollection.findById(sampleId);
-      
+
       if (!sample) {
         return res.status(404).json({ error: "Sample not found" });
       }
 
       const testIndex = sample.tests.findIndex(
-        test => test.test.toString() === testId
+        (test) => test.test.toString() === testId
       );
 
       if (testIndex === -1) {
@@ -333,7 +328,7 @@ const ServicePayableController = {
       }
 
       const testIndex = sample.tests.findIndex(
-        test => test.test.toString() === testId
+        (test) => test.test.toString() === testId
       );
 
       if (testIndex === -1) {
@@ -352,4 +347,4 @@ const ServicePayableController = {
     }
   },
 };
-module.exports = ServicePayableController;
+module.exports = SampleCollectionController;

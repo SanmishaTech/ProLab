@@ -137,7 +137,7 @@ export default function RegistrationsPage() {
         name: test?.tests?.name,
         description: test?.tests?.paymentMode?.paidAmount,
         urgent: test?.urgent ? "Yes" : "No",
-        price: test?.tests?.price || 0,
+        price: test?.price || 0,
       })), // Display service details (name, price, urgent status)
       createdAt: item?.createdAt,
     };

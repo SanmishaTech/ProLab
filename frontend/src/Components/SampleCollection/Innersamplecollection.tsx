@@ -218,67 +218,74 @@ const Innersamplecollection = () => {
   useEffect(() => {
     const fetchingSampleData = async () => {
       try {
-        const response = await axios.get<RegistrationData | RegistrationData[]>(`/api/registration/reference/${id}`);
+        const response = await axios.get<RegistrationData | RegistrationData[]>(
+          `/api/registration/reference/${id}`
+        );
 
         if (response?.data) {
           const price = Array.isArray(response.data)
             ? response.data.reduce((sum: number, item: RegistrationData) => {
-              return (
-                sum +
-                (item?.tests?.reduce(
-                  (testSum: number, test: TestItem) => testSum + (test?.price || 0),
-                  0
-                ) || 0)
-              );
-            }, 0)
+                return (
+                  sum +
+                  (item?.tests?.reduce(
+                    (testSum: number, test: TestItem) =>
+                      testSum + (test?.price || 0),
+                    0
+                  ) || 0)
+                );
+              }, 0)
             : response.data?.tests?.reduce(
-              (sum: number, test: TestItem) => sum + (test?.price || 0),
-              0
-            ) || 0;
+                (sum: number, test: TestItem) => sum + (test?.price || 0),
+                0
+              ) || 0;
 
           setTotalPrice(price);
         }
-
+        console.log("This is response", response.data);
         const invoices = Array.isArray(response?.data)
-          ? response.data.flatMap((item: RegistrationData) =>
-            item?.tests?.map((test: TestItem) => ({
+          ? response.data.flatMap(
+              (item: RegistrationData) =>
+                item?.tests?.map((test: TestItem) => ({
+                  invoice: test?.tests?._id || "",
+                  patientId: response.data?.patientId?._id || "",
+                  department: test?.tests?.department?.name || "N/A",
+                  sid: item?.sid || "N/A",
+                  patientName: item?.patientId?.firstName || "N/A",
+                  test: test?.tests?.name || "N/A",
+                  deliveryTime: test?.tat?.urgentTime || "N/A",
+                  collectionCenter:
+                    item?.collectionCenter?.[0]?.collectionCenterName || "N/A",
+                  collectionTime:
+                    item?.collectionCenter?.[0]?.collectionTime || "N/A",
+                  barcode: test?.barcode || "N/A",
+                  rejectionReason: test?.rejectionReason || "N/A",
+                  price: test?.price || 0,
+                })) || []
+            )
+          : response.data?.tests?.map((test: TestItem) => ({
               invoice: test?.tests?._id || "",
+              patientId: response.data?.patientId?._id || "",
               department: test?.tests?.department?.name || "N/A",
-              sid: item?.sid || "N/A",
-              patientName: item?.patientId?.firstName || "N/A",
+              sid: response.data?.sid || "N/A",
+              patientName: response.data?.patientId?.firstName || "N/A",
               test: test?.tests?.name || "N/A",
               deliveryTime: test?.tat?.urgentTime || "N/A",
               collectionCenter:
-                item?.collectionCenter?.[0]?.collectionCenterName || "N/A",
+                response.data?.collectionCenter?.[0]?.collectionCenterName ||
+                "N/A",
               collectionTime:
-                item?.collectionCenter?.[0]?.collectionTime || "N/A",
+                response.data?.collectionCenter?.[0]?.collectionTime || "N/A",
               barcode: test?.barcode || "N/A",
               rejectionReason: test?.rejectionReason || "N/A",
               price: test?.price || 0,
-            })) || []
-          )
-          : response.data?.tests?.map((test: TestItem) => ({
-            invoice: test?.tests?._id || "",
-            department: test?.tests?.department?.name || "N/A",
-            sid: response.data?.sid || "N/A",
-            patientName: response.data?.patientId?.firstName || "N/A",
-            test: test?.tests?.name || "N/A",
-            deliveryTime: test?.tat?.urgentTime || "N/A",
-            collectionCenter:
-              response.data?.collectionCenter?.[0]?.collectionCenterName ||
-              "N/A",
-            collectionTime:
-              response.data?.collectionCenter?.[0]?.collectionTime || "N/A",
-            barcode: test?.barcode || "N/A",
-            rejectionReason: test?.rejectionReason || "N/A",
-            price: test?.price || 0,
-          })) || [];
+            })) || [];
 
         setData(invoices);
         setFilteredData(invoices);
         setLoading(false);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "An error occurred";
+        const errorMessage =
+          err instanceof Error ? err.message : "An error occurred";
         setError(errorMessage);
         setLoading(false);
       }
@@ -296,7 +303,8 @@ const Innersamplecollection = () => {
       const test = alltests.get(invoice);
       return {
         ...test,
-        collectionDateTime: selectedTests.find((i) => i === invoice)?.dateTime || "",
+        collectionDateTime:
+          selectedTests.find((i) => i === invoice)?.dateTime || "",
       };
     });
 
@@ -308,20 +316,31 @@ const Innersamplecollection = () => {
 
   // Add useEffect to handle filtering
   useEffect(() => {
-    if (!data) return;
+    if (!data || !sampledata) return;
 
-    const filtered = data.filter((item) => {
-      const searchStr = filterValue.toLowerCase();
-      return (
-        item?.patientName?.toLowerCase().includes(searchStr) ||
-        item?.test?.toLowerCase().includes(searchStr) ||
-        item?.department?.toLowerCase().includes(searchStr) ||
-        item?.sid?.toLowerCase().includes(searchStr)
-      );
-    });
+    console.log("This is data", data);
+    console.log("This is sample data", sampledata);
+
+    // Extract the test IDs present in sampleData
+    const testIdsInSampleData = new Set(
+      sampledata.map((sample) => sample?.tests?.test?._id)
+    );
+    const patientIdsInSampleData = new Set(
+      sampledata.map((sample) => sample?.patientId)
+    );
+    console.log("This is testIdsInSampleData", patientIdsInSampleData);
+
+    // Filter the data based on the condition
+    const filtered = data.filter(
+      (item) =>
+        !testIdsInSampleData.has(item.invoice) &&
+        !patientIdsInSampleData.has(item.patientId)
+    );
+
+    console.log("Filtered data", filtered);
 
     setFilteredData(filtered);
-  }, [data, filterValue]);
+  }, [data, sampledata, filterValue]);
 
   return (
     <Card className="m-4 mt-20">

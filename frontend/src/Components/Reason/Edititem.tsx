@@ -42,16 +42,18 @@ const AddItem: React.FC<AddItemProps> = ({
   useEffect(() => {
     const fetcheditdetails = async () => {
       try {
-        const response = await axios.get(`/api/${editfetch}`);
-        setFormData(response.data);
+        const response = await axios.get(`/api/${editfetch}`).then((res) => {
+          console.log(res.data);
+          setFormData(res.data);
+        });
       } catch (error) {
-        console.error('Error fetching data', error);
+        console.error("Error fetching data", error);
         setError("Failed to fetch data.");
       }
     };
-  
+
     fetcheditdetails();
-  }, [editfetch]); 
+  }, [editfetch]);
   const handleAdd = async () => {
     // const service = services.find((s) => s.name === SelectedValue);
     await axios.put(`/api/${editid}`, formData).then(() => {
@@ -85,15 +87,17 @@ const AddItem: React.FC<AddItemProps> = ({
             <Label htmlFor="price" className="text-right">
               {capitalizeText(key)}
             </Label>
+            {console.log(
+              `Formdata in edite, ${JSON.stringify(formData.name)} `
+            )}
             <Input
-  id={key}   
-  name={key}   
-  onChange={handleChange}
-  placeholder={`Enter ${capitalizeText(key)}`}
-  value={formData[key] || ""}   
-  className="col-span-3"
-/>
-           
+              id={key}
+              name={key}
+              onChange={handleChange}
+              placeholder={`Enter ${capitalizeText(key)}`}
+              value={formData?.name || ""}
+              className="col-span-3"
+            />
           </div>
         );
       }
@@ -118,7 +122,6 @@ const AddItem: React.FC<AddItemProps> = ({
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
           {addFields(typeofschema)}
-          
         </div>
 
         <DialogFooter>

@@ -2,49 +2,52 @@
 const mongoose = require("mongoose");
 
 const testschema = new mongoose.Schema({
-  test: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  test: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: "TestMaster",
-    required: true 
   },
   status: {
     type: String,
     enum: ["pending", "collected", "rejected"],
-    default: "pending"
+    default: "pending",
   },
   rejectionReason: {
     type: String,
-    default: null
+    default: null,
   },
   collectedAt: {
     type: Date,
-    default: null
+    default: null,
   },
   collectedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    default: null
-  }
+    default: null,
+  },
 });
 
-const sampleMasterschema = new mongoose.Schema({
-  registrationId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "Registration",
-    required: true 
+const sampleMasterschema = new mongoose.Schema(
+  {
+    registrationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Registration",
+    },
+    patientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PatientMaster",
+    },
+    tests: [testschema],
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
-  patientId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "PatientMaster",
-    required: true
-  },
-  tests: [testschema],
-  userId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "User",
-    required: true 
-  }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-const SampleMasterschema = mongoose.model("Samplecollectionmaster", sampleMasterschema);
+const SampleMasterschema = mongoose.model(
+  "Samplecollectionmaster",
+  sampleMasterschema
+);
 module.exports = SampleMasterschema;

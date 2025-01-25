@@ -12,7 +12,7 @@ export default function Dashboardholiday() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const typeofschema = {
-    name: "String",
+    Reason: "String",
   };
   useEffect(() => {
     // Fetch data from the API

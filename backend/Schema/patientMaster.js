@@ -1,6 +1,5 @@
-// models/holiday.js
-
 const mongoose = require("mongoose");
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const patientMasterSchema = new mongoose.Schema({
   patientId: { type: String },
@@ -26,6 +25,9 @@ const patientMasterSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   percentage: { type: Number },
 });
+
+// Add auto-increment plugin for the `sid` field
+patientMasterSchema.plugin(AutoIncrement, { inc_field: "sid" });
 
 const PatientMaster = mongoose.model("PatientMaster", patientMasterSchema);
 module.exports = PatientMaster;

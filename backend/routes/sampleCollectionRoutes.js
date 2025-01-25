@@ -4,7 +4,7 @@ const SampleCollection = require("../controller/sampleCollectionController");
 
 router.post("/", SampleCollection.createThread);
 router.get(
-  `/allsamplemaster/:userId/:Registration`,
+  `/allsamplemaster/:userId/:RegistrationId`,
   SampleCollection.getServices
 );
 router.get("/reference/:tatTestId", SampleCollection.getServicesbyId);
