@@ -57,6 +57,21 @@ import {
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 // import Edititem from "./Edititem";
+<<<<<<< HEAD
+=======
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  FileText,
+  MessageSquare,
+  Mail,
+  Image,
+  Files,
+  FileQuestion,
+  FileSymlink,
+  Settings,
+} from "lucide-react";
+
+>>>>>>> 7a35450 (asd)
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 
@@ -172,10 +187,18 @@ export default function Dashboard({
                                     : "text-right"
                                 } ${header.hiddenOn || ""}`}
                               >
+<<<<<<< HEAD
                                 {header.key === "checkbox" ? (
                                   <Checkbox
                                     className="text-center"
                                     checked={toggleurgent}
+=======
+                                {console.log(toggleurgent[row?._id])}
+                                {header.key === "checkbox" ? (
+                                  <Checkbox
+                                    className="text-center"
+                                    checked={toggleurgent[row?._id]}
+>>>>>>> 7a35450 (asd)
                                     onCheckedChange={(e) => {
                                       setToggleurgent({
                                         ...toggleurgent,
@@ -225,7 +248,11 @@ export default function Dashboard({
                                 ) : header.key === "three" ? (
                                   row.three
                                 ) : header.key === "four" ? (
+<<<<<<< HEAD
                                   toggleurgent && row.four
+=======
+                                  toggleurgent[row._id] && row.four
+>>>>>>> 7a35450 (asd)
                                 ) : header.key === "five" ? (
                                   row.five
                                 ) : header.key === "six" ? (

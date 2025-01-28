@@ -118,158 +118,99 @@ const Innersamplecollection = () => {
     console.log("New sampledta", sampledata);
   }, [sampledata]);
 
-  const handlecollect = (invoice: SampleData | SampleData[]) => {
-    // Ensure invoice is an array
+  const handlecollect = async (invoice: SampleData | SampleData[]) => {
     const invoiceArray = Array.isArray(invoice) ? invoice : [invoice];
-
     const datatosave = {
       Registration: id,
       Tests: invoiceArray.map((inv) => ({
-        Tests: inv.invoice,
-        dateTime: inv.dateTime || new Date().toISOString(),
+        test: inv.invoice,
+        status: "collected",
+        collectedAt: inv.dateTime || new Date().toISOString(),
+        collectedBy: User?._id,
       })),
       userId: User?._id,
     };
 
-    const saveSelectedTests = async () => {
-      try {
-        const response = await axios
-          .post("/api/samplecollection", datatosave)
-          .then((response) => {
-            setSampledata(response.data.updatedRecord);
-          })
-          .then(() => {
-            window.location.reload();
-          });
-      } catch (error) {
-        console.error("Error saving selected tests:", error);
-      }
-    };
-    saveSelectedTests();
-  };
-
-  useEffect(() => {
-    const fetchingSampleData = async () => {
-      try {
-        const response = await axios
-          .get(`/api/samplecollection/allsamplemaster/${User?._id}/${id}`)
-          .then((response) => setSampledata(response.data));
-        console.log("response", response?.data);
-      } catch (error) {
-        console.error("Error fetching sample data:", error);
-      }
-    };
-    fetchingSampleData();
-  }, []);
-
-  const handleInputChange = (index: number, field: string, value: any) => {
-    setWorkingHours((prev) => {
-      const updated = [...prev];
-
-      if (!updated[index]) {
-        console.error(`No entry found at index ${index}`);
-        return prev;
-      }
-
-      if (field === "breakFrom" || field === "breakTo") {
-        const dateTime = new Date(value);
-        const formattedDateTime = dateTime
-          .toISOString()
-          .replace("T", " ")
-          .split(".")[0];
-        updated[index][field] = formattedDateTime;
-      } else if (field === "dateTime") {
-        updated[index].dateTime = {
-          ...updated[index].dateTime,
-          ...value,
-        };
-      } else {
-        updated[index][field] = value;
-      }
-
-      const dateObj = updated[index].dateTime;
-      const formattedDate = new Date(
-        dateObj.year,
-        dateObj.month - 1,
-        dateObj.day,
-        dateObj.hour,
-        dateObj.minute
+    try {
+      await axios.post("/api/samplecollection", datatosave);
+      // Re-fetch SampleCollection data to update UI
+      const response = await axios.get(
+        `/api/samplecollection/registration/${id}`
       );
+      setSampledata(response.data);
+    } catch (error) {
+      console.error("Error saving collection:", error);
+    }
+  };
 
-      const isoString = formattedDate.toISOString();
-      const humanReadable =
-        `${String(dateObj.day).padStart(2, "0")}/${String(
-          dateObj.month
-        ).padStart(2, "0")}/${dateObj.year} ` +
-        `${String(dateObj.hour).padStart(2, "0")}:${String(dateObj.minute)}`;
-
-      setData((prev) => {
-        const updatedData = [...prev];
-        if (updatedData[index]) {
-          updatedData[index].dateTime = humanReadable;
-        }
-        return updatedData;
-      });
-
-      return updated;
-    });
+  // Helper function to process registration response
+  const processRegistrationData = (
+    data: RegistrationData | RegistrationData[]
+  ) => {
+    return Array.isArray(data)
+      ? data.flatMap(
+          (item: RegistrationData) =>
+            item?.tests?.map((test: TestItem) => ({
+              // ... same mapping logic as in useEffect
+            })) || []
+        )
+      : data?.tests?.map((test: TestItem) => ({
+          // ... same mapping logic as in useEffect
+        })) || [];
   };
 
   useEffect(() => {
-    const fetchingSampleData = async () => {
+    const fetchSampleCollectionData = async () => {
+      try {
+        const response = await axios.get(
+          `/api/samplecollection/registration/${id}`
+        );
+        setSampledata(response.data);
+      } catch (error) {
+        console.error("Error fetching sample collection data:", error);
+      }
+    };
+    fetchSampleCollectionData();
+  }, [id]); // Dependency on id ensures fetch when registration changes
+
+  useEffect(() => {
+    const fetchRegistrationData = async () => {
       try {
         const response = await axios.get<RegistrationData | RegistrationData[]>(
           `/api/registration/reference/${id}`
         );
 
-        if (response?.data) {
-          const price = Array.isArray(response.data)
-            ? response.data.reduce((sum: number, item: RegistrationData) => {
-                return (
-                  sum +
-                  (item?.tests?.reduce(
-                    (testSum: number, test: TestItem) =>
-                      testSum + (test?.price || 0),
-                    0
-                  ) || 0)
-                );
-              }, 0)
-            : response.data?.tests?.reduce(
-                (sum: number, test: TestItem) => sum + (test?.price || 0),
-                0
-              ) || 0;
-
-          setTotalPrice(price);
-        }
-        console.log("This is response", response.data);
-        const invoices = Array.isArray(response?.data)
+        // Process tests from registration response
+        const invoices = Array.isArray(response.data)
           ? response.data.flatMap(
               (item: RegistrationData) =>
                 item?.tests?.map((test: TestItem) => ({
                   invoice: test?.tests?._id || "",
-                  patientId: response.data?.patientId?._id || "",
+                  patientId: item.patientId?._id || "",
                   department: test?.tests?.department?.name || "N/A",
                   sid: item?.sid || "N/A",
-                  patientName: item?.patientId?.firstName || "N/A",
+                  patientName: item.patientId?.firstName || "N/A",
                   test: test?.tests?.name || "N/A",
-                  deliveryTime: test?.tat?.urgentTime || "N/A",
+                  deliveryTime: test?.tat?.urgentTime?.toString() || "N/A",
                   collectionCenter:
-                    item?.collectionCenter?.[0]?.collectionCenterName || "N/A",
+                    item.collectionCenter?.[0]?.collectionCenterName || "N/A",
                   collectionTime:
-                    item?.collectionCenter?.[0]?.collectionTime || "N/A",
+                    item.collectionCenter?.[0]?.collectionTime || "N/A",
                   barcode: test?.barcode || "N/A",
                   rejectionReason: test?.rejectionReason || "N/A",
                   price: test?.price || 0,
                 })) || []
             )
           : response.data?.tests?.map((test: TestItem) => ({
+              _id: response.data?._id || "",
               invoice: test?.tests?._id || "",
+              status: test?.status || "",
               patientId: response.data?.patientId?._id || "",
               department: test?.tests?.department?.name || "N/A",
               sid: response.data?.sid || "N/A",
               patientName: response.data?.patientId?.firstName || "N/A",
               test: test?.tests?.name || "N/A",
-              deliveryTime: test?.tat?.urgentTime || "N/A",
+              deliveryTime: test?.tat?.urgentTime?.toString() || "N/A",
               collectionCenter:
                 response.data?.collectionCenter?.[0]?.collectionCenterName ||
                 "N/A",
@@ -279,22 +220,27 @@ const Innersamplecollection = () => {
               rejectionReason: test?.rejectionReason || "N/A",
               price: test?.price || 0,
             })) || [];
-
+        console.log("Invoices:", response.data.tests);
         setData(invoices);
         setFilteredData(invoices);
-        setLoading(false);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "An error occurred";
-        setError(errorMessage);
-        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching registration data:", error);
       }
     };
 
-    fetchingSampleData();
+    fetchRegistrationData();
   }, [id]);
 
-  function capitalizeText(text: string) {
+  useEffect(() => {
+    const newTotal = filteredData.reduce(
+      (sum, item) => sum + (item.price || 0),
+      0
+    );
+    setTotalPrice(newTotal);
+  }, [filteredData]);
+
+  function capitalizeText(text: string | undefined): string {
+    if (!text) return "N/A"; // Return default value if text is undefined or null
     return text.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
@@ -318,26 +264,42 @@ const Innersamplecollection = () => {
   useEffect(() => {
     if (!data || !sampledata) return;
 
-    console.log("This is data", data);
-    console.log("This is sample data", sampledata);
+    const collectedTestIds = new Set();
 
-    // Extract the test IDs present in sampleData
-    const testIdsInSampleData = new Set(
-      sampledata.map((sample) => sample?.tests?.test?._id)
-    );
-    const patientIdsInSampleData = new Set(
-      sampledata.map((sample) => sample?.patientId)
-    );
-    console.log("This is testIdsInSampleData", patientIdsInSampleData);
+    // Collect test IDs and statuses from sampledata
+    sampledata.forEach((sample) => {
+      sample.tests.forEach((test) => {
+        if (test) {
+          console.log("Test ID:", test.test);
+          test.test.forEach((t) => {
+            collectedTestIds.add(t._id); // Add individual test IDs
+          });
+        }
+      });
+    });
 
-    // Filter the data based on the condition
-    const filtered = data.filter(
-      (item) =>
-        !testIdsInSampleData.has(item.invoice) &&
-        !patientIdsInSampleData.has(item.patientId)
-    );
+    console.log("Data variable:", data);
+    console.log("Sample Id:", sampledata);
 
-    console.log("Filtered data", filtered);
+    // Filter out items whose invoice is in collectedTestIds and match statuses
+    const filtered = data.filter((item) => {
+      // Find the sample with a matching status
+      const matchingSample = sampledata.find((sample) =>
+        sample.tests.some((test) => {
+          console.log(test.status !== "pending");
+          return test.status === "pending";
+        })
+      );
+      console.log("Paa", matchingSample);
+      console.log("item", item);
+      // Ensure the status matches if a matching sample is found
+      return (
+        !collectedTestIds.has(item.invoice) ||
+        (matchingSample && matchingSample.status !== "pending")
+      );
+    });
+
+    console.log("Filtered Data:", filtered);
 
     setFilteredData(filtered);
   }, [data, sampledata, filterValue]);
@@ -414,59 +376,19 @@ const Innersamplecollection = () => {
                 <TableCell>
                   <div className="w-full max-w-xl flex flex-row gap-4">
                     <DatePicker
-                      hideTimeZone
-                      showMonthAndYearPickers
+                      label="Collection Time"
                       defaultValue={now(getLocalTimeZone())}
-                      label="Event Date"
-                      variant="bordered"
                       onChange={(value) => {
-                        console.log(value);
-
-                        try {
-                          const {
-                            year,
-                            month,
-                            day,
-                            hour,
-                            minute,
-                            second,
-                            millisecond,
-                            offset,
-                          } = value;
-
-                          // Create a date with the provided details (local time)
-                          const localDate = new Date(
-                            year,
-                            month - 1,
-                            day,
-                            hour,
-                            minute,
-                            second,
-                            millisecond
-                          );
-
-                          // Adjust for the timezone offset (convert to UTC)
-                          const utcDate = new Date(
-                            localDate.getTime() - offset
-                          );
-
-                          // Convert to ISO 8601 format
-                          const isoDateTime = utcDate.toISOString();
-
-                          console.log(isoDateTime); // Log the ISO date string
-
-                          // Update state
-                          setSelectedTests((prev) =>
-                            prev.map((item) => {
-                              if (item === invoice.invoice) {
-                                return isoDateTime;
-                              }
-                              return item;
-                            })
-                          );
-                        } catch (error) {
-                          console.error("Invalid date format:", value, error);
-                        }
+                        const isoDate = value
+                          .toDate(getLocalTimeZone())
+                          .toISOString();
+                        setData((prev) =>
+                          prev.map((item) =>
+                            item.invoice === invoice.invoice
+                              ? { ...item, dateTime: isoDate }
+                              : item
+                          )
+                        );
                       }}
                     />
                   </div>

@@ -83,6 +83,21 @@ import { useForm } from "react-hook-form";
 // import { Label } from "recharts";
 // import { Label } from "@/components/ui/label"
 
+<<<<<<< HEAD
+=======
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  FileText,
+  MessageSquare,
+  Mail,
+  Image,
+  Files,
+  FileQuestion,
+  FileSymlink,
+  Settings,
+} from "lucide-react";
+
+>>>>>>> 7a35450 (asd)
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 

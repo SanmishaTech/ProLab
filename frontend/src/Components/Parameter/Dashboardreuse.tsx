@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+<<<<<<< HEAD
 import {
   File,
   PlusCircle,
@@ -9,6 +10,20 @@ import {
   MoreHorizontal,
   ListFilter,
 } from "lucide-react";
+=======
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  FileText,
+  MessageSquare,
+  Mail,
+  Image,
+  Files,
+  FileQuestion,
+  FileSymlink,
+  Settings,
+} from "lucide-react";
+
+>>>>>>> 7a35450 (asd)
 import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import AlertDialogbox from "./AlertBox";
@@ -29,6 +44,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+<<<<<<< HEAD
+=======
+import EmptyStateDefault from "../EmptyState/EmptyState";
+>>>>>>> 7a35450 (asd)
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -56,6 +75,10 @@ import {
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import Edititem from "./Edititem";
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7a35450 (asd)
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 
@@ -106,6 +129,10 @@ export default function Dashboard({
     console.log("Delete clicked");
     // Implement delete functionality here
   };
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7a35450 (asd)
   return (
     <div className="flex min-h-screen w-full flex-col ">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:px-6">
@@ -180,13 +207,21 @@ export default function Dashboard({
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <Tabs defaultValue="all">
             <div className="flex items-center">
+<<<<<<< HEAD
               <TabsList className="bg-accent/60">
+=======
+              {/* <TabsList className="bg-accent/60">
+>>>>>>> 7a35450 (asd)
                 {tableColumns?.tabs?.map((tab) => (
                   <TabsTrigger key={tab.value} value={tab.value}>
                     {tab.label}
                   </TabsTrigger>
                 ))}
+<<<<<<< HEAD
               </TabsList>
+=======
+              </TabsList> */}
+>>>>>>> 7a35450 (asd)
               <div className="ml-auto flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -211,7 +246,11 @@ export default function Dashboard({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
+<<<<<<< HEAD
                
+=======
+
+>>>>>>> 7a35450 (asd)
                 {/* <Button size="sm" className="h-8 gap-1" onClick={onAddProduct}>
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -222,6 +261,7 @@ export default function Dashboard({
               </div>
             </div>
             <TabsContent value="all">
+<<<<<<< HEAD
               <Card className="bg-accent/40">
                 <CardHeader>
                   <CardTitle>{tableColumns.title}</CardTitle>
@@ -250,11 +290,45 @@ export default function Dashboard({
                           <TableRow>
                             {tableColumns?.headers?.map((header, index) => (
                               <TableCell
+=======
+              {console.log(tableData)}
+              {tableData?.length <= 0 ? (
+                <EmptyState
+                  className="bg-accent/40 w-full min-h-[500px] justify-center items-center"
+                  title="No Forms Created"
+                  description="You can create a new Form to add in your pages."
+                  icons={[FileText, FileSymlink, Files]}
+                  Item={AddItem}
+                  typeofschema={typeofschema}
+                  // action={{
+                  //   label: "Create Form",
+                  //   onClick: () => {
+                  //     console.log("Create form clicked");
+                  //   },
+                  // }}
+                />
+              ) : (
+                <Card className="bg-accent/40">
+                  <CardHeader>
+                    <CardTitle>{tableColumns.title}</CardTitle>
+                    <CardDescription>
+                      {tableColumns.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          {tableColumns?.headers?.map((header, index) => (
+                            <>
+                              <TableHead
+>>>>>>> 7a35450 (asd)
                                 key={index}
                                 className={
                                   header.hiddenOn ? header.hiddenOn : ""
                                 }
                               >
+<<<<<<< HEAD
                                 {header.key === "one" ? (
                                   row.one
                                 ) : header.key === "action" ? (
@@ -307,6 +381,78 @@ export default function Dashboard({
                             ))}
 
                             {/* <TableCell>
+=======
+                                {header.label}
+                              </TableHead>
+                            </>
+                          ))}
+                          {/* <TableHead>Services</TableHead> */}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {tableData?.map((row) => (
+                          <React.Fragment key={row._id}>
+                            <TableRow>
+                              {tableColumns?.headers?.map((header, index) => (
+                                <TableCell
+                                  key={index}
+                                  className={
+                                    header.hiddenOn ? header.hiddenOn : ""
+                                  }
+                                >
+                                  {header.key === "one" ? (
+                                    row.one
+                                  ) : header.key === "action" ? (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          className="h-8 w-8 p-0"
+                                        >
+                                          <span className="sr-only">
+                                            Open menu
+                                          </span>
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent
+                                        align="center"
+                                        className="w-full flex-col items-center flex justify-center"
+                                      >
+                                        <DropdownMenuLabel>
+                                          Actions
+                                        </DropdownMenuLabel>
+                                        <Edititem
+                                          editid={row?.edit}
+                                          toogleedit={setToggleedit}
+                                          typeofschema={typeofschema}
+                                          setToggleedit={setToggleedit}
+                                          toggleedit={toggleedit}
+                                          editfetch={row?.editfetch}
+                                        />
+                                        <DropdownMenuSeparator />
+
+                                        <AlertDialogbox url={row?.delete} />
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  ) : header.key === "two" ? (
+                                    row.two
+                                  ) : header.key === "three" ? (
+                                    row.three
+                                  ) : header.key === "four" ? (
+                                    row.four
+                                  ) : header.key === "five" ? (
+                                    row.five
+                                  ) : header.key === "six" ? (
+                                    `₹${row.six}`
+                                  ) : (
+                                    row[header.key]
+                                  )}
+                                </TableCell>
+                              ))}
+
+                              {/* <TableCell>
+>>>>>>> 7a35450 (asd)
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -320,6 +466,7 @@ export default function Dashboard({
                                 Services
                               </Button>
                             </TableCell> */}
+<<<<<<< HEAD
                           </TableRow>
                           {expandedRows.includes(row._id) && (
                             <></>
@@ -393,6 +540,24 @@ export default function Dashboard({
                   </div>
                 </CardFooter>
               </Card>
+=======
+                            </TableRow>
+                          </React.Fragment>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                  <CardFooter>
+                    <div className="text-xs text-muted-foreground">
+                      Showing <strong>{tableColumns.pagination.from}</strong>-
+                      <strong>{tableColumns.pagination.to}</strong> of{" "}
+                      <strong>{tableColumns.pagination.total}</strong>{" "}
+                      registrations
+                    </div>
+                  </CardFooter>
+                </Card>
+              )}
+>>>>>>> 7a35450 (asd)
             </TabsContent>
             {/* Add more TabsContent as needed */}
           </Tabs>

@@ -56,6 +56,21 @@ import {
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import Edititem from "./Edititem";
+<<<<<<< HEAD
+=======
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  FileText,
+  MessageSquare,
+  Mail,
+  Image,
+  Files,
+  FileQuestion,
+  FileSymlink,
+  Settings,
+} from "lucide-react";
+
+>>>>>>> 7a35450 (asd)
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 
@@ -227,6 +242,7 @@ export default function Dashboard({
               </div>
             </div>
             <TabsContent value="all">
+<<<<<<< HEAD
               <Card className="bg-accent/40">
                 <CardHeader>
                   <CardTitle>{tableColumns.title}</CardTitle>
@@ -255,11 +271,44 @@ export default function Dashboard({
                           <TableRow>
                             {tableColumns?.headers?.map((header, index) => (
                               <TableCell
+=======
+              {tableData?.length <= 0 ? (
+                <EmptyState
+                  className="bg-accent/40 w-full min-h-[500px] justify-center items-center"
+                  title="No Forms Created"
+                  description="You can create a new Form to add in your pages."
+                  icons={[FileText, FileSymlink, Files]}
+                  Item={AddItem}
+                  typeofschema={typeofschema}
+                  // action={{
+                  //   label: "Create Form",
+                  //   onClick: () => {
+                  //     console.log("Create form clicked");
+                  //   },
+                  // }}
+                />
+              ) : (
+                <Card className="bg-accent/40">
+                  <CardHeader>
+                    <CardTitle>{tableColumns.title}</CardTitle>
+                    <CardDescription>
+                      {tableColumns.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          {tableColumns?.headers?.map((header, index) => (
+                            <>
+                              <TableHead
+>>>>>>> 7a35450 (asd)
                                 key={index}
                                 className={
                                   header.hiddenOn ? header.hiddenOn : ""
                                 }
                               >
+<<<<<<< HEAD
                                 {header.key === "one" ? (
                                   row.one
                                 ) : header.key === "action" ? (
@@ -312,6 +361,78 @@ export default function Dashboard({
                             ))}
 
                             {/* <TableCell>
+=======
+                                {header.label}
+                              </TableHead>
+                            </>
+                          ))}
+                          {/* <TableHead>Services</TableHead> */}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {tableData?.map((row) => (
+                          <React.Fragment key={row._id}>
+                            <TableRow>
+                              {tableColumns?.headers?.map((header, index) => (
+                                <TableCell
+                                  key={index}
+                                  className={
+                                    header.hiddenOn ? header.hiddenOn : ""
+                                  }
+                                >
+                                  {header.key === "one" ? (
+                                    row.one
+                                  ) : header.key === "action" ? (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          className="h-8 w-8 p-0"
+                                        >
+                                          <span className="sr-only">
+                                            Open menu
+                                          </span>
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent
+                                        align="center"
+                                        className="w-full flex-col items-center flex justify-center"
+                                      >
+                                        <DropdownMenuLabel>
+                                          Actions
+                                        </DropdownMenuLabel>
+                                        <Edititem
+                                          editid={row?._id}
+                                          toogleedit={setToggleedit}
+                                          typeofschema={typeofschema}
+                                          setToggleedit={setToggleedit}
+                                          toggleedit={toggleedit}
+                                          editfetch={row?.editfetch}
+                                        />
+                                        <DropdownMenuSeparator />
+
+                                        <AlertDialogbox url={row?.delete} />
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  ) : header.key === "two" ? (
+                                    row.two
+                                  ) : header.key === "three" ? (
+                                    row.three
+                                  ) : header.key === "four" ? (
+                                    row.four
+                                  ) : header.key === "five" ? (
+                                    row.five
+                                  ) : header.key === "six" ? (
+                                    `₹${row.six}`
+                                  ) : (
+                                    row[header.key]
+                                  )}
+                                </TableCell>
+                              ))}
+
+                              {/* <TableCell>
+>>>>>>> 7a35450 (asd)
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -325,6 +446,7 @@ export default function Dashboard({
                                 Services
                               </Button>
                             </TableCell> */}
+<<<<<<< HEAD
                           </TableRow>
                           {expandedRows.includes(row._id) && (
                             <></>
@@ -398,6 +520,82 @@ export default function Dashboard({
                   </div>
                 </CardFooter>
               </Card>
+=======
+                            </TableRow>
+                            {expandedRows.includes(row._id) && (
+                              <></>
+                              // <TableRow>
+                              //   <TableCell
+                              //     colSpan={tableColumns.headers.length + 1}
+                              //   >
+                              //     <div className="p-4 bg-muted rounded-md">
+                              //       <h4 className="text-sm font-semibold mb-2">
+                              //         Services
+                              //       </h4>
+                              //       {/* Nested Services Table */}
+                              //       <Table className="mb-4">
+                              //         <TableHeader>
+                              //           <TableRow>
+                              //             <TableHead>Service Name</TableHead>
+                              //             <TableHead>Description</TableHead>
+                              //             <TableHead>Price ($)</TableHead>
+                              //             <TableHead>Urgent</TableHead>
+                              //           </TableRow>
+                              //         </TableHeader>
+                              //         <TableBody>
+                              //           {row?.services?.map((service) => (
+                              //             <TableRow key={service._id}>
+                              //               <TableCell>{service.name}</TableCell>
+                              //               <TableCell>
+                              //                 {service.description}
+                              //               </TableCell>
+                              //               <TableCell>
+                              //                 &#x20b9;{service.price}
+                              //               </TableCell>
+                              //               <TableCell>
+                              //                 {service.urgent}
+                              //               </TableCell>
+                              //             </TableRow>
+                              //           ))}
+                              //         </TableBody>
+                              //         <TableFooter>
+                              //           <TableRow>
+                              //             <TableCell colSpan={2}>
+                              //               <strong>Total</strong>
+                              //             </TableCell>
+                              //             <TableCell>
+                              //               &#x20b9;{" "}
+                              //               {row?.services
+                              //                 ?.reduce(
+                              //                   (total, service) =>
+                              //                     total + service.price,
+                              //                   0
+                              //                 )
+                              //                 .toFixed(2)}
+                              //             </TableCell>
+                              //           </TableRow>
+                              //         </TableFooter>
+                              //       </Table>
+                              //     </div>
+                              //   </TableCell>
+                              // </TableRow>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                  <CardFooter>
+                    <div className="text-xs text-muted-foreground">
+                      Showing <strong>{tableColumns.pagination.from}</strong>-
+                      <strong>{tableColumns.pagination.to}</strong> of{" "}
+                      <strong>{tableColumns.pagination.total}</strong>{" "}
+                      registrations
+                    </div>
+                  </CardFooter>
+                </Card>
+              )}
+>>>>>>> 7a35450 (asd)
             </TabsContent>
             {/* Add more TabsContent as needed */}
           </Tabs>
