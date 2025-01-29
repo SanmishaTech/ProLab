@@ -11,45 +11,6 @@ const SampleCollectionController = {
   createThread: async (req, res, next) => {
     try {
       const { Registration, Tests, userId } = req.body;
-<<<<<<< HEAD
-      const registrationtobefound = new mongoose.Types.ObjectId(Registration);
-
-      const findExistingrecords = await SampleCollection.findOne({
-        Registration: registrationtobefound,
-      });
-
-      if (findExistingrecords) {
-        const existingTests = findExistingrecords.tests || [];
-
-        // Ensure tests are unique
-        const newTests = Tests.filter(
-          (test) =>
-            !existingTests.some(
-              (existingTest) => existingTest.test.toString() === test.test
-            ) // Match by test ObjectId
-        );
-        const updatedTests = [...existingTests, ...newTests];
-
-        const updateData = {
-          registrationId: Registration,
-          userId,
-          tests: updatedTests,
-        };
-
-        const updateRecord = await SampleCollection.findByIdAndUpdate(
-          findExistingrecords._id,
-          updateData,
-          { new: true }
-        );
-
-        if (!updateRecord) {
-          return res.status(404).json({ message: "Service not found." });
-        }
-
-        // Populate the updated record
-        const updatedRecord = await SampleCollection.findById(
-          updateRecord._id
-=======
       const registrationId = new mongoose.Types.ObjectId(Registration);
 
       // Check for existing record with the same registrationId
@@ -92,7 +53,6 @@ const SampleCollectionController = {
         // Populate the updated record
         const populatedRecord = await SampleCollection.findById(
           existingRecord._id
->>>>>>> 7a35450 (asd)
         ).populate({
           path: "tests",
           populate: {
@@ -101,24 +61,6 @@ const SampleCollectionController = {
         });
 
         return res.json({
-<<<<<<< HEAD
-          message: "Service updated successfully.",
-          updatedRecord,
-        });
-      }
-
-      // Create a new record if none exists
-      const newService = new SampleCollection({
-        registrationId: Registration,
-        tests: Tests,
-        userId,
-      });
-      const newServiceSaved = await newService.save();
-
-      // Populate the new record
-      const updatedRecord = await SampleCollection.findById(
-        newServiceSaved._id
-=======
           message: "Record updated successfully.",
           populatedRecord,
         });
@@ -143,7 +85,6 @@ const SampleCollectionController = {
       // Populate the newly created record
       const populatedRecord = await SampleCollection.findById(
         savedRecord._id
->>>>>>> 7a35450 (asd)
       ).populate({
         path: "tests",
         populate: {
@@ -152,24 +93,15 @@ const SampleCollectionController = {
       });
 
       return res.json({
-<<<<<<< HEAD
-        message: "Patient record created successfully",
-        updatedRecord,
-      });
-    } catch (error) {
-=======
         message: "Record created successfully.",
         populatedRecord,
       });
     } catch (error) {
       console.error("Error in createThread:", error);
->>>>>>> 7a35450 (asd)
       return res.status(500).json({ error: error.message });
     }
   },
 
-<<<<<<< HEAD
-=======
   getByRegistrationId: async (req, res) => {
     try {
       const { registrationId } = req.params;
@@ -192,7 +124,6 @@ const SampleCollectionController = {
     }
   },
 
->>>>>>> 7a35450 (asd)
   getServices: async (req, res, next) => {
     try {
       const { userId, RegistrationId } = req.params;
@@ -204,14 +135,6 @@ const SampleCollectionController = {
 
       const servicePayable = await SampleCollection.find({
         userId: usertobefound,
-<<<<<<< HEAD
-      }).populate({
-        path: "tests",
-        populate: {
-          path: "test",
-        },
-      });
-=======
       })
         .populate({
           path: "tests",
@@ -222,7 +145,6 @@ const SampleCollectionController = {
         .populate({
           path: "registrationId",
         });
->>>>>>> 7a35450 (asd)
 
       console.log("SampleCollection", servicePayable);
       return res.status(200).json(servicePayable);
@@ -383,11 +305,7 @@ const SampleCollectionController = {
         patientId: registration.patientId,
         tests: registration.tests.map((test) => ({
           test: test.tests,
-<<<<<<< HEAD
-          status: "pending",
-=======
           status: "collected",
->>>>>>> 7a35450 (asd)
         })),
         userId: req.body.userId,
       });
@@ -420,10 +338,7 @@ const SampleCollectionController = {
       if (!sample) {
         return res.status(404).json({ error: "Sample not found" });
       }
-<<<<<<< HEAD
-=======
       console.log("sample", JSON.stringify(sample));
->>>>>>> 7a35450 (asd)
 
       const testIndex = sample.tests.findIndex(
         (test) => test.test.toString() === testId

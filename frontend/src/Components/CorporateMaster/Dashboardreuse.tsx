@@ -56,8 +56,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 // import Edititem from "./Edititem";
-<<<<<<< HEAD
-=======
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   FileText,
@@ -70,7 +68,6 @@ import {
   Settings,
 } from "lucide-react";
 
->>>>>>> 7a35450 (asd)
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 
@@ -228,11 +225,6 @@ export default function Dashboard({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-<<<<<<< HEAD
-                
-=======
-
->>>>>>> 7a35450 (asd)
                 {/* <Button size="sm" className="h-8 gap-1" onClick={onAddProduct}>
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">

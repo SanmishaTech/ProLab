@@ -315,22 +315,6 @@ const Servicescontroller = {
         });
 
       // Create sample collection entry
-<<<<<<< HEAD
-      const sampleCollection = new SampleCollection({
-        registrationId: newRegistration._id,
-        patientId: newRegistration.patientId,
-        tests: newRegistration.tests.map(test => ({
-          test: test.tests,
-          status: "pending"
-        })),
-        userId: newRegistration.userId
-      });
-      await sampleCollection.save();
-
-      res.status(201).json({
-        registration: populatedRegistration,
-        sampleCollection
-=======
       // const sampleCollection = new SampleCollection({
       //   registrationId: newRegistration._id,
       //   patientId: newRegistration.patientId,
@@ -345,7 +329,6 @@ const Servicescontroller = {
       res.status(201).json({
         registration: populatedRegistration,
         // sampleCollection,
->>>>>>> 7a35450 (asd)
       });
     } catch (error) {
       console.error("Error creating registration:", error);

@@ -75,14 +75,11 @@ const testSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-<<<<<<< HEAD
-=======
   status: {
     type: String,
     enum: ["pending", "collected", "rejected"],
     default: "pending",
   },
->>>>>>> 7a35450 (asd)
   expectedCompletionTime: {
     type: Date,
     required: true,

@@ -7,13 +7,10 @@ router.get(
   `/allsamplemaster/:userId/:RegistrationId`,
   SampleCollection.getServices
 );
-<<<<<<< HEAD
-=======
 router.get(
   "/registration/:registrationId",
   SampleCollection.getByRegistrationId
 );
->>>>>>> 7a35450 (asd)
 router.get("/reference/:tatTestId", SampleCollection.getServicesbyId);
 router.put("/update/:tatTestId", SampleCollection.updateThreads);
 router.delete("/delete/:tatTestId", SampleCollection.deleteThread);

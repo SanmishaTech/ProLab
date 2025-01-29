@@ -48,11 +48,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^11.16.1",
     "jodit-react": "^4.1.2",
-<<<<<<< HEAD
-    "lucide-react": "^0.468.0",
-=======
     "lucide-react": "^0.474.0",
->>>>>>> 7a35450 (asd)
     "path": "^0.12.7",
     "react": "^18.3.1",
     "react-day-picker": "^9.5.0",

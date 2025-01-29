@@ -10,20 +10,13 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-<<<<<<< HEAD
-=======
 import { cn } from "@/lib/utils";
 
->>>>>>> 7a35450 (asd)
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
-import { cn } from "@/lib/utils";
-=======
->>>>>>> 7a35450 (asd)
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -51,15 +44,11 @@ interface AddItemProps {
   }) => void;
 }
 
-<<<<<<< HEAD
-const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
-=======
 const AddItem: React.FC<AddItemProps> = ({
   onAdd,
   typeofschema,
   className,
 }) => {
->>>>>>> 7a35450 (asd)
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
   const [SelectedValue, setSelectedValue] = useState("");
@@ -118,13 +107,10 @@ const AddItem: React.FC<AddItemProps> = ({
     });
     return [...allFieldstorender];
   };
-<<<<<<< HEAD
-=======
 
   useEffect(() => {
     console.log("className", className);
   }, [className]);
->>>>>>> 7a35450 (asd)
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -137,11 +123,7 @@ const AddItem: React.FC<AddItemProps> = ({
             Enter the details of the Parameters you want to add to the order.
           </DialogDescription>
         </DialogHeader>
-<<<<<<< HEAD
-        <div className="grid gap-4 py-4">
-=======
         <div className={cn("grid gap-4 py-4", className)}>
->>>>>>> 7a35450 (asd)
           {error && <p className="text-red-500">{error}</p>}
           {addFields(typeofschema)}
           {/* <div className="grid grid-cols-4 items-center gap-4">
