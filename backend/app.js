@@ -98,10 +98,10 @@ app.use("/api/collectionmaster", CollectionMaster);
 app.use("/api/workinghours", WorkingHours);
 app.use("/api/samplecollection", samplecollection);
 
-app.use(express.static(path.join(__dirname, "./dist")));
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "./dist/index.html"));
+  res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
 });
 // catch 404 and forward to error handler
 
