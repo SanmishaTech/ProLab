@@ -21,7 +21,7 @@ export default function Sidebar({ className }: SidebarProps) {
     <aside
       className={cn(
         `  hidden min-h-screen flex-none  bg-light transition-[width] duration-500 md:block sticky`,
-        !isMinimized ? "w-72" : "w-[72px]",
+        !isMinimized ? "w-72" : "w-[5.2rem]",
         className
       )}
     >
