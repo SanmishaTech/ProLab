@@ -118,11 +118,13 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Test Master</Button>
+        <Button className="min-w-[20rem] " variant="outline">
+          Profile
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Test Master</DialogTitle>
+          <DialogTitle>Add Test Master</DialogTitle>
           <DialogDescription>
             Enter the details of the Test Master you want to add.
           </DialogDescription>

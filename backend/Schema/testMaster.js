@@ -18,6 +18,14 @@ const testSchema = new mongoose.Schema({
   sortOrder: { type: Number },
   isFormTest: { type: Boolean },
   isSinglePageReport: { type: Boolean },
+  outsideAssociates: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "AssociateMaster",
+  },
+  outsource: { type: Boolean },
+  longdurationtests: { type: Boolean },
+  hidedurationregistration: { type: Boolean },
+  suffix: { type: String },
 });
 
 const TestMaster = mongoose.model("TestMaster", testSchema);

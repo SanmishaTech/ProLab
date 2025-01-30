@@ -50,7 +50,17 @@ const profileFormSchema = z.object({
   specimen: z.string().optional(),
   price: z.any().optional(),
   department: z.string().optional(),
-  // profile: z.boolean().optional(),
+  profile: z.array().optional(),
+  isFormTest: z.boolean().optional(),
+  sortOrder: z.coerce.number().optional(),
+  machineInterface: z.boolean().optional(),
+  isSinglePageReport: z.boolean().optional(),
+  suffix: z.string().optional(),
+  hidedurationregistration: z.boolean().optional(),
+  longdurationtests: z.boolean().optional(),
+  outsource: z.boolean().optional(),
+  singlepagereport: z.boolean().optional(),
+  outsideAssociates: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -66,6 +76,9 @@ function ProfileForm({ formData }) {
   });
   const { id } = useParams();
   const { reset } = form;
+  const {
+    formState: { errors },
+  } = form;
 
   const [content, setContent] = useState("");
   const [consent, setconsent] = useState("");
@@ -74,6 +87,7 @@ function ProfileForm({ formData }) {
   const [department, setDepartment] = useState([]);
   const [profile, setProfile] = useState([]);
   const [formdata, setFormData] = useState([]);
+  const [associates, setAssociates] = useState([]);
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
   useEffect(() => {
@@ -108,10 +122,14 @@ function ProfileForm({ formData }) {
   };
 
   useEffect(() => {
+    console.log("This is errors", errors);
+  }, [errors]);
+  useEffect(() => {
     reset({
       ...formData,
       specimen: formData.specimen?._id,
       department: formData.department?._id,
+      outsideAssociates: formData.outsideAssociates?._id,
     });
     setContent(formData?.prerquisite);
     setconsent(formData?.consentForm);
@@ -137,6 +155,21 @@ function ProfileForm({ formData }) {
       navigate("/testmaster");
     });
   }
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(
+          `/api/associatemaster/allassociates/${User?._id}`
+        );
+        console.log(response.data);
+        setAssociates(response.data);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   return (
     <Form {...form}>
@@ -252,6 +285,120 @@ function ProfileForm({ formData }) {
             )}
           />
         </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
+          <FormField
+            className="flex-1"
+            control={form.control}
+            name="outsideAssociates"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Select Outside Associates</FormLabel>
+                {console.log("fieldvalue", field.value)}
+
+                <Select
+                  onValueChange={field.onChange}
+                  className="w-full"
+                  defaultValue={field.value}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Outside Associates " />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {associates?.map((associates) => (
+                      <SelectItem key={associates._id} value={associates._id}>
+                        {associates.firstName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="flex gap-4 items-center pl-4">
+          <div className="flex items-center space-x-2">
+            <FormField
+              control={form.control}
+              name="outsource"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Checkbox
+                      id="outsource"
+                      className="mr-2"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      defaultChecked={field.value}
+                    />
+                  </FormControl>
+                  <FormLabel
+                    htmlFor="outsource"
+                    className="text-md text-center font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Outsource
+                  </FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />{" "}
+          </div>
+          <div className="flex items-center space-x-2">
+            <FormField
+              control={form.control}
+              name="longdurationtests"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Checkbox
+                      id="longdurationtests"
+                      className="mr-2"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      defaultChecked={field.value}
+                    />
+                  </FormControl>
+                  <FormLabel
+                    htmlFor="longdurationtests"
+                    className="text-md text-center font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 "
+                  >
+                    Long Duration Test
+                  </FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />{" "}
+          </div>
+          <div className="flex items-center space-x-2">
+            <FormField
+              control={form.control}
+              name="hidedurationregistration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Checkbox
+                      id="hidedurationregistration"
+                      className="mr-2"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      defaultChecked={field.value}
+                    />
+                  </FormControl>
+                  <FormLabel
+                    htmlFor="hidedurationregistration"
+                    className="text-md text-center font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-4"
+                  >
+                    Hide During Registration
+                  </FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />{" "}
+          </div>
+        </div>
         <div className=" p-4 space-y-4">
           <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Prereqizite
@@ -319,11 +466,119 @@ function ProfileForm({ formData }) {
             onBlur={setinterpretation}
           />
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-full p-4">
-          <MultiSelectorComponent
-            defaultValue={formData}
-            setData={getformdatafromnextcomponent}
+        <div className="flex items-center space-x-2  gap-[4rem]">
+          <MultiSelectorComponent setData={getformdatafromnextcomponent} />
+          <div className="flex items-center space-x-2 jutify-center">
+            <FormField
+              control={form.control}
+              name="isSinglePageReport"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Checkbox
+                      id="isSinglePageReport"
+                      className="mr-2"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      defaultChecked={field.value}
+                    />
+                  </FormControl>
+                  <FormLabel
+                    htmlFor="isSinglePageReport"
+                    className="text-md text-center  leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Single Page Report
+                  </FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />{" "}
+          </div>
+          <div className="flex items-center space-x-2 justify-center ">
+            <FormField
+              control={form.control}
+              name="isFormTest"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Checkbox
+                      id="isFormTest"
+                      className="mr-2"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      defaultChecked={field.value}
+                    />
+                  </FormControl>
+                  <FormLabel
+                    htmlFor="isFormTest"
+                    className="text-md text-center font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Is Form Test
+                  </FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />{" "}
+          </div>
+        </div>
+        <div className="flex items-center space-x-2  gap-[4rem]">
+          <FormField
+            control={form.control}
+            name="sortOrder"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sort Order</FormLabel>
+                <FormControl>
+                  <Input
+                    className="min-w-[20rem]"
+                    placeholder="sortOrder..."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="machineInterface"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Checkbox
+                    id="machineInterface"
+                    className="mr-2"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    defaultChecked={field.value}
+                  />
+                </FormControl>
+                <FormLabel
+                  htmlFor="machineInterface"
+                  className="text-md text-center font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Machine Interface
+                </FormLabel>
+                <FormMessage />
+              </FormItem>
+            )}
           />{" "}
+          <FormField
+            className="ml-[10rem] "
+            control={form.control}
+            name="suffix"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Suffix for barcode (Use , as separator Ex: -1,-2,-3) :
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="Suffix..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">

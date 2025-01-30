@@ -156,6 +156,12 @@ const Servicescontroller = {
         isFormTest,
         isSinglePageReport,
         userId,
+        outsideAssociates,
+        outsource,
+        longdurationtests,
+        hidedurationregistration,
+        singlepagereport,
+        suffix,
       } = req.body;
       const newService = new Department({
         name,
@@ -173,6 +179,12 @@ const Servicescontroller = {
         isFormTest,
         isSinglePageReport,
         userId,
+        outsideAssociates,
+        outsource,
+        longdurationtests,
+        hidedurationregistration,
+        singlepagereport,
+        suffix,
       });
       const newServics = await newService.save();
       res.json({
@@ -196,6 +208,9 @@ const Servicescontroller = {
         })
         .populate({
           path: "profile",
+        })
+        .populate({
+          path: "outsideAssociates",
         });
 
       res.status(200).json(doctor);
@@ -212,6 +227,9 @@ const Servicescontroller = {
         })
         .populate({
           path: "department",
+        })
+        .populate({
+          path: "outsideAssociates",
         });
       res.status(200).json(services);
     } catch (error) {
@@ -236,6 +254,12 @@ const Servicescontroller = {
         sortOrder,
         isFormTest,
         isSinglePageReport,
+        outsideAssociates,
+        outsource,
+        longdurationtests,
+        hidedurationregistration,
+        singlepagereport,
+        suffix,
       } = req.body;
 
       const newService = await Department.findByIdAndUpdate(
@@ -255,6 +279,12 @@ const Servicescontroller = {
           sortOrder,
           isFormTest,
           isSinglePageReport,
+          outsideAssociates,
+          outsource,
+          longdurationtests,
+          hidedurationregistration,
+          singlepagereport,
+          suffix,
         },
         { new: true }
       );

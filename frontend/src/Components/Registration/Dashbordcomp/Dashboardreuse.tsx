@@ -169,6 +169,8 @@ export default function Dashboard({
       setDateRange({ startDate: null, endDate: null });
       return;
     }
+    console.log("Start Date", value.start);
+    console.log("End Date", value.end);
 
     setDateRange({
       startDate: value.start,

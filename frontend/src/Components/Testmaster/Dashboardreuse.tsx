@@ -346,14 +346,14 @@ export default function Dashboard({
                             //       </h4>
                             //       {/* Nested Services Table */}
                             //       <Table className="mb-4">
-                            //         <TableHeader>
+                            //         <TableHead er>
                             //           <TableRow>
                             //             <TableHead>Service Name</TableHead>
                             //             <TableHead>Description</TableHead>
                             //             <TableHead>Price ($)</TableHead>
                             //             <TableHead>Urgent</TableHead>
                             //           </TableRow>
-                            //         </TableHeader>
+                            //         </TableHead>
                             //         <TableBody>
                             //           {row?.services?.map((service) => (
                             //             <TableRow key={service._id}>

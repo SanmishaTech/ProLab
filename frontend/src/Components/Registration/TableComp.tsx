@@ -178,7 +178,7 @@ export default function Dashboard({
                             {tableColumns?.headers?.map((header, index) => (
                               <TableCell
                                 key={index}
-                                className={`px-4 py-2 border border-gray-200 ${
+                                className={`px-4 py-2 border border-gray-200  ${
                                   header.key === "checkbox"
                                     ? "text-center"
                                     : "text-right"
@@ -187,7 +187,7 @@ export default function Dashboard({
                                 {console.log(toggleurgent[row?._id])}
                                 {header.key === "checkbox" ? (
                                   <Checkbox
-                                    className="text-center"
+                                    className="text-center "
                                     checked={toggleurgent[row?._id]}
                                     onCheckedChange={(e) => {
                                       setToggleurgent({
@@ -243,6 +243,7 @@ export default function Dashboard({
                                   row.five
                                 ) : header.key === "six" ? (
                                   <Input
+                                    className="min-w-[5rem]"
                                     value={row.six || ""}
                                     onChange={(e) => {
                                       setAddTestTable((prev) =>
@@ -272,15 +273,16 @@ export default function Dashboard({
                         <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
                         <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
                         <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
+                        <TableCell className="text-left px-4 py-2 border border-gray-200 min-w-[10rem]"></TableCell>
                         <TableCell
                           colSpan={1}
-                          className="text-right px-4 py-2 border border-gray-200 min-w-[10rem]"
+                          className="text-right px-4 py-2 border border-gray-200 min-w-[2rem]"
                         >
                           <strong>SubTotal</strong>
                         </TableCell>
                         <TableCell
                           colSpan={1}
-                          className="text-right px-4 py-2 border border-gray-200 min-w-[10rem]"
+                          className="text-right px-4 py-2 border border-gray-200 min-w-[5rem]"
                         >
                           <strong>{totalprice}</strong>
                         </TableCell>
