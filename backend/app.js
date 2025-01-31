@@ -44,6 +44,7 @@ var LabmasterRoutes = require("./routes/labmasterRoutes");
 var CollectionMaster = require("./routes/collectionMasterRoutes");
 var WorkingHours = require("./routes/workingHours");
 var samplecollection = require("./routes/sampleCollectionRoutes");
+var samplecollection = require("./routes/ref");
 var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application

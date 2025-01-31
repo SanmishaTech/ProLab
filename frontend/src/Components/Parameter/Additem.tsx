@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Popover,
   PopoverContent,
@@ -75,37 +76,163 @@ const AddItem: React.FC<AddItemProps> = ({
     return text.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
+  const handleChange = (name: string, value: any) => {
+    setFormData((prevData: any) => ({
       ...prevData,
-      [name]: value, // dynamically set key-value pairs
+      [name]: value,
     }));
   };
-  const addFields = (typeofschema) => {
-    const allFieldstorender = [];
-    Object.entries(typeofschema).map(([key, value]) => {
-      console.log(key, value);
+  const handlecheckbox = (key, value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [key]: value, // Directly updating the key with its new value
+    }));
+  };
 
-      if (value === "String") {
-        allFieldstorender.push(
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              {capitalizeText(key)}
-            </Label>
-            <Input
-              id="name"
-              name={key}
-              onChange={handleChange}
-              placeholder="Enter name"
-              value={formData[key]}
-              className="col-span-3"
-            />
-          </div>
-        );
+  const addFields = (schema: Record<string, any>) => {
+    const allFieldsToRender = [];
+
+    Object.entries(schema).forEach(([key, value]) => {
+      const fieldType = value.type;
+      const label = value.label || capitalizeText(key);
+
+      switch (fieldType) {
+        case "String":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              <Input
+                id={key}
+                name={key}
+                onChange={(e) => handleChange(key, e.target.value)}
+                placeholder={`Enter ${label.toLowerCase()}`}
+                value={formData[key] || ""}
+                className="col-span-3"
+              />
+            </div>
+          );
+          break;
+
+        case "Number":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              <Input
+                id={key}
+                name={key}
+                type="number"
+                onChange={(e) => handleChange(key, e.target.value)}
+                placeholder={`Enter ${label.toLowerCase()}`}
+                value={formData[key] || ""}
+                className="col-span-3"
+              />
+            </div>
+          );
+          break;
+
+        case "Date":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData[key] && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2" />
+                    {formData[key] ? (
+                      format(new Date(formData[key]), "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={formData[key] ? new Date(formData[key]) : null}
+                    onSelect={(date) =>
+                      handleChange(key, date ? date.toISOString() : null)
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          );
+          break;
+
+        case "Select":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              <Select onValueChange={(value) => handleChange(key, value)}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue
+                    placeholder={`Select ${label.toLowerCase()}`}
+                    value={formData[key] || ""}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>{label}</SelectLabel>
+                    {value.options.map((option: any) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          );
+          break;
+
+        // Add this case in the addFields method
+        case "Checkbox":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              <div className="col-span-3 flex items-center space-x-2">
+                <Checkbox
+                  id={key}
+                  checked={formData[key] || false}
+                  onCheckedChange={(checked) => handlecheckbox(key, checked)}
+                />
+                {/* <label
+                  htmlFor={key}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {label}
+                </label> */}
+              </div>
+            </div>
+          );
+          break;
+
+        // Add more cases for different field types as needed
+
+        default:
+          console.warn(`Unsupported field type: ${fieldType}`);
+          break;
       }
     });
-    return [...allFieldstorender];
+
+    return allFieldsToRender;
   };
 
   useEffect(() => {

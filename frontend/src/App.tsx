@@ -25,6 +25,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import Referencerange from "@/Components/ReferenceRange/TestCard";
 import { Icons } from "@/Dashboard/Icon";
 import { Editor } from "@/Components/Editor/Editor";
 import Navbar from "@/Navbar/Navbarcomp";
@@ -156,6 +157,7 @@ function App() {
         <Route path="/workhours" element={<Dashboard />} />
         <Route path="/samplecollection/collect/:id" element={<Dashboard />} />
         <Route path="/registration/payment/:id" element={<PaymentDetails />} />
+        <Route path="/referencerange" element={<Dashboard />} />
       </Routes>
     </>
   );

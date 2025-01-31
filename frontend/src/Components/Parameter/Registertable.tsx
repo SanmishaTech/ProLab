@@ -12,10 +12,29 @@ export default function Dashboardholiday() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const typeofschema = {
-    name: "String",
-    unit: "String",
-    fieldType: "String",
+    name: { type: "String", label: "Name" },
+    unit: { type: "String", label: "Unit" },
+    fieldType: {
+      type: "Select",
+      label: "Field Type",
+      options: [
+        { value: "hiden", label: "Hidden" },
+        { value: "image2", label: "Image2" },
+        { value: "label", label: "Label" },
+        { value: "textarea", label: "TextArea" },
+        { value: "textbox", label: "Textbox" },
+      ],
+    },
+    hideinprinting: {
+      type: "Checkbox",
+      label: "Hide in printing",
+    },
+    interpretation: {
+      type: "Checkbox",
+      label: "Interpretation",
+    },
   };
+
   useEffect(() => {
     // Fetch data from the API
     axios

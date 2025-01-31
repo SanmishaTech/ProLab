@@ -9,9 +9,51 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Check, ChevronsUpDown } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+const frameworks = [
+  {
+    value: "next.js",
+    label: "Next.js",
+  },
+  {
+    value: "sveltekit",
+    label: "SvelteKit",
+  },
+  {
+    value: "nuxt.js",
+    label: "Nuxt.js",
+  },
+  {
+    value: "remix",
+    label: "Remix",
+  },
+  {
+    value: "astro",
+    label: "Astro",
+  },
+];
 
 const AdvancedFormulaBuilder = () => {
   // Sample parameters (in real app, fetch from API)
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState("");
+
   const [parameters] = useState([
     { id: 1, name: "CBC", value: "cbc" },
     { id: 2, name: "Hematology", value: "hematology" },
@@ -107,6 +149,59 @@ const AdvancedFormulaBuilder = () => {
           <CardTitle>Formula Builder</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-[200px] justify-between"
+                >
+                  {value
+                    ? frameworks.find((framework) => framework.value === value)
+                        ?.label
+                    : "Select framework..."}
+                  <ChevronsUpDown className="opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <CommandInput
+                    placeholder="Search framework..."
+                    className="h-9"
+                  />
+                  <CommandList>
+                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandGroup>
+                      {frameworks.map((framework) => (
+                        <CommandItem
+                          key={framework.value}
+                          value={framework.value}
+                          onSelect={(currentValue) => {
+                            setValue(
+                              currentValue === value ? "" : currentValue
+                            );
+                            setOpen(false);
+                          }}
+                        >
+                          {framework.label}
+                          <Check
+                            className={cn(
+                              "ml-auto",
+                              value === framework.value
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
           {/* Formula Display */}
           <div className="p-4 min-h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-wrap gap-2 items-center">
             {formula.length === 0 ? (
