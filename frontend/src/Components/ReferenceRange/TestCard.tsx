@@ -131,28 +131,29 @@ function ProfileForm() {
   const [formData, setFormData] = useState<any>({});
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
+  const parameterValue = form.watch("parameter");
   const [associates, setAssociates] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get(
-          `/api/associatemaster/allassociates/${User?._id}`
-        );
-        console.log(response.data);
-        setAssociates(response.data);
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-      }
-    };
-    fetchProfile();
-  }, []);
+  const [apidata, setapidata] = useState<any>();
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         `/api/referencerange/allReference/${parameterValue}/${User?._id}`
+  //       );
+  //       console.log(response.data);
+  //       setapidata(response.data);
+  //     } catch (error) {
+  //       console.error("Error fetching profile:", error);
+  //     }
+  //   };
+  //   fetchProfile();
+  // }, []);
 
   useEffect(() => {
     const fetchSpecimen = async () => {
       try {
         const response = await axios.get(
-          `/api/specimen/allspecimen/${User?._id}`
+          `/api/parameter/allparameter/${User?._id}`
         );
         console.log(response.data);
         setSpecimen(response.data);
@@ -174,19 +175,40 @@ function ProfileForm() {
     fetchDepartment();
     fetchSpecimen();
   }, []);
+
+  useEffect(() => {
+    if (parameterValue) {
+      console.log("Parameter value changed:", parameterValue);
+      const fetchData = async () => {
+        try {
+          const response = await axios.get(
+            `/api/referencerange/allReference/${parameterValue}/${User?._id}`
+          );
+          console.log("Data based on parameter:", response.data);
+          // Update the apidata state so that the table can render the data
+          setapidata(response.data);
+        } catch (error) {
+          console.error("Error fetching data for parameter:", error);
+        }
+      };
+
+      fetchData();
+    }
+  }, [parameterValue]);
+
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
     // console.log("Sas", data);
     console.log("ppappappa", data);
     data.remark = content;
-    data.profile = formData;
+
     data.userId = User?._id;
 
-    await axios.post(`/api/testmaster`, data).then((res) => {
+    await axios.post(`/api/referencerange`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Test Master Created Successfully");
-      navigate("/testmaster");
+      navigate("/referencerange");
     });
   }
 
@@ -225,9 +247,11 @@ function ProfileForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="clinic">Clinic</SelectItem>
-                    <SelectItem value="doctor">Doctor</SelectItem>
-                    <SelectItem value="hospital">Hospital</SelectItem>
+                    {specimen?.map((specimen) => (
+                      <SelectItem key={specimen._id} value={specimen._id}>
+                        {specimen.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormDescription>
@@ -252,63 +276,58 @@ function ProfileForm() {
             )}
           />
         </div>
-        <Table className="min-w-full">
-          <TableCaption>A list of your recent invoices.</TableCaption>
+        <Table className="min-w-full border border-slate-200 rounded-lg">
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">Gender</TableHead>
               <TableHead className="text-center">Age From</TableHead>
-              <TableHead className="text-center">Age To</TableHead>
+              <TableHead className="text-right">Age To</TableHead>
               <TableHead className="text-right">Age Type</TableHead>
-              <TableHead className="text-right">Normal Range Hi</TableHead>
-              <TableHead className="text-right">Normal Range Low</TableHead>
-              <TableHead className="text-right">Normal Range Def</TableHead>
-              <TableHead className="text-right">Critical Range Hi</TableHead>
-              <TableHead className="text-right">Critical Range Low</TableHead>
-              <TableHead className="text-right">Critical Range Def</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableHead className="text-center">Normal Range Hi</TableHead>
+              <TableHead className="text-center">Normal Range Low</TableHead>
+              <TableHead className="text-center">Normal Range Def</TableHead>
+              <TableHead className="text-center">Critical Range Hi</TableHead>
+              <TableHead className="text-center">Critical Range Low</TableHead>
+              <TableHead className="text-center">Critical Range Def</TableHead>
+              <TableHead className="text-center">Action</TableHead>
             </TableRow>
           </TableHeader>
+          {console.log("Apidata", apidata)}
           <TableBody>
-            {invoices.map((invoice) => (
-              <TableRow key={invoice.invoice}>
-                <TableCell className="font-medium">{invoice.invoice}</TableCell>
-                <TableCell className="text-center">
-                  {invoice.paymentStatus}
-                </TableCell>
-                <TableCell className="text-center">
-                  {invoice.paymentMethod}
-                </TableCell>
-                <TableCell className="text-right">
-                  {invoice.totalAmount}
-                </TableCell>
-                <TableCell className="text-right">
-                  {invoice.totalAmount}
-                </TableCell>
-                <TableCell className="text-right">
-                  {invoice.totalAmount}
-                </TableCell>
-                <TableCell className="text-right">
-                  {invoice.totalAmount}
-                </TableCell>
-                <TableCell className="text-right">
-                  {invoice.totalAmount}
-                </TableCell>
-                <TableCell className="text-right">
-                  {invoice.totalAmount}
-                </TableCell>
-                <TableCell className="text-right">
-                  {invoice.totalAmount}
-                </TableCell>
-              </TableRow>
-            ))}
+            {apidata &&
+              apidata.map((item) => (
+                <TableRow key={item._id}>
+                  <TableCell className="text-left">{item.gender}</TableCell>
+                  <TableCell className="text-center">{item.agefrom}</TableCell>
+                  <TableCell className="text-center">{item.ageto}</TableCell>
+                  <TableCell className="text-right">{item.agetype}</TableCell>
+                  <TableCell className="text-center">
+                    {item.normalRange}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {item.normalRangeHi}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {item.normalRangeLow}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {item.criticalRange}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {item.criticalRangeHi}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {item.criticalRangeLow}
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
-          <TableFooter>
+          {/* <TableFooter>
             <TableRow>
               <TableCell colSpan={10}>Total</TableCell>
               <TableCell className="text-right">$2,500.00</TableCell>
             </TableRow>
-          </TableFooter>
+          </TableFooter> */}
         </Table>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
           <FormField

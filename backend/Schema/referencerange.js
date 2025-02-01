@@ -2,7 +2,7 @@
 const mongoose = require("mongoose");
 
 const reference = new mongoose.Schema({
-  parameter: { type: String },
+  parameter: { type: mongoose.Schema.Types.ObjectId, ref: "Parameter" },
   testName: { type: String },
   gender: { type: String },
   agefrom: { type: String },

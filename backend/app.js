@@ -13,7 +13,7 @@ var usersRouter = require("./routes/users");
 // var channelRoutes = require("./routes/channelRoutes");
 // var chatRoutes = require("./routes/chatRoute");
 var ServiceRoutes = require("./routes/serviceRoutes");
-var ReferenceRoutes = require("./routes/referenceRoutes");
+// var ReferenceRoutes = require("./routes/referenceRoutes");
 var RegistrationRoutes = require("./routes/Registration");
 var HolidayRoutes = require("./routes/holidayRoutes");
 var DepartmentRoutes = require("./routes/departmentRoutes");
@@ -44,7 +44,7 @@ var LabmasterRoutes = require("./routes/labmasterRoutes");
 var CollectionMaster = require("./routes/collectionMasterRoutes");
 var WorkingHours = require("./routes/workingHours");
 var samplecollection = require("./routes/sampleCollectionRoutes");
-var samplecollection = require("./routes/ref");
+var referenceRange = require("./routes/referencerange");
 var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application
@@ -68,7 +68,7 @@ app.use("/api/users", usersRouter);
 // app.use("/api/channel", channelRoutes);
 // app.use("/api/chats", chatRoutes);
 app.use("/api/services", ServiceRoutes);
-app.use("/api/reference", ReferenceRoutes);
+// app.use("/api/reference", ReferenceRoutes);
 app.use("/api/registration", RegistrationRoutes);
 app.use("/api/department", DepartmentRoutes);
 app.use("/api/holiday", HolidayRoutes);
@@ -98,7 +98,7 @@ app.use("/api/labmaster", LabmasterRoutes);
 app.use("/api/collectionmaster", CollectionMaster);
 app.use("/api/workinghours", WorkingHours);
 app.use("/api/samplecollection", samplecollection);
-
+app.use("/api/referencerange", referenceRange);
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 app.get("*", (req, res) => {
