@@ -45,6 +45,7 @@ var CollectionMaster = require("./routes/collectionMasterRoutes");
 var WorkingHours = require("./routes/workingHours");
 var samplecollection = require("./routes/sampleCollectionRoutes");
 var referenceRange = require("./routes/referencerange");
+var autocompleteRoutes = require("./routes/autocompleteRoutes");
 var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application
@@ -99,6 +100,7 @@ app.use("/api/collectionmaster", CollectionMaster);
 app.use("/api/workinghours", WorkingHours);
 app.use("/api/samplecollection", samplecollection);
 app.use("/api/referencerange", referenceRange);
+app.use("/api/autocomplete", autocompleteRoutes);
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 app.get("*", (req, res) => {

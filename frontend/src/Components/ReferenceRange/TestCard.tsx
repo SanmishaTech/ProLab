@@ -292,7 +292,6 @@ function ProfileForm() {
               <TableHead className="text-center">Action</TableHead>
             </TableRow>
           </TableHeader>
-          {console.log("Apidata", apidata)}
           <TableBody>
             {apidata &&
               apidata.map((item) => (

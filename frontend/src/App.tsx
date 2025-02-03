@@ -158,6 +158,7 @@ function App() {
         <Route path="/samplecollection/collect/:id" element={<Dashboard />} />
         <Route path="/registration/payment/:id" element={<PaymentDetails />} />
         <Route path="/referencerange" element={<Dashboard />} />
+        <Route path="/branchsetup" element={<Dashboard />} />
       </Routes>
     </>
   );

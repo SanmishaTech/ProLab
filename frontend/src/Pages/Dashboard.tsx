@@ -56,7 +56,7 @@ import Workinghours from "@/Components/Workinghours/Workinghours";
 import Accession from "@/Components/Accession/Registertable";
 import AccessionInner from "@/Components/Accession/Inneraccession";
 import Referencerange from "@/Components/ReferenceRange/TestCard";
-
+import Branchsetup from "@/Components/Branchsetup/branch";
 const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -144,6 +144,7 @@ const Dashboard = () => {
         {location.pathname === "/accession" && <Accession />}
         {location.pathname === "/accession/verification" && <AccessionInner />}
         {location.pathname === "/referencerange" && <Referencerange />}
+        {location.pathname === "/branchsetup" && <Branchsetup />}
 
         {/\/samplecollection\/collect\/\d+/.test(location.pathname) && (
           <Innnerfile />
