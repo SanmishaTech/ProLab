@@ -57,7 +57,7 @@ const Autocomplete = () => {
       try {
         setIsLoading(true);
         const response = await axios.get(
-          `/api/parameter/allparameter/${User?._id}`,
+          `/api/parameter/allparameter/${User?._id}`
         );
         setParameters(response.data);
       } catch (error) {
@@ -78,7 +78,7 @@ const Autocomplete = () => {
       try {
         setIsLoading(true);
         const response = await axios.get(
-          `/api/autocomplete/allautocomplete/${selectedParameter}/${User?._id}`,
+          `/api/autocomplete/allautocomplete/${selectedParameter}/${User?._id}`
         );
         console.log("Formdata", response.data);
         setFormData(response.data);
@@ -112,7 +112,7 @@ const Autocomplete = () => {
   };
 
   const handleUpdate = async () => {
-    if (!input?.trim() || !selectedParameter || !message?.trim()) {
+    if (!selectedParameter || !message?.trim()) {
       toast.error("Please fill all required fields");
       return;
     }
@@ -122,7 +122,6 @@ const Autocomplete = () => {
     const updateData = {
       parameterId: selectedParam?._id,
       parameterName: selectedParam?.name || "",
-      autocompleteText: input,
       message: message,
       defaultValue: defaultCheckbox,
       abnormal: abnormal,
@@ -133,12 +132,14 @@ const Autocomplete = () => {
       setIsSaving(true);
       const response = await axios.put(
         `/api/autocomplete/update/${editingId}`,
-        updateData,
+        updateData
       );
 
       // Update the formData state with the edited item
       setFormData((prev) =>
-        prev.map((item) => (item._id === editingId ? response.data : item)),
+        prev.map((item) =>
+          item._id === editingId ? response.data.newService : item
+        )
       );
 
       toast.success("Data updated successfully");
@@ -177,7 +178,6 @@ const Autocomplete = () => {
     const newData = {
       parameterId: selectedParam?._id,
       parameterName: selectedParam?.name || "",
-      autocompleteText: input,
       message: message,
       defaultValue: defaultCheckbox,
       abnormal: abnormal,
@@ -198,7 +198,7 @@ const Autocomplete = () => {
   };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="p-4 w-4xl mx-auto ">
       <Card className="bg-accent/40">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">
@@ -225,17 +225,6 @@ const Autocomplete = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            {/* Auto Complete Text Input */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Auto Complete Text</label>
-              <Input
-                className="max-w-lg"
-                placeholder="Enter Auto Complete Text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-              />
             </div>
 
             {/* Message Input */}

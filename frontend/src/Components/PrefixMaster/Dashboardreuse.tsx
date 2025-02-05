@@ -29,24 +29,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  Tabs,
-  TabsContent,
-} from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Dashboard({
   breadcrumbs = [],
   searchPlaceholder = "Search...",
   userAvatar = "/placeholder-user.jpg",
 }) {
-  const barcodeId = "6736f5bf5be3d753757a49ee"; 
+  const barcodeId = "6736f5bf5be3d753757a49ee";
   const [formData, setFormData] = useState({
-    prefix: "",   
-    suffix: "",   
-    separator: "",   
-    digits: "1", 
-    startNumber: "",  
+    prefix: "",
+    suffix: "",
+    separator: "",
+    digits: "1",
+    startNumber: "",
     prefixFor: "patient",
     resetToStart: false,
   });
@@ -59,7 +58,7 @@ export default function Dashboard({
 
     try {
       const response = await axios.get(`/api/prefix/${prefixFor}`);
-      
+
       if (response.data && response.data.length > 0) {
         const prefixData = response.data[0];
         setFormData({
@@ -96,35 +95,42 @@ export default function Dashboard({
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,  
+      [name]: value,
     }));
   };
 
   const handleDropdownChange = (value) => {
     setFormData((prevData) => ({
       ...prevData,
-      separator: value,   
+      separator: value,
     }));
   };
 
   const handleNumberOfDigitsChange = (value) => {
     setFormData((prevData) => ({
       ...prevData,
-      digits: value,  
+      digits: value,
+    }));
+  };
+
+  const handleStartfromcheckbox = (value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      resetToStart: value,
     }));
   };
 
   const handlePrefixForChange = (value) => {
     if (value !== "patient" && value !== "sid" && value !== "invoice") {
       console.error("Invalid prefixFor value:", value);
-      return;   
+      return;
     }
 
     setFormData((prevData) => ({
       ...prevData,
-      prefixFor: value,  
+      prefixFor: value,
     }));
-    fetchRecord(value);   
+    fetchRecord(value);
   };
 
   const handleSubmit = async (e) => {
@@ -137,7 +143,7 @@ export default function Dashboard({
 
     try {
       const response = await axios.get(`/api/prefix/${formData.prefixFor}`);
-      
+
       const payload = {
         ...formData,
         digits: formData.digits.toString(),
@@ -145,15 +151,20 @@ export default function Dashboard({
 
       if (response.data && response.data.length > 0) {
         const existingPrefix = response.data[0];
-        await axios.put(`/api/prefix/${formData.prefixFor}/${existingPrefix._id}`, payload);
+        await axios.put(
+          `/api/prefix/${formData.prefixFor}/${existingPrefix._id}`,
+          payload
+        );
         toast.success("Configuration updated successfully");
       } else {
-        await axios.post('/api/prefix', payload);
+        await axios.post("/api/prefix", payload);
         toast.success("Configuration saved successfully");
       }
     } catch (error) {
       console.error("Error saving configuration", error);
-      toast.error(error.response?.data?.message || "Failed to save configuration");
+      toast.error(
+        error.response?.data?.message || "Failed to save configuration"
+      );
     }
   };
 
@@ -187,26 +198,40 @@ export default function Dashboard({
                 <form onSubmit={handleSubmit}>
                   <CardHeader>
                     <CardTitle>Prefix Setup</CardTitle>
-                    <CardDescription>Add/Update the Prefix Configuration</CardDescription>
+                    <CardDescription>
+                      Add/Update the Prefix Configuration
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {/* Prefix For Dropdown */}
                     <div className="mb-4">
-                      <label className="mr-4 text-sm font-medium">Prefix For:</label>
+                      <label className="mr-4 text-sm font-medium">
+                        Prefix For:
+                      </label>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="outline" size="sm">
-                            {formData.prefixFor === "patient" ? "Patient" : formData.prefixFor === "sid" ? "SID" : "InvoiceId"}
+                            {formData.prefixFor === "patient"
+                              ? "Patient"
+                              : formData.prefixFor === "sid"
+                              ? "SID"
+                              : "InvoiceId"}
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handlePrefixForChange("patient")}>
+                          <DropdownMenuItem
+                            onClick={() => handlePrefixForChange("patient")}
+                          >
                             Patient
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handlePrefixForChange("sid")}>
+                          <DropdownMenuItem
+                            onClick={() => handlePrefixForChange("sid")}
+                          >
                             SID
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handlePrefixForChange("invoice")}>
+                          <DropdownMenuItem
+                            onClick={() => handlePrefixForChange("invoice")}
+                          >
                             InvoiceId
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -216,7 +241,10 @@ export default function Dashboard({
                     {/* Input fields for Prefix and Suffix */}
                     <div className="mb-4 grid grid-cols-2 gap-4">
                       <div className="col-span-1">
-                        <label htmlFor="prefix" className="block text-sm font-medium">
+                        <label
+                          htmlFor="prefix"
+                          className="block text-sm font-medium"
+                        >
                           Prefix
                         </label>
                         <Input
@@ -229,7 +257,10 @@ export default function Dashboard({
                         />
                       </div>
                       <div className="col-span-1">
-                        <label htmlFor="suffix" className="block text-sm font-medium">
+                        <label
+                          htmlFor="suffix"
+                          className="block text-sm font-medium"
+                        >
                           Suffix
                         </label>
                         <Input
@@ -247,7 +278,9 @@ export default function Dashboard({
                     <div className="mb-4 flex space-x-4">
                       {/* Separator Dropdown */}
                       <div className="flex-1">
-                        <label className="mr-4 text-sm font-medium">Select Separator:</label>
+                        <label className="mr-4 text-sm font-medium">
+                          Select Separator:
+                        </label>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
@@ -255,16 +288,24 @@ export default function Dashboard({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleDropdownChange(",")}>
+                            <DropdownMenuItem
+                              onClick={() => handleDropdownChange(",")}
+                            >
                               Comma (,)
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDropdownChange("-")}>
+                            <DropdownMenuItem
+                              onClick={() => handleDropdownChange("-")}
+                            >
                               Hyphen (-)
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDropdownChange("/")}>
+                            <DropdownMenuItem
+                              onClick={() => handleDropdownChange("/")}
+                            >
                               Slash (/)
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDropdownChange(":")}>
+                            <DropdownMenuItem
+                              onClick={() => handleDropdownChange(":")}
+                            >
                               Colon (:)
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -273,7 +314,9 @@ export default function Dashboard({
 
                       {/* Number of Digits Dropdown */}
                       <div className="flex-1">
-                        <label className="mr-4 text-sm font-medium">Select Number of Digits:</label>
+                        <label className="mr-4 text-sm font-medium">
+                          Select Number of Digits:
+                        </label>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
@@ -284,7 +327,12 @@ export default function Dashboard({
                             {[1, 2, 3, 4, 5, 6, 7].map((digit) => (
                               <DropdownMenuItem
                                 key={digit}
-                                onClick={() => setFormData(prev => ({...prev, digits: digit.toString()}))}
+                                onClick={() =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    digits: digit.toString(),
+                                  }))
+                                }
                               >
                                 {digit}
                               </DropdownMenuItem>
@@ -296,7 +344,10 @@ export default function Dashboard({
 
                     {/* Input for Start Number */}
                     <div className="mb-4">
-                      <label htmlFor="startNumber" className="block text-sm font-medium">
+                      <label
+                        htmlFor="startNumber"
+                        className="block text-sm font-medium"
+                      >
                         Start Number
                       </label>
                       <Input
@@ -305,9 +356,20 @@ export default function Dashboard({
                         name="startNumber"
                         value={formData.startNumber || ""}
                         onChange={handleInputChange}
-                        max="99999"  // Enforcing maximum of 5 digits (i.e., 99999)
-                        min="0"      // Ensuring only positive numbers are allowed
+                        max="99999" // Enforcing maximum of 5 digits (i.e., 99999)
+                        min="0" // Ensuring only positive numbers are allowed
                         placeholder="Enter Start Number"
+                      />
+                    </div>
+
+                    {/* Reset from Start Checkbox */}
+                    <div className="flex items-center gap-2">
+                      <Label>Reset from start</Label>
+                      <Checkbox
+                        checked={formData.resetToStart}
+                        onCheckedChange={(checked) =>
+                          handleStartfromcheckbox(checked)
+                        }
                       />
                     </div>
                   </CardContent>

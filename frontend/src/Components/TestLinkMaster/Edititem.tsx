@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MultiSelect } from "@/components/ui/multi-select";
+import { MultipleSelect } from "@/components/ui/multiple-select";
 
 import axios from "axios";
 
@@ -56,6 +56,7 @@ const AddItem: React.FC<AddItemProps> = ({
   const [loading, setLoading] = useState(false);
   const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
   const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
+  const [defaultdata, setDefaultdata] = useState<any>({});
   useEffect(() => {
     if (editid) {
       setLoading(true);
@@ -69,16 +70,30 @@ const AddItem: React.FC<AddItemProps> = ({
           const initialFormData = {
             test: res.data.test?._id,
             parameterGroup: res.data.parameterGroup?._id,
-            parameter: res.data.parameter?.map((p: any) => p._id) || [],
+            parameter:
+              res.data.parameter?.map((p) => {
+                return {
+                  key: p._id,
+                  name: p.name,
+                };
+              }) || [],
           };
 
-          console.log("Setting initial form data:", initialFormData);
+          console.log("Setting initial form data:", res.data);
           setFormData(initialFormData);
 
           if (res.data.parameter) {
-            const parameterIds = res.data.parameter.map((p: any) => p._id);
+            const parameterIds = res.data.parameter.map((p) => p._id);
             console.log("Setting selected parameters:", parameterIds);
             setSelectedParameters(parameterIds);
+            const converteddata = res.data.parameter.map((p) => {
+              return {
+                key: p._id,
+                name: p.name,
+              };
+            });
+            console.log("converted data", converteddata);
+            setDefaultdata(converteddata);
           }
         })
         .catch((err) => {
@@ -172,12 +187,12 @@ const AddItem: React.FC<AddItemProps> = ({
           `/api/parameter/allparameter/${User?._id}`
         );
         console.log(response.data);
-        setSelectedFrameworks(
-          response.data.map((framework) => ({
-            value: framework?._id,
-            label: framework?.name,
-          }))
-        );
+        const convertData = response.data.map((framework) => ({
+          key: framework?._id,
+          name: framework?.name,
+        }));
+        console.log("converted data", convertData);
+        setSelectedFrameworks(convertData);
       } catch (error) {
         console.error("Error fetching services:", error);
       }
@@ -365,15 +380,18 @@ const AddItem: React.FC<AddItemProps> = ({
           {addFields(typeofschema)}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">Select Parameters</Label>
-            <MultiSelect
+            <MultipleSelect
               className="col-span-3"
-              options={selectedFrameworks}
-              onValueChange={(values) => {
+              tags={selectedFrameworks}
+              width="405px"
+              onChange={(values) => {
                 console.log("MultiSelect values changed:", values);
-                setSelectedParameters(values);
+                setSelectedParameters(values.map((item) => item.key));
               }}
-              value={selectedParameters}
-              defaultValue={selectedParameters}
+              // value={selectedParameters.filter((item) =>
+              //   selectedFrameworks.some((framework) => framework.key === item)
+              // )}
+              defaultValue={defaultdata}
               placeholder="Select parameters"
             />
           </div>

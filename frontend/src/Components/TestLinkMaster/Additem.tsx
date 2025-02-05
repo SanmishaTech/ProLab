@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { MultiSelect } from "@/components/ui/multi-select";
+import { MultipleSelect } from "@/components/ui/multiple-select";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import axios from "axios";
@@ -60,6 +60,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
         ...formData,
         parameter: selectedParameters,
       });
+      console.log("selectedparameters", selectedParameters);
       await axios.post(`/api/testmasterlink`, {
         test: formData.test,
         parameterGroup: formData.parameterGroup,
@@ -98,13 +99,13 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
         const response = await axios.get(
           `/api/parameter/allparameter/${User?._id}`
         );
-        console.log(response.data);
-        setSelectedFrameworks(
-          response.data.map((framework) => ({
-            value: framework?._id,
-            label: framework?.name,
-          }))
-        );
+        // console.log(response.data);
+        const convertData = response.data.map((framework) => ({
+          key: framework?._id,
+          name: framework?.name,
+        }));
+        console.log("converted data", convertData);
+        setSelectedFrameworks(convertData);
       } catch (error) {
         console.error("Error fetching services:", error);
       }
@@ -274,16 +275,20 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
         <div className="grid gap-4 py-4">
           {error && <p className="text-red-500">{error}</p>}
           {addFields(typeofschema)}
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid grid-cols-4 items-center gap-4 max-w-1xl">
             <Label className="text-right">Select Parameters</Label>
-            <MultiSelect
-              className="col-span-3"
-              options={selectedFrameworks}
-              onValueChange={setSelectedParameters}
+            <MultipleSelect
+              className="col-span-1 max-w-1xl"
+              tags={selectedFrameworks}
+              onChange={(value) => {
+                console.log("value", value);
+                setSelectedParameters(value.map((item) => item.key));
+              }}
               // defaultValue={selectedFrameworks}
               placeholder="Select frameworks"
               variant="inverted"
               animation={2}
+              width="405px"
               maxCount={2}
             />
           </div>

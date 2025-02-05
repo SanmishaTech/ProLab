@@ -50,7 +50,7 @@ const profileFormSchema = z.object({
   specimen: z.string().optional(),
   price: z.any().optional(),
   department: z.string().optional(),
-  profile: z.array().optional(),
+  profile: z.any().optional(),
   isFormTest: z.boolean().optional(),
   sortOrder: z.coerce.number().optional(),
   machineInterface: z.boolean().optional(),
@@ -86,7 +86,7 @@ function ProfileForm({ formData }) {
   const [specimen, setSpecimen] = useState([]);
   const [department, setDepartment] = useState([]);
   const [profile, setProfile] = useState([]);
-  const [formdata, setFormData] = useState([]);
+  const [formdata1, setFormData1] = useState([]);
   const [associates, setAssociates] = useState([]);
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
@@ -118,7 +118,8 @@ function ProfileForm({ formData }) {
   }, []);
 
   const getformdatafromnextcomponent = (data) => {
-    setFormData(data);
+    console.log(data);
+    setFormData1(data);
   };
 
   useEffect(() => {
@@ -147,6 +148,7 @@ function ProfileForm({ formData }) {
     data.prerequisite = content;
     data.consentForm = consent;
     data.interpretedText = interpretation;
+    data.profile = formdata1;
     data.userId = User?._id;
 
     await axios.put(`/api/testmaster/update/${id}`, data).then((res) => {
@@ -467,7 +469,10 @@ function ProfileForm({ formData }) {
           />
         </div>
         <div className="flex items-center space-x-2  gap-[4rem]">
-          <MultiSelectorComponent setData={getformdatafromnextcomponent} />
+          <MultiSelectorComponent
+            setData={getformdatafromnextcomponent}
+            existingvalues={formData}
+          />
           <div className="flex items-center space-x-2 jutify-center">
             <FormField
               control={form.control}

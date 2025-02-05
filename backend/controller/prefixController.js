@@ -22,8 +22,8 @@ exports.createPrefix = async (req, res) => {
     // Check if a prefix configuration already exists for this type
     const existingPrefix = await Prefix.findOne({ prefixFor });
     if (existingPrefix) {
-      return res.status(400).json({ 
-        message: `A prefix configuration for ${prefixFor} already exists. Please use update instead.` 
+      return res.status(400).json({
+        message: `A prefix configuration for ${prefixFor} already exists. Please use update instead.`,
       });
     }
 

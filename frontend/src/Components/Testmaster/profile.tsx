@@ -18,14 +18,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import FancyMultiSelect from "./Selectcomponent";
-import { MultiSelect } from "@/components/ui/multi-select";
+import { MultipleSelect } from "@/components/ui/multiple-select";
 
 import axios from "axios";
 
 interface AddItemProps {
   // other props...
   setData: (data: any) => void;
-
+  existingvalues?: any;
   defaultValue?: any;
   onDataChange: (data: any) => void;
 }
@@ -34,6 +34,7 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
   onAdd,
   typeofschema,
   setData,
+  existingvalues,
   defaultValue,
 }) => {
   const frameworksList = [
@@ -49,11 +50,15 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
   const [handleopen, setHandleopen] = useState(false);
   const [value, setValue] = useState<string[]>([]);
   const [formData, setFormData] = useState<any>([]);
-  const [error, setError] = useState("");
+  const [tags, settag] = useState();
   const [tempvalue, settempvalue] = useState<string[]>([]);
   const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [availableOptions, setAvailableOptions] = useState<any[]>([]);
+
   const arayofformids = [];
   useEffect(() => {
+    console.log("Defaultvalue", defaultValue);
     if (defaultValue?.profile) {
       const arayofformids = defaultValue?.profile.map(
         (item: any) => item.value
@@ -63,11 +68,36 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
   }, [defaultValue]);
 
   useEffect(() => {
-    const arayofformids = Object.values(formData).map(
-      (item: any) => item.value
-    );
-    settempvalue(arayofformids);
+    settempvalue(formData);
   }, [formData]);
+
+  useEffect(() => {
+    const convertdata = existingvalues?.profile?.map((item: any) => ({
+      key: item._id,
+      name: item.name,
+    }));
+
+    setFormData(convertdata);
+  }, [existingvalues]);
+
+  useEffect(() => {
+    const initialSelected =
+      // defaultValue?.profile?.map((item: any) => item.key) ||
+      existingvalues?.profile?.map((item: any) => item.key) || [];
+    setSelectedItems(initialSelected);
+  }, [defaultValue, existingvalues]);
+
+  useEffect(() => {
+    if (existingvalues?.profile && selectedFrameworks.length > 0) {
+      const filteredFrameworks = selectedFrameworks.filter(
+        (framework) =>
+          !existingvalues.profile.some(
+            (existing: any) => existing.value === framework._id
+          )
+      );
+      settag(filteredFrameworks);
+    }
+  }, [existingvalues, selectedFrameworks]);
 
   useEffect(() => {
     if (typeof setData === "function") {
@@ -80,32 +110,46 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get(`/api/testmaster/alltestmaster`);
-        const filteredData = response.data.map((item: any) => ({
-          value: item._id,
-          label: item.name,
+        const response = await axios.get(
+          `/api/testmaster/alltestmaster/${User?._id}`
+        );
+        const fetchedData = response.data.map((item: any) => ({
+          key: item._id,
+          name: item.name,
         }));
-        setSelectedFrameworks(filteredData);
+
+        // Filter out items that have already been selected (existing values)
+        const filteredData = fetchedData.filter(
+          (item) => !existingvalues?.profile?.includes(item.key)
+        );
+
+        setAvailableOptions(filteredData);
       } catch (error) {
         console.error("Error fetching services:", error);
       }
     };
     fetchServices();
-  }, []);
+  }, [User]);
 
   function capitalizeText(text: string) {
     return text.replace(/\b\w/g, (char) => char.toUpperCase());
   }
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData: any) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+  const handleSelectChange = (selected: any[]) => {
+    // Update selected items state (which might be a union of default and newly selected items)
+    const newSelected = selected.map((item) => item.key);
+    setSelectedItems(newSelected);
+    // If you want to update available options to exclude the newly selected ones:
+    setAvailableOptions((prevOptions) =>
+      prevOptions.filter((option) => !newSelected.includes(option.key))
+    );
+    setData(newSelected);
   };
+
   useEffect(() => {
     console.log("This is formData", formData);
   }, [formData]);
+
   useEffect(() => {
     setValue(
       selectedFrameworks?.map((framework) => ({
@@ -132,14 +176,14 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
         <div className="mt-4">
           <h2 className="text-sm font-semibold">Select Tests</h2>
         </div>
-        <FancyMultiSelect
-          options={selectedFrameworks}
-          value={formData}
-          onChange={setFormData}
-          defaultValue={defaultValue?.profile}
+        <MultipleSelect
+          tags={availableOptions} // Only items that haven't been selected
+          // value={selectedItems} // Currently selected items (default + newly added)
+          width="550px"
+          onChange={handleSelectChange}
+          defaultValue={existingvalues?.profile}
           placeholder="Select Tests"
         />
-
         <DialogFooter>
           <Button
             onClick={() => {

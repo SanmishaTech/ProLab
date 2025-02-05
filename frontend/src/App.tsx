@@ -159,6 +159,7 @@ function App() {
         <Route path="/registration/payment/:id" element={<PaymentDetails />} />
         <Route path="/referencerange" element={<Dashboard />} />
         <Route path="/branchsetup" element={<Dashboard />} />
+        <Route path="/makerchecker" element={<Dashboard />} />
       </Routes>
     </>
   );

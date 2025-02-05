@@ -230,6 +230,9 @@ const Servicescontroller = {
         })
         .populate({
           path: "outsideAssociates",
+        })
+        .populate({
+          path: "profile",
         });
       res.status(200).json(services);
     } catch (error) {

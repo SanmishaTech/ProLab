@@ -57,6 +57,7 @@ import Accession from "@/Components/Accession/Registertable";
 import AccessionInner from "@/Components/Accession/Inneraccession";
 import Referencerange from "@/Components/ReferenceRange/TestCard";
 import Branchsetup from "@/Components/Branchsetup/branch";
+import Makerchecker from "@/Components/MakerChecker/Makerchecker";
 const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -145,6 +146,7 @@ const Dashboard = () => {
         {location.pathname === "/accession/verification" && <AccessionInner />}
         {location.pathname === "/referencerange" && <Referencerange />}
         {location.pathname === "/branchsetup" && <Branchsetup />}
+        {location.pathname === "/makerchecker" && <Makerchecker />}
 
         {/\/samplecollection\/collect\/\d+/.test(location.pathname) && (
           <Innnerfile />

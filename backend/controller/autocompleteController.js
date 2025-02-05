@@ -61,7 +61,7 @@ const Servicescontroller = {
           abnormal,
           message,
         },
-        { new: true },
+        { new: true }
       );
       if (!newService) {
         return res.status(404).json({ message: "Service not found." });

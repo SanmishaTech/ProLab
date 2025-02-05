@@ -93,7 +93,14 @@ const Usercontroller = {
       res.status(500).json({ error: error.message });
     }
   },
-
+  GetAllusers: async (req, res, next) => {
+    try {
+      const users = await User.find({});
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
   Getuser: async (req, res, next) => {
     try {
       const userid = req.user._id;

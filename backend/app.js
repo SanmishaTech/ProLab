@@ -46,6 +46,7 @@ var WorkingHours = require("./routes/workingHours");
 var samplecollection = require("./routes/sampleCollectionRoutes");
 var referenceRange = require("./routes/referencerange");
 var autocompleteRoutes = require("./routes/autocompleteRoutes");
+var makercheckerRoutes = require("./routes/makercheckerRoutes");
 var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application
@@ -101,6 +102,8 @@ app.use("/api/workinghours", WorkingHours);
 app.use("/api/samplecollection", samplecollection);
 app.use("/api/referencerange", referenceRange);
 app.use("/api/autocomplete", autocompleteRoutes);
+app.use("/api/makerchecker", makercheckerRoutes);
+
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 app.get("*", (req, res) => {
