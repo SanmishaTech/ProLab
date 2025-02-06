@@ -1,5 +1,3 @@
-"use client";
-
 import {
   HTMLAttributes,
   PropsWithChildren,
@@ -10,7 +8,6 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import * as React from "react";
 
 export type TTag = {
   key: string;
@@ -21,7 +18,8 @@ type MultipleSelectProps = {
   tags: TTag[];
   customTag?: (item: TTag) => ReactNode | string;
   onChange?: (value: TTag[]) => void;
-  defaultValue?: TTag[];
+  value?: TTag[]; // Controlled value
+  defaultValue?: TTag[]; // Fallback default value if not controlled
   width?: string;
 };
 
@@ -29,20 +27,27 @@ export const MultipleSelect = ({
   tags,
   customTag,
   onChange,
+  value,
   defaultValue,
   width,
 }: MultipleSelectProps) => {
-  // Initialize with defaultValue or an empty array
-  const [selected, setSelected] = useState<TTag[]>(defaultValue ?? []);
+  // If `value` is provided, use it; otherwise, fallback to internal state.
+  const [internalSelected, setInternalSelected] = useState<TTag[]>(
+    defaultValue ?? []
+  );
+  const selected = value ?? internalSelected;
+
   const [focused, setFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // **NEW EFFECT**: Update the selected state whenever defaultValue changes.
+  // If not controlled, update internal state from defaultValue changes
   useEffect(() => {
-    setSelected(defaultValue ?? []);
-  }, [defaultValue]);
+    if (value === undefined) {
+      setInternalSelected(defaultValue ?? []);
+    }
+  }, [defaultValue, value]);
 
-  // Whenever selected changes, scroll the container and inform the parent.
+  // Scroll the container when selected changes (without triggering onChange again)
   useEffect(() => {
     if (containerRef?.current) {
       containerRef.current.scrollBy({
@@ -50,25 +55,33 @@ export const MultipleSelect = ({
         behavior: "smooth",
       });
     }
-    onValueChange(selected);
   }, [selected]);
 
-  const onValueChange = (value: TTag[]) => {
-    onChange?.(value);
-  };
-
   const onSelect = (item: TTag) => {
-    setSelected((prev) => [...prev, item]);
+    const newSelection = [...selected, item];
+    if (value === undefined) {
+      setInternalSelected(newSelection);
+    }
+    onChange?.(newSelection);
   };
 
   const onDeselect = (item: TTag) => {
-    setSelected((prev) => prev.filter((i) => i.key !== item.key));
+    const newSelection = selected.filter((i) => i.key !== item.key);
+    if (value === undefined) {
+      setInternalSelected(newSelection);
+    }
+    onChange?.(newSelection);
   };
+
+  // Calculate available options: only show items that haven't been selected.
+  const availableOptions = tags.filter(
+    (item) => !selected.some((i) => i.key === item.key)
+  );
 
   return (
     <AnimatePresence mode={"popLayout"}>
       <div
-        className={`flex  flex-col gap-2 min-h-[50px]`}
+        className={`flex flex-col gap-2 min-h-[50px]`}
         tabIndex={0}
         style={{ width }}
         onFocus={() => setFocused(true)}
@@ -81,8 +94,7 @@ export const MultipleSelect = ({
           className="selected no-scrollbar flex h-12 w-full items-center overflow-y-hidden overflow-x-scroll scroll-smooth rounded-md border border-solid border-gray-200 bg-gray-50 p-2"
         >
           <motion.div layout className="flex items-center gap-2">
-            {console.log("selected", selected)}
-            {selected?.map((item) => (
+            {selected.map((item) => (
               <Tag name={item.key} key={item.key} className={"bg-white shadow"}>
                 <div className="flex items-center gap-2">
                   <motion.span layout className={"text-nowrap"}>
@@ -106,26 +118,24 @@ export const MultipleSelect = ({
           </motion.div>
         </motion.div>
 
-        {/* Dropdown: only show if the container is focused and there are tags left to select */}
-        {focused && tags.length > selected.length && (
+        {/* Dropdown: show if focused and there are available tags */}
+        {focused && availableOptions.length > 0 && (
           <div className="flex w-full flex-wrap gap-2 rounded-md border border-solid border-gray-200 p-2">
-            {tags
-              .filter((item) => !selected.some((i) => i.key === item.key))
-              .map((item) => (
-                <Tag
-                  name={item.key}
-                  onClick={() => onSelect(item)}
-                  key={item.key}
-                >
-                  {customTag ? (
-                    customTag(item)
-                  ) : (
-                    <motion.span layout className={"text-nowrap"}>
-                      {item.name}
-                    </motion.span>
-                  )}
-                </Tag>
-              ))}
+            {availableOptions.map((item) => (
+              <Tag
+                name={item.key}
+                onClick={() => onSelect(item)}
+                key={item.key}
+              >
+                {customTag ? (
+                  customTag(item)
+                ) : (
+                  <motion.span layout className={"text-nowrap"}>
+                    {item.name}
+                  </motion.span>
+                )}
+              </Tag>
+            ))}
           </div>
         )}
       </div>

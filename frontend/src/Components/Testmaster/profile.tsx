@@ -1,5 +1,3 @@
-// components/AddItem.tsx
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -10,159 +8,83 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import FancyMultiSelect from "./Selectcomponent";
 import { MultipleSelect } from "@/components/ui/multiple-select";
-
 import axios from "axios";
 
 interface AddItemProps {
-  // other props...
   setData: (data: any) => void;
   existingvalues?: any;
-  defaultValue?: any;
   onDataChange: (data: any) => void;
+  currentTestId?: string; // Add this prop to receive the current test ID
 }
 
 const MultiSelectorComponent: React.FC<AddItemProps> = ({
-  onAdd,
-  typeofschema,
   setData,
   existingvalues,
-  defaultValue,
+  onDataChange,
+  currentTestId,
 }) => {
-  const frameworksList = [
-    { value: "react", label: "React" },
-    { value: "angular", label: "Angular" },
-    { value: "vue", label: "Vue" },
-    { value: "svelte", label: "Svelte" },
-    { value: "ember", label: "Ember" },
-  ];
-
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
   const [handleopen, setHandleopen] = useState(false);
-  const [value, setValue] = useState<string[]>([]);
-  const [formData, setFormData] = useState<any>([]);
-  const [tags, settag] = useState();
-  const [tempvalue, settempvalue] = useState<string[]>([]);
-  const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [availableOptions, setAvailableOptions] = useState<any[]>([]);
-
-  const arayofformids = [];
+  const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [allOptions, setAllOptions] = useState<any[]>([]);
+  // Initialize selected items for edit mode
   useEffect(() => {
-    console.log("Defaultvalue", defaultValue);
-    if (defaultValue?.profile) {
-      const arayofformids = defaultValue?.profile.map(
-        (item: any) => item.value
-      );
-      settempvalue(arayofformids);
+    if (existingvalues?.profile) {
+      const formattedExisting = existingvalues.profile.map((item: any) => ({
+        key: item._id,
+        name: item.name,
+      }));
+      setSelectedItems(formattedExisting);
     }
-  }, [defaultValue]);
-
-  useEffect(() => {
-    settempvalue(formData);
-  }, [formData]);
-
-  useEffect(() => {
-    const convertdata = existingvalues?.profile?.map((item: any) => ({
-      key: item._id,
-      name: item.name,
-    }));
-
-    setFormData(convertdata);
   }, [existingvalues]);
 
-  useEffect(() => {
-    const initialSelected =
-      // defaultValue?.profile?.map((item: any) => item.key) ||
-      existingvalues?.profile?.map((item: any) => item.key) || [];
-    setSelectedItems(initialSelected);
-  }, [defaultValue, existingvalues]);
-
-  useEffect(() => {
-    if (existingvalues?.profile && selectedFrameworks.length > 0) {
-      const filteredFrameworks = selectedFrameworks.filter(
-        (framework) =>
-          !existingvalues.profile.some(
-            (existing: any) => existing.value === framework._id
-          )
-      );
-      settag(filteredFrameworks);
-    }
-  }, [existingvalues, selectedFrameworks]);
-
-  useEffect(() => {
-    if (typeof setData === "function") {
-      setData(tempvalue);
-    } else {
-      console.error("setData is not a function");
-    }
-  }, [tempvalue, setData]);
-
+  // Fetch all available options
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const response = await axios.get(
           `/api/testmaster/alltestmaster/${User?._id}`
         );
-        const fetchedData = response.data.map((item: any) => ({
-          key: item._id,
-          name: item.name,
-        }));
-
-        // Filter out items that have already been selected (existing values)
-        const filteredData = fetchedData.filter(
-          (item) => !existingvalues?.profile?.includes(item.key)
-        );
-
-        setAvailableOptions(filteredData);
+        // Filter out the current test and transform the data
+        const fetchedData = Array.isArray(response.data)
+          ? response.data
+              .filter((item: any) => item._id !== currentTestId) // Filter out current test
+              .map((item: any) => ({
+                key: item._id,
+                name: item.name,
+              }))
+          : [];
+        console.log("Fetched options:", fetchedData);
+        setAllOptions(fetchedData);
       } catch (error) {
         console.error("Error fetching services:", error);
       }
     };
-    fetchServices();
-  }, [User]);
+    if (User?._id) fetchServices();
+  }, [User?._id, currentTestId]); // Add currentTestId to dependencies
 
-  function capitalizeText(text: string) {
-    return text.replace(/\b\w/g, (char) => char.toUpperCase());
-  }
-
-  const handleSelectChange = (selected: any[]) => {
-    // Update selected items state (which might be a union of default and newly selected items)
-    const newSelected = selected.map((item) => item.key);
-    setSelectedItems(newSelected);
-    // If you want to update available options to exclude the newly selected ones:
-    setAvailableOptions((prevOptions) =>
-      prevOptions.filter((option) => !newSelected.includes(option.key))
-    );
-    setData(newSelected);
+  // Compute available options
+  const getAvailableOptions = () => {
+    const selectedIds = new Set(selectedItems.map((item) => item.key));
+    const filtered = allOptions.filter((item) => !selectedIds.has(item.key));
+    console.log("Selected IDs:", selectedIds); // Debug log
+    console.log("Filtered options:", filtered); // Debug log
+    return filtered;
   };
 
+  // Update parent component
   useEffect(() => {
-    console.log("This is formData", formData);
-  }, [formData]);
-
-  useEffect(() => {
-    setValue(
-      selectedFrameworks?.map((framework) => ({
-        value: framework._id,
-        label: framework.name,
-      })) || []
-    );
-  }, [selectedFrameworks]);
-
+    if (typeof setData === "function") {
+      setData(selectedItems.map((item) => item.key));
+    }
+  }, [selectedItems, setData]);
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button className="min-w-[20rem] " variant="outline">
+        <Button className="min-w-[20rem]" variant="outline">
           Profile
         </Button>
       </DialogTrigger>
@@ -177,11 +99,13 @@ const MultiSelectorComponent: React.FC<AddItemProps> = ({
           <h2 className="text-sm font-semibold">Select Tests</h2>
         </div>
         <MultipleSelect
-          tags={availableOptions} // Only items that haven't been selected
-          // value={selectedItems} // Currently selected items (default + newly added)
+          tags={getAvailableOptions()}
+          value={selectedItems}
           width="550px"
-          onChange={handleSelectChange}
-          defaultValue={existingvalues?.profile}
+          onChange={(value) => {
+            console.log("Selection changed:", value); // Debug log
+            setSelectedItems(value);
+          }}
           placeholder="Select Tests"
         />
         <DialogFooter>

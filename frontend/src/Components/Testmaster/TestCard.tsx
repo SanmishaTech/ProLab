@@ -143,12 +143,7 @@ function ProfileForm() {
     });
   }
 
-  useEffect(() => {
-    console.log("This is formData", formData);
-  }, [formData]);
-
   const getformdatafromnextcomponent = (data) => {
-    console.log("Received data:", data);
     setFormData(data);
   };
 
@@ -273,7 +268,6 @@ function ProfileForm() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Select Outside Associates</FormLabel>
-                {console.log("fieldvalue", field.value)}
                 <Select
                   onValueChange={field.onChange}
                   className="w-full"

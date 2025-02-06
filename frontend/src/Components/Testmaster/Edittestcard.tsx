@@ -126,16 +126,19 @@ function ProfileForm({ formData }) {
     console.log("This is errors", errors);
   }, [errors]);
   useEffect(() => {
-    reset({
-      ...formData,
-      specimen: formData.specimen?._id,
-      department: formData.department?._id,
-      outsideAssociates: formData.outsideAssociates?._id,
-    });
-    setContent(formData?.prerquisite);
-    setconsent(formData?.consentForm);
-    setinterpretation(formData?.interpretedText);
-  }, [formData, reset]);
+    if (Object.keys(formData).length > 0) {
+      // Only reset when formData is populated
+      reset({
+        ...formData,
+        specimen: formData.specimen?._id,
+        department: formData.department?._id,
+        outsideAssociates: formData.outsideAssociates?._id,
+      });
+      setContent(formData?.prerquisite || "");
+      setconsent(formData?.consentForm || "");
+      setinterpretation(formData?.interpretedText || "");
+    }
+  }, [formData]); // Remove reset from dependencies
   //   const { fields, append } = useFieldArray({
   //     name: "urls",
   //     control: form.control,
@@ -295,7 +298,6 @@ function ProfileForm({ formData }) {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Select Outside Associates</FormLabel>
-                {console.log("fieldvalue", field.value)}
 
                 <Select
                   onValueChange={field.onChange}
@@ -472,6 +474,7 @@ function ProfileForm({ formData }) {
           <MultiSelectorComponent
             setData={getformdatafromnextcomponent}
             existingvalues={formData}
+            currentTestId={id}
           />
           <div className="flex items-center space-x-2 jutify-center">
             <FormField
@@ -603,15 +606,16 @@ export default function SettingsProfilePage() {
   useEffect(() => {
     const fetchData = async () => {
       const response = await axios.get(`/api/testmaster/reference/${id}`);
-      console.log(response.data);
-      setFormData(response.data);
+      // Ensure profile data is an array of objects with _id and name
+      const profileData = response.data.profile.map((test) => ({
+        _id: test._id,
+        name: test.name,
+      }));
+      setFormData({ ...response.data, profile: profileData });
     };
     if (id) {
       fetchData();
     }
-    return () => {
-      setFormData({});
-    };
   }, [id]);
   return (
     <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
