@@ -157,6 +157,11 @@ export const navItems: NavItem[] = [
         href: "/associatemaster",
         icon: "Associate",
       },
+      {
+        title: "Medication History",
+        href: "/medicationhistory",
+        icon: "Associate",
+      },
 
       {
         title: "Specimen",

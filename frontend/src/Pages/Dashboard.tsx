@@ -58,6 +58,8 @@ import AccessionInner from "@/Components/Accession/Inneraccession";
 import Referencerange from "@/Components/ReferenceRange/TestCard";
 import Branchsetup from "@/Components/Branchsetup/branch";
 import Makerchecker from "@/Components/MakerChecker/Makerchecker";
+import AssociateType from "@/Components/Associatetype/Registertable";
+import Medicationhistory from "@/Components/MedicationHistory/Registertable";
 const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -147,6 +149,8 @@ const Dashboard = () => {
         {location.pathname === "/referencerange" && <Referencerange />}
         {location.pathname === "/branchsetup" && <Branchsetup />}
         {location.pathname === "/makerchecker" && <Makerchecker />}
+        {location.pathname === "/associatetype" && <AssociateType />}
+        {location.pathname === "/medicationhistory" && <Medicationhistory />}
 
         {/\/samplecollection\/collect\/\d+/.test(location.pathname) && (
           <Innnerfile />

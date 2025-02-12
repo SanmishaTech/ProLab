@@ -47,6 +47,9 @@ var samplecollection = require("./routes/sampleCollectionRoutes");
 var referenceRange = require("./routes/referencerange");
 var autocompleteRoutes = require("./routes/autocompleteRoutes");
 var makercheckerRoutes = require("./routes/makercheckerRoutes");
+var associatetypeRoutes = require("./routes/associatetypeRoutes");
+var medicationhistoryRoutes = require("./routes/medicationhistoryRoutes");
+
 var app = express();
 const corsOptions = {
   origin: "*", // Specify the origin of your frontend application
@@ -103,6 +106,8 @@ app.use("/api/samplecollection", samplecollection);
 app.use("/api/referencerange", referenceRange);
 app.use("/api/autocomplete", autocompleteRoutes);
 app.use("/api/makerchecker", makercheckerRoutes);
+app.use("/api/associatetype", associatetypeRoutes);
+app.use("/api/medicationhistory", medicationhistoryRoutes);
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 

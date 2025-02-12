@@ -207,7 +207,7 @@ function ProfileForm() {
 
     await axios.post(`/api/referencerange`, data).then((res) => {
       console.log("ppappappa", res.data);
-      toast.success("Test Master Created Successfully");
+      toast.success("Reference Range Created Successfully");
       navigate("/referencerange");
     });
   }
@@ -561,8 +561,8 @@ export default function SettingsProfilePage() {
       </Button>
 
       <CardHeader>
-        <CardTitle>Test Master</CardTitle>
-        <CardDescription>Test master</CardDescription>
+        <CardTitle>Reference Range Master</CardTitle>
+        <CardDescription>Reference Rangemaster</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6 ">

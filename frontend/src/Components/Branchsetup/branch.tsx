@@ -53,7 +53,7 @@ const LabMasterForm = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <Card className="w-full max-w-4xl mx-auto">
+      <Card className="w-full min-h-screen w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-primary">
             Lab Master Registration
@@ -62,7 +62,7 @@ const LabMasterForm = () => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                 {/* Lab Details Section */}
                 <div className="space-y-4">
                   <FormField
@@ -143,6 +143,20 @@ const LabMasterForm = () => {
 
                 {/* Location Details */}
                 <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="pincode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pincode</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormField
                     control={form.control}
                     name="country"
@@ -235,7 +249,19 @@ const LabMasterForm = () => {
                       </FormItem>
                     )}
                   />
-
+                  <FormField
+                    control={form.control}
+                    name="designation1"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Designation</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="contactNumber1"
@@ -249,7 +275,59 @@ const LabMasterForm = () => {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="contactPerson2"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contact Person 2</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="designation2"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Designation 2</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="contactNumber2"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contact Number 2</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
+                  <FormField
+                    control={form.control}
+                    name="fax"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fax</FormLabel>
+                        <FormControl>
+                          <Input type="Fax" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="emailId"
@@ -263,8 +341,45 @@ const LabMasterForm = () => {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="alternativeemailId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Alternative Email ID</FormLabel>
+                        <FormControl>
+                          <Input type="Alternative email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
+
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select State" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Maharashtra">Maharashtra</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="flex justify-end space-x-4 mt-6">
                 <Button type="submit" className="bg-blue-500 hover:bg-blue-600">

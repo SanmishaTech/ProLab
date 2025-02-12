@@ -17,9 +17,6 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import { now, getLocalTimeZone } from "@internationalized/date";
-import { DatePicker } from "@nextui-org/react";
-
 import {
   Popover,
   PopoverContent,
@@ -55,14 +52,17 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const handleAdd = async () => {
     setLoading(true);
     try {
-      await axios.post(`/api/promocodemaster`, formData);
+      formData.userId = User?._id;
+      await axios.post(`/api/medicationhistory`, formData).then((res) => {
+        console.log("ppaapppppp", res.data);
+        window.location.reload();
+      });
       onAdd(formData); // Notify parent component
       setFormData({});
       setHandleopen(false);
       setError("");
-      window.location.reload();
     } catch (err) {
-      setError("Failed to add Promo code. Please try again.");
+      setError("Failed to add parameter group. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -130,24 +130,38 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
 
         case "Date":
           allFieldsToRender.push(
-            <div
-              key={key}
-              className="flex items-center justify-center mr-44  gap-4"
-            >
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
-              <DatePicker
-                hideTimeZone
-                showMonthAndYearPickers
-                defaultValue={now(getLocalTimeZone())}
-                label="Event Date"
-                variant="bordered"
-                onChange={(value) => {
-                  console.log("Date changed:", value);
-                  handleInputChange(index, invoice.test, value);
-                }}
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData[key] && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2" />
+                    {formData[key] ? (
+                      format(new Date(formData[key]), "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={formData[key] ? new Date(formData[key]) : null}
+                    onSelect={(date) =>
+                      handleChange(key, date ? date.toISOString() : null)
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           );
           break;
@@ -181,28 +195,28 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
           break;
 
         // Add this case in the addFields method
-        // case "Checkbox":
-        //   allFieldsToRender.push(
-        //     <div key={key} className="grid grid-cols-4 items-center gap-4">
-        //       <Label htmlFor={key} className="text-right">
-        //         {label}
-        //       </Label>
-        //       <div className="col-span-3 flex items-center space-x-2">
-        //         <Checkbox
-        //           id={key}
-        //           checked={formData[key] || false}
-        //           onCheckedChange={(checked) => handleChange(key, checked)}
-        //         />
-        //         <label
-        //           htmlFor={key}
-        //           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        //         >
-        //           {label}
-        //         </label>
-        //       </div>
-        //     </div>
-        //   );
-        //   break;
+        case "Checkbox":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              <div className="col-span-3 flex items-center space-x-2">
+                <Checkbox
+                  id={key}
+                  checked={formData[key] || false}
+                  onCheckedChange={(checked) => handleChange(key, checked)}
+                />
+                {/* <label
+                  htmlFor={key}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {label}
+                </label> */}
+              </div>
+            </div>
+          );
+          break;
 
         // Add more cases for different field types as needed
 
@@ -218,13 +232,13 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   return (
     <Dialog open={handleopen} onOpenChange={setHandleopen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Promo Code</Button>
+        <Button variant="outline">Add Medication History</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Promo Code</DialogTitle>
+          <DialogTitle>Add New Medication History</DialogTitle>
           <DialogDescription>
-            Enter the details of the Promo Code you want to add.
+            Enter the details of the Medication History you want to add.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

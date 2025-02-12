@@ -160,6 +160,8 @@ function App() {
         <Route path="/referencerange" element={<Dashboard />} />
         <Route path="/branchsetup" element={<Dashboard />} />
         <Route path="/makerchecker" element={<Dashboard />} />
+        <Route path="/associatetype" element={<Dashboard />} />
+        <Route path="/medicationhistory" element={<Dashboard />} />
       </Routes>
     </>
   );
