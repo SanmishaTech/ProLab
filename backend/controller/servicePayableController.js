@@ -9,9 +9,10 @@ const csv = require("csv-parser");
 const ServicePayableController = {
   createThread: async (req, res, next) => {
     try {
-      const { associate, test, value, userId } = req.body;
+      const { associate, department, test, value, userId } = req.body;
       const newService = new ServicePayable({
         associate,
+        department,
         test,
         value,
         userId,
@@ -67,12 +68,13 @@ const ServicePayableController = {
   updateThreads: async (req, res, next) => {
     try {
       const patientId = req.params.associateId;
-      const { associate, test, value, userId } = req.body;
+      const { associate, department, test, value, userId } = req.body;
 
       const newService = await ServicePayable.findByIdAndUpdate(
         patientId,
         {
           associate,
+          department,
           test,
           value,
           userId,

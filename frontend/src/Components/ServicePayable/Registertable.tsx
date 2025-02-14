@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Dashboard from "./Dashboardreuse";
-import AddItem from "./Additem"; // Corrected import path
+import AddItem from "./TestCard"; // Corrected import path
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -215,13 +215,13 @@ export default function Dashboardholiday() {
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
         typeofschema={typeofschema}
-        AddItem={() => (
-          <AddItem
-            typeofschema={typeofschema}
-            onAdd={() => {}}
-            editid={selectedItemId}
-          />
-        )}
+        // AddItem={() => (
+        //   <AddItem
+        //     typeofschema={typeofschema}
+        //     onAdd={() => {}}
+        //     editid={selectedItemId}
+        //   />
+        // )}
       />
     </div>
   );

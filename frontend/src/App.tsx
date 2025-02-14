@@ -105,7 +105,8 @@ function App() {
         <Route path="/registration" element={<Dashboard />} />
         <Route path="/registrationlist" element={<Dashboard />} />
         <Route path="/holiday" element={<Dashboard />} />
-        <Route path="/services" element={<Dashboard />} />
+        {/* <Route path="/services" element={<Dashboard />} /> */}
+        <Route path="/service/add" element={<Dashboard />} />
         <Route path="/department" element={<Dashboard />} />
         <Route path="/parameter" element={<Dashboard />} />
         <Route path="/reason" element={<Dashboard />} />

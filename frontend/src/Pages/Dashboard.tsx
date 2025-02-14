@@ -60,6 +60,8 @@ import Branchsetup from "@/Components/Branchsetup/branch";
 import Makerchecker from "@/Components/MakerChecker/Makerchecker";
 import AssociateType from "@/Components/Associatetype/Registertable";
 import Medicationhistory from "@/Components/MedicationHistory/Registertable";
+import ServiceAdd from "@/Components/ServicePayable/TestCard";
+
 const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -80,7 +82,8 @@ const Dashboard = () => {
       <main className="w-full flex-1 overflow-hidden ">
         {location.pathname === "/dashboard" && <Dashboardcomponent />}
         {location.pathname === "/registrationlist" && <DashboardPage />}
-        {location.pathname === "/services" && <DashboardServices />}
+        {/* {location.pathname === "/services" && <DashboardServices />} */}
+
         {location.pathname === "/holiday" && <Dashboardholiday />}
         {location.pathname === "/department" && <Dashboarddepartment />}
         {location.pathname === "/parameter" && <Dashboardparameter />}
@@ -130,6 +133,7 @@ const Dashboard = () => {
           <DashboardedittestuserMaster />
         )}
         {location.pathname === "/service" && <ServicePayable />}
+        {location.pathname === "/service/add" && <ServiceAdd />}
         {location.pathname === "/labmaster" && <Labmaster />}
         {location.pathname === "/autocomplete" && <Autocomplete />}
         {location.pathname === "/collectionmaster" && <CollectionMaster />}
