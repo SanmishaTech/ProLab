@@ -60,6 +60,7 @@ function DataTable<T extends { id: string | number }>({
   onBulkEdit,
   selectedItems,
   onSelectedItemsChange,
+  conflictchecks,
 }: DataTableProps<T>) {
   // const [selectedItemsa, setSelectedItems] = useState<T[]>([]);
   const [sortColumn, setSortColumn] = useState<keyof T | null>(null);
@@ -77,9 +78,17 @@ function DataTable<T extends { id: string | number }>({
   // };
 
   useEffect(() => {
+    console.log("currentitem", currentitem);
+  }, [currentitem]);
+  useEffect(() => {
     if (rowselected) {
       const selected = selectedItems?.some((i) => i._id === currentitem._id);
-      console.log("selected", !selected, !selectedItems?.includes(currentitem));
+      console.log(
+        "selected",
+        !selected,
+        !selectedItems?.includes(currentitem),
+        currentitem
+      );
       handleSelectItem(currentitem, !selected);
     }
   }, [currentitem, rowselected]);
@@ -177,16 +186,30 @@ function DataTable<T extends { id: string | number }>({
   };
 
   // Bulk edit handlers
-  const handleBulkEditConfirm = () => {
+  const handleBulkEditConfirm = (e: any) => {
+    e.preventDefault();
     if (onBulkEdit) {
       onBulkEdit(bulkEditPercentage);
-      // handleSelectItem(currentitem, false);
+      // handleSelectItem(selectedItems, false);
+      setRowselected(!rowselected);
       onSelectedItemsChange([]);
 
       setBulkEditPercentage(0);
       setShowBulkEditModal(false);
     }
   };
+  // useEffect(() => {
+  //   console.log("conflictchecks", conflictchecks);
+  //   const checkingConflicts = conflictchecks[0]?.test?.map((item) => {
+  //     console.log("item before", selectedItems);
+  //     selectedItems.map((selectedItem) => {
+  //       if (item.testId === selectedItem._id) {
+  //         return item;
+  //       }
+  //     });
+  //   });
+  //   console.log("Calculated checkingConflicts", checkingConflicts);
+  // }, [conflictchecks, selectedItems, currentitem]);
 
   return (
     <>
@@ -300,22 +323,37 @@ function DataTable<T extends { id: string | number }>({
                 placeholder="Discount percentage"
               />
               <div className="flex justify-end gap-2">
-                <Button onClick={() => setShowBulkEditModal(false)}>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setShowBulkEditModal(false);
+                  }}
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleBulkEditConfirm}>Apply</Button>
+                <Button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevents the event from bubbling up to the form
+                    e.preventDefault();
+                    handleBulkEditConfirm(e);
+                  }}
+                >
+                  Apply
+                </Button>
               </div>
             </div>
           </div>
         )}
         {selectedItems && selectedItems.length > 0 && (
-          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg flex items-center space-x-4 animate-in fade-in slide-in-from-bottom-4">
+          <div className="fixed bottom-4 left-1/2 transform  bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg flex items-center space-x-4 animate-in fade-in slide-in-from-bottom-4">
             {console.log("Selected items", selectedItems)}
             <span className="font-medium">
               {selectedItems?.length} item(s) selected
             </span>
             <div>
-              <Button
+              {/* <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => onDelete(selectedItems)}
@@ -339,11 +377,15 @@ function DataTable<T extends { id: string | number }>({
                   <line x1="10" x2="10" y1="11" y2="17" />
                   <line x1="14" x2="14" y1="11" y2="17" />
                 </svg>
-              </Button>
+              </Button> */}
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => setShowBulkEditModal(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setShowBulkEditModal(true);
+                }}
                 className="hover:bg-destructive hover:text-destructive-foreground hover:scale-105 hover:cursor-pointer bg-transparent text-sm"
               >
                 <svg
@@ -361,6 +403,36 @@ function DataTable<T extends { id: string | number }>({
                   <path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2" />
                   <path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
                   <path d="M8 18h1" />
+                </svg>
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  // setShowBulkEditModal(false);
+                  onSelectedItemsChange([]);
+                  // setCurrentitem([]);
+                  setRowselected(!rowselected);
+                  // handleSelectItem(selectedItems, false);
+                }}
+                className="hover:bg-destructive hover:text-destructive-foreground hover:scale-105 hover:cursor-pointer bg-transparent text-sm"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-x"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
                 </svg>
               </Button>
             </div>

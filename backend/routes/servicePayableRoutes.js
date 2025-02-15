@@ -1,18 +1,22 @@
 var express = require("express");
 var router = express.Router();
-const associateController = require("../controller/servicePayableController");
+const servicePayableController = require("../controller/servicePayableController");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 
-router.post("/", associateController.createThread);
-router.get("/allservicepayable/:userId", associateController.getServices);
-router.get("/reference/:referenceId", associateController.getServicesbyId);
+router.post("/", servicePayableController.createThread);
+router.get("/allservicepayable/:userId", servicePayableController.getServices);
+router.get("/reference/:referenceId", servicePayableController.getServicesbyId);
 router.post(
   "/upload-csv",
   upload.single("file"),
-  associateController.uploadCSV
+  servicePayableController.uploadCSV
 );
-router.put("/update/:associateId", associateController.updateThreads);
-router.delete("/delete/:specimenId", associateController.deleteThread);
+router.get(
+  "/getassociate/:associateId/:userId",
+  servicePayableController.getAssociate
+);
+router.put("/update/:associateId", servicePayableController.updateThreads);
+router.delete("/delete/:specimenId", servicePayableController.deleteThread);
 
 module.exports = router;

@@ -70,6 +70,31 @@ function ProfileForm() {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
   const [associates, setAssociates] = useState<any[]>([]);
+  const [updatedtests, setUpdatedtests] = useState<any[]>([]);
+  const [percentagevalue, setPercentagevalue] = useState<any[]>([]);
+  const [conflictchecks, setconflictchecks] = useState<any[]>([]);
+
+  const { watch } = form;
+  const watchedAssociate = watch("associate");
+  // const watchedAssociate = form.watch("associate");
+
+  // Whenever "associate" changes, trigger this useEffect
+  useEffect(() => {
+    console.log("Associate value changed:", watchedAssociate);
+    if (!watchedAssociate) return;
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(
+          `/api/service/getassociate/${watchedAssociate}/${User?._id}`
+        );
+        console.log("Fetched on associate change:", response.data);
+        setconflictchecks(response.data);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+    fetchProfile();
+  }, [watchedAssociate, User?._id]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -117,16 +142,21 @@ function ProfileForm() {
   async function onSubmit(data: ProfileFormValues) {
     // console.log("Sas", data);
     console.log("ppappappa");
-    data.prerquisite = content;
-    data.consentForm = consent;
-    data.interpretedText = interpretation;
-    data.profile = formData;
+    data.department = {
+      department: data.department,
+      percentage: percentagevalue,
+    };
+    data.test = updatedtests?.map((item) => ({
+      testId: item._id,
+      price: item.price,
+      percentage: percentagevalue,
+    }));
     data.userId = User?._id;
 
-    await axios.post(`/api/testmaster`, data).then((res) => {
+    await axios.post(`/api/service`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Test Master Created Successfully");
-      navigate("/testmaster");
+      navigate("/service");
     });
   }
 
@@ -274,7 +304,12 @@ function ProfileForm() {
           /> */}
         </div>
         <div className="flex  w-full ">
-          <Tablecomponent data={testmaster} />
+          <Tablecomponent
+            data={testmaster}
+            setUpdatedtests={setUpdatedtests}
+            setPercentagevalue={setPercentagevalue}
+            conflictchecks={conflictchecks}
+          />
         </div>
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">

@@ -10,6 +10,32 @@ const ServicePayableController = {
   createThread: async (req, res, next) => {
     try {
       const { associate, department, test, value, userId } = req.body;
+
+      const findexistingservice = await ServicePayable.findOne({
+        associate,
+
+        userId,
+      });
+      if (findexistingservice) {
+        const updatetests = await ServicePayable.findOneAndUpdate(
+          {
+            associate,
+            userId,
+          },
+          {
+            associate,
+            department,
+            test,
+            value,
+            userId,
+          }
+        );
+        return res.json({
+          message: "Patients created successfully",
+          service: updatetests,
+        });
+      }
+
       const newService = new ServicePayable({
         associate,
         department,
@@ -65,6 +91,28 @@ const ServicePayableController = {
     }
   },
 
+  getAssociate: async (req, res, next) => {
+    try {
+      const associateId = req.params.associateId;
+      const assocaitetobefound = new mongoose.Types.ObjectId(associateId);
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      const services = await ServicePayable.find({
+        associate: assocaitetobefound,
+        userId: usertobefound,
+      })
+        .populate({
+          path: "associate",
+        })
+        .populate({
+          path: "test",
+        });
+
+      res.status(200).json(services);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
   updateThreads: async (req, res, next) => {
     try {
       const patientId = req.params.associateId;

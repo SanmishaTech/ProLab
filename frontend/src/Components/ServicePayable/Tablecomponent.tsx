@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import DataTable from "./Tablecomponents/data-table";
+import axios from "axios";
 
 interface User {
   id: number;
@@ -22,7 +23,12 @@ const fields = [
   { key: "role", label: "Role", type: "text" },
 ];
 
-export default function Home({ data }) {
+export default function Home({
+  data,
+  setUpdatedtests,
+  setPercentagevalue,
+  conflictchecks,
+}) {
   // useEffect(() => {
   //   console.log("data", data);
   //   setUsers(data);
@@ -37,31 +43,15 @@ export default function Home({ data }) {
     ]);
   };
 
-  const handleEdit = (discountPercentage) => {
-    const updatedUsers = users.map((user) => {
-      if (user._id) {
-        // Assuming user.price holds the current price
-        const discountAmount = user.price * (discountPercentage / 100);
-        console.log("discountAmount", discountAmount);
-
-        // Update the user object with the new discounted price
-        return { ...user, price: Number(discountAmount) };
-      }
-      return user;
-    });
-
-    // Update the users state with the new prices
-    setUsers(updatedUsers);
-  };
+  useEffect(() => {
+    console.log("Updatedtests", users);
+    setUpdatedtests(users);
+  }, [users]);
 
   const handleDelete = (usersToDelete: User[]) => {
     setUsers((prev) =>
       prev.filter((user) => !usersToDelete.some((u) => u._id === user._id))
     );
-
-    const filteredusers = users.filter((user) => {
-      return !usersToDelete.some((u) => u.id === user.id);
-    });
   };
 
   useEffect(() => {
@@ -73,7 +63,22 @@ export default function Home({ data }) {
     setUsers(usersWithOriginal);
   }, [data]);
 
+  // useEffect(() => {
+  //   const userwithupdatedprices = conflictchecks[0]?.test?.map((item) => {
+  //     users?.map((user) => {
+  //       console.log("userItem", user);
+  //       if (item.testId === user._id) {
+  //         console.log("item.value", user);
+  //         return { ...user, price: item.value };
+  //       }
+  //     });
+  //   });
+  //   console.log("userwithupdatedprices", userwithupdatedprices);
+  //   setUsers(userwithupdatedprices);
+  // }, [conflictchecks]);
+
   const handleBulkEdit = (discountPercentage: number) => {
+    setPercentagevalue(discountPercentage);
     const updatedUsers = users.map((user) => {
       if (selectedItems.some((selected) => selected._id === user._id)) {
         const discount = user.originalPrice * (discountPercentage / 100);
@@ -81,8 +86,9 @@ export default function Home({ data }) {
       }
       return user;
     });
+    console.log("Updated users", updatedUsers);
     setUsers(updatedUsers);
-    setSelectedItems([]);
+    // setSelectedItems([]);
   };
 
   return (
@@ -92,11 +98,12 @@ export default function Home({ data }) {
         columns={columns}
         fields={fields}
         onAdd={handleAdd}
-        onBulkEdit={handleBulkEdit} // New bulk edit handler
+        onBulkEdit={handleBulkEdit}
         onDelete={handleDelete}
         itemsPerPage={10}
         selectedItems={selectedItems}
         onSelectedItemsChange={setSelectedItems}
+        conflictchecks={conflictchecks}
       />
     </main>
   );
