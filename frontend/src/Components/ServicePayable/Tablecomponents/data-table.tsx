@@ -36,6 +36,7 @@ interface Field<T> {
   type: string;
 }
 
+//cancel
 interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
@@ -526,6 +527,7 @@ function DataTable<T extends {
                 <div className="text-sm text-muted-foreground">
                   {conflictItems.filter(item => item.selected).length} of {conflictItems.length} items selected
                 </div>
+                
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -534,6 +536,7 @@ function DataTable<T extends {
                       setConflictItems([]);
                     }}
                   >
+
                     Cancel
                   </Button>
                   <Button
