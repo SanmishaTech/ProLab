@@ -21,6 +21,8 @@ import {
 import { ChevronDown, ChevronUp, MoreHorizontal, Plus } from "lucide-react";
 import AddEditModal from "./Add-editModal";
 import Pagination from "./pagination";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, FilePenLine, X } from "lucide-react";
 
 type SortDirection = "asc" | "desc" | null;
 
@@ -49,20 +51,22 @@ interface DataTableProps<T> {
   onSelectedItemsChange: (items: T[]) => void;
   itemsPerPage?: number;
   conflictchecks?: {
-    type: 'associate' | 'department';
+    type: "associate" | "department";
     value: number;
     isPercentage: boolean;
   }[];
 }
 
-function DataTable<T extends { 
-  id: string | number; 
-  _id: string | number;
-  price?: number;
-  name?: string;
-  department?: string;
-  associate?: string;
-}>({
+function DataTable<
+  T extends {
+    id: string | number;
+    _id: string | number;
+    price?: number;
+    name?: string;
+    department?: string;
+    associate?: string;
+  }
+>({
   data,
   columns,
   fields,
@@ -83,17 +87,19 @@ function DataTable<T extends {
   const [bulkEditPercentage, setBulkEditPercentage] = useState(0);
   const [showBulkEditModal, setShowBulkEditModal] = useState(false);
   const [showConflictModal, setShowConflictModal] = useState(false);
-  const [conflictItems, setConflictItems] = useState<Array<{
-    item: T;
-    oldValue: number;
-    newValue: number;
-    selected: boolean;
-    discountSource?: {
-      type: 'associate' | 'department';
-      value: number;
-      isPercentage: boolean;
-    };
-  }>>([]);
+  const [conflictItems, setConflictItems] = useState<
+    Array<{
+      item: T;
+      oldValue: number;
+      newValue: number;
+      selected: boolean;
+      discountSource?: {
+        type: "associate" | "department";
+        value: number;
+        isPercentage: boolean;
+      };
+    }>
+  >([]);
 
   const handleSort = (column: keyof T) => {
     if (sortColumn === column) {
@@ -160,23 +166,26 @@ function DataTable<T extends {
     e.preventDefault();
     if (onBulkEdit) {
       // Check for conflicts and get discount sources
-      const conflicts = selectedItems.filter(item => {
-        const existingDiscount = item?.price ?? 0;
-        return existingDiscount !== 0;
-      }).map(item => {
-        const discountSource = conflictchecks?.find(check => 
-          (check.type === 'associate' && item.associate) || 
-          (check.type === 'department' && item.department)
-        );
+      const conflicts = selectedItems
+        .filter((item) => {
+          const existingDiscount = item?.price ?? 0;
+          return existingDiscount !== 0;
+        })
+        .map((item) => {
+          const discountSource = conflictchecks?.find(
+            (check) =>
+              (check.type === "associate" && item.associate) ||
+              (check.type === "department" && item.department)
+          );
 
-        return {
-          item,
-          oldValue: item?.price ?? 0,
-          newValue: (item?.price ?? 0) * (1 - bulkEditPercentage / 100),
-          selected: false,
-          discountSource
-        };
-      });
+          return {
+            item,
+            oldValue: item?.price ?? 0,
+            newValue: (item?.price ?? 0) * (1 - bulkEditPercentage / 100),
+            selected: false,
+            discountSource,
+          };
+        });
 
       if (conflicts.length > 0) {
         setConflictItems(conflicts);
@@ -195,21 +204,22 @@ function DataTable<T extends {
     if (onBulkEdit) {
       // Get selected items from conflicts
       const selectedConflictItems = conflictItems
-        .filter(conflict => conflict.selected)
-        .map(conflict => conflict.item);
+        .filter((conflict) => conflict.selected)
+        .map((conflict) => conflict.item);
 
       // Get items without conflicts
-      const nonConflictItems = selectedItems.filter(item => 
-        !conflictItems.some(conflict => conflict.item._id === item._id)
+      const nonConflictItems = selectedItems.filter(
+        (item) =>
+          !conflictItems.some((conflict) => conflict.item._id === item._id)
       );
 
       // Combine selected conflict items with non-conflict items
       const itemsToUpdate = [...selectedConflictItems, ...nonConflictItems];
-      
+
       if (itemsToUpdate.length > 0) {
         onBulkEdit(bulkEditPercentage, itemsToUpdate);
       }
-      
+
       setShowConflictModal(false);
       onSelectedItemsChange([]);
       setBulkEditPercentage(0);
@@ -217,23 +227,23 @@ function DataTable<T extends {
   };
 
   const toggleConflictItem = (index: number) => {
-    setConflictItems(prev => 
-      prev.map((item, i) => 
+    setConflictItems((prev) =>
+      prev.map((item, i) =>
         i === index ? { ...item, selected: !item.selected } : item
       )
     );
   };
 
   const toggleAllConflictItems = (selected: boolean) => {
-    setConflictItems(prev => 
-      prev.map(item => ({ ...item, selected }))
-    );
+    setConflictItems((prev) => prev.map((item) => ({ ...item, selected })));
   };
 
   const handleRowClick = (item: T) => {
-    const isSelected = selectedItems.some(selectedItem => selectedItem._id === item._id);
+    const isSelected = selectedItems.some(
+      (selectedItem) => selectedItem._id === item._id
+    );
     if (isSelected) {
-      onSelectedItemsChange(selectedItems.filter(i => i._id !== item._id));
+      onSelectedItemsChange(selectedItems.filter((i) => i._id !== item._id));
     } else {
       onSelectedItemsChange([...selectedItems, item]);
     }
@@ -248,7 +258,9 @@ function DataTable<T extends {
               <TableRow>
                 <TableHead className="w-[50px]">
                   <Checkbox
-                    checked={data?.length > 0 && selectedItems?.length === data?.length}
+                    checked={
+                      data?.length > 0 && selectedItems?.length === data?.length
+                    }
                     onCheckedChange={handleSelectAll}
                   />
                 </TableHead>
@@ -277,13 +289,15 @@ function DataTable<T extends {
                 <TableRow
                   key={item._id as React.Key}
                   className={`hover:bg-muted/50 transition-colors cursor-pointer ${
-                    selectedItems.some(i => i._id === item._id) ? 'bg-muted/30' : ''
+                    selectedItems.some((i) => i._id === item._id)
+                      ? "bg-muted/30"
+                      : ""
                   }`}
                   onClick={(e) => {
                     // Don't trigger row click when clicking on checkbox or action buttons
                     if (
-                      (e.target as HTMLElement).closest('.checkbox-cell') ||
-                      (e.target as HTMLElement).closest('.action-cell')
+                      (e.target as HTMLElement).closest(".checkbox-cell") ||
+                      (e.target as HTMLElement).closest(".action-cell")
                     ) {
                       return;
                     }
@@ -293,7 +307,9 @@ function DataTable<T extends {
                   <TableCell className="checkbox-cell">
                     <Checkbox
                       checked={selectedItems?.some((i) => i._id === item._id)}
-                      onCheckedChange={(checked) => handleSelectItem(item, checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleSelectItem(item, checked as boolean)
+                      }
                     />
                   </TableCell>
                   {columns.map((column) => (
@@ -363,7 +379,7 @@ function DataTable<T extends {
                   </svg>
                 </Button>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-1 block">
@@ -375,11 +391,15 @@ function DataTable<T extends {
                       min="0"
                       max="100"
                       value={bulkEditPercentage}
-                      onChange={(e) => setBulkEditPercentage(Number(e.target.value))}
+                      onChange={(e) =>
+                        setBulkEditPercentage(Number(e.target.value))
+                      }
                       className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 pr-12"
                       placeholder="Enter percentage"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      %
+                    </span>
                   </div>
                 </div>
 
@@ -405,7 +425,8 @@ function DataTable<T extends {
                   </div>
                   {bulkEditPercentage > 0 && (
                     <div className="text-xs text-muted-foreground">
-                      This will apply a {bulkEditPercentage}% discount to all selected items
+                      This will apply a {bulkEditPercentage}% discount to all
+                      selected items
                     </div>
                   )}
                 </div>
@@ -425,7 +446,9 @@ function DataTable<T extends {
                       e.preventDefault();
                       handleBulkEditConfirm(e);
                     }}
-                    disabled={bulkEditPercentage <= 0 || bulkEditPercentage > 100}
+                    disabled={
+                      bulkEditPercentage <= 0 || bulkEditPercentage > 100
+                    }
                   >
                     Apply Discount
                   </Button>
@@ -435,7 +458,7 @@ function DataTable<T extends {
           </div>
         )}
         {showConflictModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg max-w-4xl w-full">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold">Resolve Conflicts</h3>
@@ -466,7 +489,8 @@ function DataTable<T extends {
               </div>
               <div className="mb-4">
                 <p className="text-sm text-gray-600 mb-4">
-                  The following items already have discounts applied. Select which items should receive the new discount.
+                  The following items already have discounts applied. Select
+                  which items should receive the new discount.
                 </p>
                 <div className="max-h-[60vh] overflow-y-auto rounded-lg border">
                   <table className="w-full text-sm">
@@ -475,8 +499,12 @@ function DataTable<T extends {
                         <th className="py-3 px-4 text-left">
                           <div className="flex items-center space-x-2">
                             <Checkbox
-                              checked={conflictItems.every(item => item.selected)}
-                              onCheckedChange={(checked) => toggleAllConflictItems(!!checked)}
+                              checked={conflictItems.every(
+                                (item) => item.selected
+                              )}
+                              onCheckedChange={(checked) =>
+                                toggleAllConflictItems(!!checked)
+                              }
                             />
                             <span>Select All</span>
                           </div>
@@ -485,7 +513,9 @@ function DataTable<T extends {
                         <th className="py-3 px-4 text-right">Current Price</th>
                         <th className="py-3 px-4 text-right">New Price</th>
                         <th className="py-3 px-4 text-right">Difference</th>
-                        <th className="py-3 px-4 text-center">Current Discount</th>
+                        <th className="py-3 px-4 text-center">
+                          Current Discount
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -497,25 +527,39 @@ function DataTable<T extends {
                               onCheckedChange={() => toggleConflictItem(index)}
                             />
                           </td>
-                          <td className="py-3 px-4">{conflict.item?.name ?? 'Unnamed Item'}</td>
-                          <td className="py-3 px-4 text-right">{conflict.oldValue.toFixed(2)}</td>
-                          <td className="py-3 px-4 text-right">{conflict.newValue.toFixed(2)}</td>
+                          <td className="py-3 px-4">
+                            {conflict.item?.name ?? "Unnamed Item"}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            {conflict.oldValue.toFixed(2)}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            {conflict.newValue.toFixed(2)}
+                          </td>
                           <td className="py-3 px-4 text-right text-destructive">
                             {(conflict.newValue - conflict.oldValue).toFixed(2)}
                           </td>
                           <td className="py-3 px-4 text-center">
                             {conflict.discountSource ? (
                               <div className="flex flex-col items-center gap-1">
-                                <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
-                                  {conflict.discountSource.type === 'associate' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}">
-                                  {conflict.discountSource.type === 'associate' ? 'Associate' : 'Department'}
+                                <span
+                                  className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
+                                  {conflict.discountSource.type === 'associate' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}"
+                                >
+                                  {conflict.discountSource.type === "associate"
+                                    ? "Associate"
+                                    : "Department"}
                                 </span>
                                 <span className="text-sm font-medium">
                                   {conflict.discountSource.value}
-                                  {conflict.discountSource.isPercentage ? '%' : ' Rs'}
+                                  {conflict.discountSource.isPercentage
+                                    ? "%"
+                                    : " Rs"}
                                 </span>
                               </div>
-                            ) : '-'}
+                            ) : (
+                              "-"
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -525,9 +569,10 @@ function DataTable<T extends {
               </div>
               <div className="flex justify-between items-center">
                 <div className="text-sm text-muted-foreground">
-                  {conflictItems.filter(item => item.selected).length} of {conflictItems.length} items selected
+                  {conflictItems.filter((item) => item.selected).length} of{" "}
+                  {conflictItems.length} items selected
                 </div>
-                
+
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -536,12 +581,11 @@ function DataTable<T extends {
                       setConflictItems([]);
                     }}
                   >
-
                     Cancel
                   </Button>
                   <Button
                     onClick={handleConflictResolution}
-                    disabled={!conflictItems.some(item => item.selected)}
+                    disabled={!conflictItems.some((item) => item.selected)}
                   >
                     Apply Selected Changes
                   </Button>
@@ -550,68 +594,61 @@ function DataTable<T extends {
             </div>
           </div>
         )}
-        {selectedItems && selectedItems.length > 0 && (
-          <div className="fixed bottom-4 left-1/2 transform  bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg flex items-center space-x-4 animate-in fade-in slide-in-from-bottom-4">
-            <span className="font-medium">
-              {selectedItems?.length} item(s) selected
-            </span>
-            <div>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setShowBulkEditModal(true);
-                }}
-                className="hover:bg-destructive hover:text-destructive-foreground hover:scale-105 hover:cursor-pointer bg-transparent text-sm"
+        <AnimatePresence>
+          {selectedItems && selectedItems.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed bottom-4 left-[40%] transform -translate-x-1/2 bg-gradient-to-r from-[#2563EB] to-[#2563EB] text-white px-6 py-3 rounded-full shadow-xl flex items-center justify-between space-x-6 backdrop-blur- border border-white/10"
+            >
+              <motion.div
+                className="flex items-center space-x-3"
+                initial={{ x: -5, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.02 }}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-file-pen-line"
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
+                  <Check className="text-white" size={18} strokeWidth={10} />
+                </span>
+                <span className="font-medium text-lg">
+                  {selectedItems?.length} item
+                  {selectedItems?.length !== 1 && "s"} selected
+                </span>
+              </motion.div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setShowBulkEditModal(true);
+                  }}
+                  className="hover:bg-white/20 hover:text-white text-white p-2.5 rounded-full transition-all duration-200 focus:ring-2 focus:ring-white/30 focus:outline-none"
                 >
-                  <path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2" />
-                  <path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
-                  <path d="M8 18h1" />
-                </svg>
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  onSelectedItemsChange([]);
-                }}
-                className="hover:bg-destructive hover:text-destructive-foreground hover:scale-105 hover:cursor-pointer bg-transparent text-sm"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-x"
+                  <FilePenLine className="text-white" size={20} />
+                  <span className="sr-only">Edit selected</span>
+                </Button>
+                <div className="w-px h-6 bg-white/20"></div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    onSelectedItemsChange([]);
+                  }}
+                  className="hover:bg-white/20 hover:text-white text-white p-2.5 rounded-full transition-all duration-200 focus:ring-2 focus:ring-white/30 focus:outline-none"
                 >
-                  <path d="M18 6 6 18" />
-                  <path d="m6 6 12 12" />
-                </svg>
-              </Button>
-            </div>
-          </div>
-        )}
+                  <X className="text-white" size={20} />
+                  <span className="sr-only">Clear selection</span>
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <AddEditModal
           isOpen={isAddEditModalOpen}
           onClose={() => setIsAddEditModalOpen(false)}

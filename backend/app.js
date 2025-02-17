@@ -49,6 +49,7 @@ var autocompleteRoutes = require("./routes/autocompleteRoutes");
 var makercheckerRoutes = require("./routes/makercheckerRoutes");
 var associatetypeRoutes = require("./routes/associatetypeRoutes");
 var medicationhistoryRoutes = require("./routes/medicationhistoryRoutes");
+var branchsetupRoutes = require("./routes/branchRoutes");
 
 var app = express();
 const corsOptions = {
@@ -108,6 +109,7 @@ app.use("/api/autocomplete", autocompleteRoutes);
 app.use("/api/makerchecker", makercheckerRoutes);
 app.use("/api/associatetype", associatetypeRoutes);
 app.use("/api/medicationhistory", medicationhistoryRoutes);
+app.use("/api/branchsetup", branchsetupRoutes);
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
