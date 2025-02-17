@@ -43,13 +43,25 @@ interface DataTableProps<T> {
   onAdd: (item: T) => void;
   onEdit: (item: T) => void;
   onDelete: (items: T[]) => void;
-  onBulkEdit?: (discountPercentage: number) => void;
+  onBulkEdit?: (discountPercentage: number, items: T[]) => void;
   selectedItems: T[];
   onSelectedItemsChange: (items: T[]) => void;
   itemsPerPage?: number;
+  conflictchecks?: {
+    type: 'associate' | 'department';
+    value: number;
+    isPercentage: boolean;
+  }[];
 }
 
-function DataTable<T extends { id: string | number }>({
+function DataTable<T extends { 
+  id: string | number; 
+  _id: string | number;
+  price?: number;
+  name?: string;
+  department?: string;
+  associate?: string;
+}>({
   data,
   columns,
   fields,
@@ -62,55 +74,25 @@ function DataTable<T extends { id: string | number }>({
   onSelectedItemsChange,
   conflictchecks,
 }: DataTableProps<T>) {
-  // const [selectedItemsa, setSelectedItems] = useState<T[]>([]);
   const [sortColumn, setSortColumn] = useState<keyof T | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<T | undefined>(undefined);
-  const [rowselected, setRowselected] = useState<boolean>(false);
-  const [currentitem, setCurrentitem] = useState<T | undefined>(undefined);
   const [bulkEditPercentage, setBulkEditPercentage] = useState(0);
   const [showBulkEditModal, setShowBulkEditModal] = useState(false);
-
-  // const handleSelectAll = (checked: boolean) => {
-  //   setSelectedItems(checked ? data : []);
-  // };
-
-  useEffect(() => {
-    console.log("currentitem", currentitem);
-  }, [currentitem]);
-  useEffect(() => {
-    if (rowselected) {
-      const selected = selectedItems?.some((i) => i._id === currentitem._id);
-      console.log(
-        "selected",
-        !selected,
-        !selectedItems?.includes(currentitem),
-        currentitem
-      );
-      handleSelectItem(currentitem, !selected);
-    }
-  }, [currentitem, rowselected]);
-
-  // const handleSelectItem = (item: T, checked: boolean) => {
-  //   console.log("This is checked", checked);
-  //   // setSelectedItems((prev) =>
-  //   //   checked ? [...prev, item] : prev.filter((i) => i._id !== item._id)
-  //   // );
-  //   console.log("Handleseelect", selectedItems.includes(item));
-  //   // if (selectedItems.includes(item)) {
-  //   //   return;
-  //   // }
-  //   if (checked) {
-  //     setSelectedItems((prev) => [...prev, item]);
-  //     console.log("checked true", selectedItems);
-  //   }
-  //   if (!checked) {
-  //     setSelectedItems((prev) => prev.filter((i) => i._id !== item._id));
-  //     console.log("checked true", selectedItems);
-  //   }
-  // };
+  const [showConflictModal, setShowConflictModal] = useState(false);
+  const [conflictItems, setConflictItems] = useState<Array<{
+    item: T;
+    oldValue: number;
+    newValue: number;
+    selected: boolean;
+    discountSource?: {
+      type: 'associate' | 'department';
+      value: number;
+      isPercentage: boolean;
+    };
+  }>>([]);
 
   const handleSort = (column: keyof T) => {
     if (sortColumn === column) {
@@ -157,78 +139,115 @@ function DataTable<T extends { id: string | number }>({
     setIsAddEditModalOpen(false);
   };
 
-  useEffect(() => {
-    console.log("Selected uses", selectedItems);
-  }, [selectedItems]);
-
-  // useEffect(() => {
-  //   if (data.length === 0) return;
-  //   // Only update if there's a difference.
-  //   const filteredData = data?.filter((item) =>
-  //     selectedItems.some((selected) => selected._id === item._id)
-  //   );
-  //   console.log("Filtered data", filteredData);
-  //   if (filteredData.length !== selectedItems.length) {
-  //     onSelectedItemsChange(filteredData);
-  //   }
-  // }, [data]); // You might also need to include `selectedItems` in the dependency array
-
   const handleSelectAll = (checked: boolean) => {
-    onSelectedItemsChange(checked ? data : []);
+    if (checked) {
+      onSelectedItemsChange([...data]);
+    } else {
+      onSelectedItemsChange([]);
+    }
   };
 
   const handleSelectItem = (item: T, checked: boolean) => {
-    onSelectedItemsChange(
-      checked
-        ? [...selectedItems, item]
-        : selectedItems.filter((i) => i._id !== item._id)
-    );
+    if (checked) {
+      onSelectedItemsChange([...selectedItems, item]);
+    } else {
+      onSelectedItemsChange(selectedItems.filter((i) => i._id !== item._id));
+    }
   };
 
-  // Bulk edit handlers
   const handleBulkEditConfirm = (e: any) => {
     e.preventDefault();
     if (onBulkEdit) {
-      onBulkEdit(bulkEditPercentage);
-      // handleSelectItem(selectedItems, false);
-      setRowselected(!rowselected);
-      onSelectedItemsChange([]);
+      // Check for conflicts and get discount sources
+      const conflicts = selectedItems.filter(item => {
+        const existingDiscount = item?.price ?? 0;
+        return existingDiscount !== 0;
+      }).map(item => {
+        const discountSource = conflictchecks?.find(check => 
+          (check.type === 'associate' && item.associate) || 
+          (check.type === 'department' && item.department)
+        );
 
-      setBulkEditPercentage(0);
-      setShowBulkEditModal(false);
+        return {
+          item,
+          oldValue: item?.price ?? 0,
+          newValue: (item?.price ?? 0) * (1 - bulkEditPercentage / 100),
+          selected: false,
+          discountSource
+        };
+      });
+
+      if (conflicts.length > 0) {
+        setConflictItems(conflicts);
+        setShowConflictModal(true);
+        setShowBulkEditModal(false);
+      } else {
+        onBulkEdit(bulkEditPercentage, selectedItems);
+        onSelectedItemsChange([]);
+        setBulkEditPercentage(0);
+        setShowBulkEditModal(false);
+      }
     }
   };
-  // useEffect(() => {
-  //   console.log("conflictchecks", conflictchecks);
-  //   const checkingConflicts = conflictchecks[0]?.test?.map((item) => {
-  //     console.log("item before", selectedItems);
-  //     selectedItems.map((selectedItem) => {
-  //       if (item.testId === selectedItem._id) {
-  //         return item;
-  //       }
-  //     });
-  //   });
-  //   console.log("Calculated checkingConflicts", checkingConflicts);
-  // }, [conflictchecks, selectedItems, currentitem]);
+
+  const handleConflictResolution = () => {
+    if (onBulkEdit) {
+      // Get selected items from conflicts
+      const selectedConflictItems = conflictItems
+        .filter(conflict => conflict.selected)
+        .map(conflict => conflict.item);
+
+      // Get items without conflicts
+      const nonConflictItems = selectedItems.filter(item => 
+        !conflictItems.some(conflict => conflict.item._id === item._id)
+      );
+
+      // Combine selected conflict items with non-conflict items
+      const itemsToUpdate = [...selectedConflictItems, ...nonConflictItems];
+      
+      if (itemsToUpdate.length > 0) {
+        onBulkEdit(bulkEditPercentage, itemsToUpdate);
+      }
+      
+      setShowConflictModal(false);
+      onSelectedItemsChange([]);
+      setBulkEditPercentage(0);
+    }
+  };
+
+  const toggleConflictItem = (index: number) => {
+    setConflictItems(prev => 
+      prev.map((item, i) => 
+        i === index ? { ...item, selected: !item.selected } : item
+      )
+    );
+  };
+
+  const toggleAllConflictItems = (selected: boolean) => {
+    setConflictItems(prev => 
+      prev.map(item => ({ ...item, selected }))
+    );
+  };
+
+  const handleRowClick = (item: T) => {
+    const isSelected = selectedItems.some(selectedItem => selectedItem._id === item._id);
+    if (isSelected) {
+      onSelectedItemsChange(selectedItems.filter(i => i._id !== item._id));
+    } else {
+      onSelectedItemsChange([...selectedItems, item]);
+    }
+  };
 
   return (
     <>
       <div className="space-y-4">
-        {/* <div className="flex justify-end items-end">
-      <Button
-        onClick={handleAdd}
-        className="bg-primary text-primary-foreground hover:bg-primary/90"
-      >
-        <Plus className="mr-2 h-4 w-4" /> Add New
-      </Button>
-    </div> */}
         <div className="rounded-md border shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[50px]">
                   <Checkbox
-                    checked={selectedItems?.length === data?.length}
+                    checked={data?.length > 0 && selectedItems?.length === data?.length}
                     onCheckedChange={handleSelectAll}
                   />
                 </TableHead>
@@ -256,19 +275,24 @@ function DataTable<T extends { id: string | number }>({
               {paginatedData?.map((item) => (
                 <TableRow
                   key={item._id as React.Key}
-                  className="hover:bg-muted/50 transition-colors"
+                  className={`hover:bg-muted/50 transition-colors cursor-pointer ${
+                    selectedItems.some(i => i._id === item._id) ? 'bg-muted/30' : ''
+                  }`}
                   onClick={(e) => {
-                    setRowselected(!rowselected);
-                    setCurrentitem(item);
-                  }} // Row click toggles selection
+                    // Don't trigger row click when clicking on checkbox or action buttons
+                    if (
+                      (e.target as HTMLElement).closest('.checkbox-cell') ||
+                      (e.target as HTMLElement).closest('.action-cell')
+                    ) {
+                      return;
+                    }
+                    handleRowClick(item);
+                  }}
                 >
-                  <TableCell>
+                  <TableCell className="checkbox-cell">
                     <Checkbox
                       checked={selectedItems?.some((i) => i._id === item._id)}
-                      onClick={(e) => e.stopPropagation()}
-                      onCheckedChange={(checked) =>
-                        handleSelectItem(item, checked as boolean)
-                      }
+                      onCheckedChange={(checked) => handleSelectItem(item, checked as boolean)}
                     />
                   </TableCell>
                   {columns.map((column) => (
@@ -278,7 +302,7 @@ function DataTable<T extends { id: string | number }>({
                         : (item[column.key] as React.ReactNode)}
                     </TableCell>
                   ))}
-                  <TableCell>
+                  <TableCell className="action-cell">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -313,71 +337,222 @@ function DataTable<T extends { id: string | number }>({
         />
         {showBulkEditModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-            <div className="bg-white p-4 rounded-lg">
-              <h3 className="text-lg font-bold mb-4">Apply Discount</h3>
-              <input
-                type="number"
-                value={bulkEditPercentage}
-                onChange={(e) => setBulkEditPercentage(Number(e.target.value))}
-                className="border p-2 w-full mb-4"
-                placeholder="Discount percentage"
-              />
-              <div className="flex justify-end gap-2">
+            <div className="bg-white p-6 rounded-lg max-w-md w-full">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-bold">Apply Discount</h3>
                 <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    setShowBulkEditModal(false);
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowBulkEditModal(false)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-x"
+                  >
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Discount Percentage
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={bulkEditPercentage}
+                      onChange={(e) => setBulkEditPercentage(Number(e.target.value))}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 pr-12"
+                      placeholder="Enter percentage"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                  </div>
+                </div>
+
+                <div className="bg-muted/30 p-3 rounded-md">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-info"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="16" x2="12" y2="12" />
+                      <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                    <span>Selected Items: {selectedItems.length}</span>
+                  </div>
+                  {bulkEditPercentage > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      This will apply a {bulkEditPercentage}% discount to all selected items
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-2 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowBulkEditModal(false);
+                      setBulkEditPercentage(0);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleBulkEditConfirm(e);
+                    }}
+                    disabled={bulkEditPercentage <= 0 || bulkEditPercentage > 100}
+                  >
+                    Apply Discount
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {showConflictModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg max-w-4xl w-full">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold">Resolve Conflicts</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowConflictModal(false);
+                    setConflictItems([]);
                   }}
                 >
-                  Cancel
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-x"
+                  >
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
                 </Button>
-                <Button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation(); // prevents the event from bubbling up to the form
-                    e.preventDefault();
-                    handleBulkEditConfirm(e);
-                  }}
-                >
-                  Apply
-                </Button>
+              </div>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-4">
+                  The following items already have discounts applied. Select which items should receive the new discount.
+                </p>
+                <div className="max-h-[60vh] overflow-y-auto rounded-lg border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/60 sticky top-0">
+                      <tr className="border-b">
+                        <th className="py-3 px-4 text-left">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={conflictItems.every(item => item.selected)}
+                              onCheckedChange={(checked) => toggleAllConflictItems(!!checked)}
+                            />
+                            <span>Select All</span>
+                          </div>
+                        </th>
+                        <th className="py-3 px-4 text-left">Item</th>
+                        <th className="py-3 px-4 text-right">Current Price</th>
+                        <th className="py-3 px-4 text-right">New Price</th>
+                        <th className="py-3 px-4 text-right">Difference</th>
+                        <th className="py-3 px-4 text-center">Current Discount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {conflictItems.map((conflict, index) => (
+                        <tr key={index} className="border-b hover:bg-muted/50">
+                          <td className="py-3 px-4">
+                            <Checkbox
+                              checked={conflict.selected}
+                              onCheckedChange={() => toggleConflictItem(index)}
+                            />
+                          </td>
+                          <td className="py-3 px-4">{conflict.item?.name ?? 'Unnamed Item'}</td>
+                          <td className="py-3 px-4 text-right">{conflict.oldValue.toFixed(2)}</td>
+                          <td className="py-3 px-4 text-right">{conflict.newValue.toFixed(2)}</td>
+                          <td className="py-3 px-4 text-right text-destructive">
+                            {(conflict.newValue - conflict.oldValue).toFixed(2)}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            {conflict.discountSource ? (
+                              <div className="flex flex-col items-center gap-1">
+                                <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
+                                  {conflict.discountSource.type === 'associate' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}">
+                                  {conflict.discountSource.type === 'associate' ? 'Associate' : 'Department'}
+                                </span>
+                                <span className="text-sm font-medium">
+                                  {conflict.discountSource.value}
+                                  {conflict.discountSource.isPercentage ? '%' : ' Rs'}
+                                </span>
+                              </div>
+                            ) : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-muted-foreground">
+                  {conflictItems.filter(item => item.selected).length} of {conflictItems.length} items selected
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowConflictModal(false);
+                      setConflictItems([]);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleConflictResolution}
+                    disabled={!conflictItems.some(item => item.selected)}
+                  >
+                    Apply Selected Changes
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         )}
         {selectedItems && selectedItems.length > 0 && (
           <div className="fixed bottom-4 left-1/2 transform  bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg flex items-center space-x-4 animate-in fade-in slide-in-from-bottom-4">
-            {console.log("Selected items", selectedItems)}
             <span className="font-medium">
               {selectedItems?.length} item(s) selected
             </span>
             <div>
-              {/* <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => onDelete(selectedItems)}
-                className="hover:bg-destructive hover:text-destructive-foreground hover:scale-105 hover:cursor-pointer bg-transparent text-sm"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  stroke-width="5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  className="lucide lucide-trash-2"
-                >
-                  <path d="M3 6h18" />
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                  <line x1="10" x2="10" y1="11" y2="17" />
-                  <line x1="14" x2="14" y1="11" y2="17" />
-                </svg>
-              </Button> */}
               <Button
                 variant="secondary"
                 size="sm"
@@ -395,9 +570,9 @@ function DataTable<T extends { id: string | number }>({
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="white"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   className="lucide lucide-file-pen-line"
                 >
                   <path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2" />
@@ -411,11 +586,7 @@ function DataTable<T extends { id: string | number }>({
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  // setShowBulkEditModal(false);
                   onSelectedItemsChange([]);
-                  // setCurrentitem([]);
-                  setRowselected(!rowselected);
-                  // handleSelectItem(selectedItems, false);
                 }}
                 className="hover:bg-destructive hover:text-destructive-foreground hover:scale-105 hover:cursor-pointer bg-transparent text-sm"
               >
@@ -426,10 +597,10 @@ function DataTable<T extends { id: string | number }>({
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="lucide lucide-x"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-x"
                 >
                   <path d="M18 6 6 18" />
                   <path d="m6 6 12 12" />

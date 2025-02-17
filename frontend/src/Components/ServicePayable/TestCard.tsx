@@ -45,15 +45,21 @@ import Tablecomponent from "./Tablecomponent";
 const profileFormSchema = z.object({
   associate: z.string().optional(),
   department: z.string().optional(),
-  test: z.string().optional(),
+  test: z.array(z.object({
+    testId: z.string(),
+    price: z.number(),
+    percentage: z.number()
+  })).optional(),
   value: z.any().optional(),
-  // percentage: z.any().optional(),
+  userId: z.string().optional()
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 // This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {};
+const defaultValues: Partial<ProfileFormValues> = {
+  test: []
+};
 
 function ProfileForm() {
   const form = useForm<ProfileFormValues>({
@@ -89,6 +95,23 @@ function ProfileForm() {
         );
         console.log("Fetched on associate change:", response.data);
         setconflictchecks(response.data);
+        
+        // Update the test values if they exist
+        if (response.data && response.data.length > 0) {
+          const associateTests = response.data[0]?.test || [];
+          const updatedTestMaster = testmaster.map(test => {
+            const savedTest = associateTests.find(at => at.testId === test._id);
+            if (savedTest) {
+              return {
+                ...test,
+                price: savedTest.price,
+                originalPrice: test.price // Keep original price for reference
+              };
+            }
+            return test;
+          });
+          settestmaster(updatedTestMaster);
+        }
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -140,28 +163,70 @@ function ProfileForm() {
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
-    // console.log("Sas", data);
-    console.log("ppappappa");
-    data.department = {
+    const formattedData = {
+      associate: data.associate,
       department: data.department,
-      percentage: percentagevalue,
+      test: updatedtests?.map((item) => ({
+        testId: item._id,
+        price: item.price,
+        percentage: percentagevalue
+      })),
+      userId: User?._id
     };
-    data.test = updatedtests?.map((item) => ({
-      testId: item._id,
-      price: item.price,
-      percentage: percentagevalue,
-    }));
-    data.userId = User?._id;
 
-    await axios.post(`/api/service`, data).then((res) => {
-      console.log("ppappappa", res.data);
-      toast.success("Test Master Created Successfully");
+    try {
+      const response = await axios.post(`/api/service`, formattedData);
+      console.log("Service saved:", response.data);
+      toast.success("Service Payable Created Successfully");
       navigate("/service");
-    });
+    } catch (error) {
+      console.error("Error saving service:", error);
+      toast.error("Failed to create Service Payable");
+    }
   }
 
   const getformdatafromnextcomponent = (data) => {
     setFormData(data);
+  };
+
+  const handleUpdateTests = async (testsToUpdate: any[], discountPercentage: number) => {
+    try {
+      const formattedData = {
+        associate: watchedAssociate,
+        department: form.getValues('department'),
+        test: testsToUpdate.map((item) => ({
+          testId: item._id,
+          price: item.price,
+          percentage: discountPercentage
+        })),
+        userId: User?._id
+      };
+
+      const response = await axios.put(
+        `/api/service/updatetests/${watchedAssociate}/${User?._id}`,
+        formattedData
+      );
+      
+      if (response.data) {
+        toast.success("Test values updated successfully");
+        // Refresh the test values
+        const updatedTestMaster = testmaster.map(test => {
+          const updatedTest = testsToUpdate.find(ut => ut._id === test._id);
+          if (updatedTest) {
+            return {
+              ...test,
+              price: updatedTest.price,
+              originalPrice: test.price
+            };
+          }
+          return test;
+        });
+        settestmaster(updatedTestMaster);
+      }
+    } catch (error) {
+      console.error("Error updating test values:", error);
+      toast.error("Failed to update test values");
+    }
   };
 
   return (
@@ -303,12 +368,13 @@ function ProfileForm() {
             )}
           /> */}
         </div>
-        <div className="flex  w-full ">
+        <div className="flex w-full">
           <Tablecomponent
             data={testmaster}
             setUpdatedtests={setUpdatedtests}
             setPercentagevalue={setPercentagevalue}
             conflictchecks={conflictchecks}
+            onUpdateTests={handleUpdateTests}
           />
         </div>
         <div className="flex justify-end w-full ">
