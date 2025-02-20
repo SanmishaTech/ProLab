@@ -671,7 +671,7 @@ function ProfileForm({ formData }) {
             )}
           />
           {showFields && (
-            <>
+            <div>
               <FormField
                 control={form.control}
                 name="value"
@@ -700,7 +700,7 @@ function ProfileForm({ formData }) {
                   </FormItem>
                 )}
               />
-            </>
+            </div>
           )}
         </div>
         <div className="flex justify-end w-full ">

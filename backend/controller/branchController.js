@@ -1,4 +1,4 @@
-const Barcode = require("../Schema/branch");
+const Branch = require("../Schema/branch");
 const mongoose = require("mongoose");
 
 const barcodeController = {
@@ -27,13 +27,16 @@ const barcodeController = {
         syncStatus,
         userId,
       } = req.body;
-      const usertobefound = mongoose.Types.ObjectId(userId);
-      const findbranch = await find({
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      console.log("UserId", usertobefound);
+      const findbranch = await Branch.find({
         userId: usertobefound,
       });
+      console.log("FindBranch", findbranch);
       if (findbranch.length > 0) {
-        const branchUpdated = await Barcode.findByIdAndUpdate(
-          branchId,
+        console.log("Branch", findbranch);
+        const branchUpdated = await Branch.findByIdAndUpdate(
+          findbranch[0]._id,
           {
             branchName,
             mainBranch,
@@ -57,13 +60,16 @@ const barcodeController = {
             syncStatus,
           },
           { new: true }
-        );
-        return res
-          .status(200)
-          .json({ message: "Branch updated successfully.", branch: branch });
+        ).then((branchUpdated) => {
+          console.log("BranchUpdated", branchUpdated);
+        });
+        return res.status(200).json({
+          message: "Branch updated successfully.",
+          branch: branchUpdated,
+        });
       }
 
-      const newbarcode = new Barcode({
+      const newbarcode = new Branch({
         branchName,
         mainBranch,
         branchCode,
@@ -89,7 +95,7 @@ const barcodeController = {
       const newBarcode = await newbarcode.save();
 
       res.json({
-        message: "Barcode created successfully",
+        message: "Branch created successfully",
         service: newBarcode,
       });
     } catch (error) {
@@ -99,10 +105,10 @@ const barcodeController = {
   getServices: async (req, res, next) => {
     try {
       const userId = req.params.userId;
-      const usertobefound = mongoose.Types.ObjectId(userId);
-      const barcode = await Barcode.find({ userId: usertobefound });
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+      const branch = await Branch.find({ userId: usertobefound });
 
-      res.status(200).json(barcode);
+      res.status(200).json(branch);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -110,7 +116,7 @@ const barcodeController = {
   getServicesbyId: async (req, res, next) => {
     try {
       const barcodeID = req.params.barcodeId;
-      const barcode = await Barcode.findById(barcodeID);
+      const barcode = await Branch.findById(barcodeID);
       res.status(200).json(barcode);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -141,7 +147,7 @@ const barcodeController = {
         currency,
         syncStatus,
       } = req.body;
-      const barcode = await Barcode.findByIdAndUpdate(
+      const barcode = await Branch.findByIdAndUpdate(
         branchId,
         {
           branchName,
@@ -168,7 +174,7 @@ const barcodeController = {
         { new: true }
       );
       if (!barcode) {
-        return res.status(404).json({ message: "Barcode not found." });
+        return res.status(404).json({ message: "Branch not found." });
       }
 
       res.json({ message: "barcode updated successfully.", barcode });

@@ -40,16 +40,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-
-import {
   Table,
   TableBody,
   TableCell,
@@ -64,8 +54,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useNavigate } from "react-router-dom";
-// import Edititem from "./Edititem";
+import Edititem from "./Edititem";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   FileText,
@@ -77,6 +66,7 @@ import {
   FileSymlink,
   Settings,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
@@ -87,16 +77,7 @@ export default function Dashboard({
   userAvatar = "/placeholder-user.jpg",
   tableColumns = {},
   AddItem,
-  Edititem,
-  filterValue,
   typeofschema,
-  handleNextPage,
-  totalPages,
-  setSearch,
-  setCurrentPage,
-  Searchitem,
-  currentPage,
-  handlePrevPage,
   tableData = [],
   onAddProduct = () => {},
   onExport = () => {},
@@ -109,19 +90,22 @@ export default function Dashboard({
   const [toggledelete, setToggledelete] = useState();
   // State to manage expanded rows (array of _id)
   const [expandedRows, setExpandedRows] = useState([]);
-
+  const Navigate = useNavigate();
   // Handler to toggle row expansion with debug logs
   const toggleRow = (rowId) => {
     setExpandedRows((prev) => {
       if (prev.includes(rowId)) {
+        console.log(`Collapsing row with _id: ${rowId}`);
         return prev.filter((id) => id !== rowId);
       } else {
+        console.log(`Expanding row with _id: ${rowId}`);
         return [...prev, rowId];
       }
     });
   };
 
   const handleEdit = async (id, url) => {
+    console.log("Edit clicked");
     setToggleedit(true);
     setEditid({
       id: id,
@@ -131,6 +115,7 @@ export default function Dashboard({
   };
 
   const handleDelete = (id) => {
+    console.log("Delete clicked");
     // Implement delete functionality here
   };
   return (
@@ -153,7 +138,14 @@ export default function Dashboard({
               ))}
             </BreadcrumbList>
           </Breadcrumb>
-
+          <div className="relative ml-auto flex-1 md:grow-0">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder={searchPlaceholder}
+              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+            />
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -189,20 +181,23 @@ export default function Dashboard({
           </DropdownMenu>
         </header>
 
+        {/* {toggleedit && (
+          <Edititem
+            editid={editid}
+            toogleedit={setToggleedit}
+            typeofschema={typeofschema}
+          />
+        )} */}
+        {/* Main Content */}
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <Tabs defaultValue="all">
             <div className="flex items-center">
-              <TabsList>
-                <div className="relative ml-auto flex-1 md:grow-0">
-                  {/* <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" /> */}
-                  <Input
-                    type="search"
-                    placeholder={searchPlaceholder}
-                    value={Searchitem}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-                  />
-                </div>
+              <TabsList className="bg-accent/60">
+                {tableColumns?.tabs?.map((tab) => (
+                  <TabsTrigger key={tab.value} value={tab.value}>
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
                 <DropdownMenu>
@@ -217,32 +212,31 @@ export default function Dashboard({
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {[
-                      {
-                        label: "Priority Card",
-                        value: true,
-                        checked: filterValue === true,
-                      },
-                    ].map((filter, index) => (
+                    {tableColumns?.filters?.map((filter, index) => (
                       <DropdownMenuCheckboxItem
                         key={index}
                         checked={filter.checked}
-                        onCheckedChange={() => onFilterChange(filter.value)} // Apply the filter when selected
+                        onCheckedChange={() => onFilterChange(filter.value)}
                       >
                         {filter.label}
                       </DropdownMenuCheckboxItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-
                 {/* <Button size="sm" className="h-8 gap-1" onClick={onAddProduct}>
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                     Add Product
                   </span>
                 </Button> */}
-
-                <AddItem typeofschema={typeofschema} add={tableData?.add} />
+                {/* <AddItem typeofschema={typeofschema} /> */}
+                <Button
+                  onClick={() => {
+                    Navigate("/template/add");
+                  }}
+                >
+                  Add Item
+                </Button>
               </div>
             </div>
             <TabsContent value="all">
@@ -256,15 +250,16 @@ export default function Dashboard({
                     <TableHeader>
                       <TableRow>
                         {tableColumns?.headers?.map((header, index) => (
-                          <TableHead
-                            key={index}
-                            className={
-                              header.hiddenOn === "hidden" ? "hidden" : ""
-                            }
-                          >
-                            {header.label}
-                          </TableHead>
+                          <>
+                            <TableHead
+                              key={index}
+                              className={header.hiddenOn ? header.hiddenOn : ""}
+                            >
+                              {header.label}
+                            </TableHead>
+                          </>
                         ))}
+                        {/* <TableHead>Services</TableHead> */}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -300,7 +295,25 @@ export default function Dashboard({
                                       <DropdownMenuLabel>
                                         Actions
                                       </DropdownMenuLabel>
-                                      <Edititem id={row?._id} />
+                                      {/* <Edititem
+                                        editid={row?.edit}
+                                        toogleedit={setToggleedit}
+                                        typeofschema={typeofschema}
+                                        setToggleedit={setToggleedit}
+                                        toggleedit={toggleedit}
+                                        editfetch={row?.editfetch}
+                                      /> */}
+                                      <Button
+                                        variant="ghost"
+                                        className="w-full"
+                                        onClick={() => {
+                                          Navigate(
+                                            `/template/edit/${row?._id}`
+                                          );
+                                        }}
+                                      >
+                                        Edit
+                                      </Button>
                                       <DropdownMenuSeparator />
 
                                       <AlertDialogbox url={row?.delete} />
@@ -321,71 +334,96 @@ export default function Dashboard({
                                 )}
                               </TableCell>
                             ))}
+
+                            {/* <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleRow(row._id)}
+                                aria-expanded={expandedRows.includes(row._id)}
+                                aria-controls={`services-${row._id}`}
+                              >
+                                {expandedRows.includes(row._id)
+                                  ? "Hide"
+                                  : "Show"}{" "}
+                                Services
+                              </Button>
+                            </TableCell> */}
                           </TableRow>
+                          {expandedRows.includes(row._id) && (
+                            <></>
+                            // <TableRow>
+                            //   <TableCell
+                            //     colSpan={tableColumns.headers.length + 1}
+                            //   >
+                            //     <div className="p-4 bg-muted rounded-md">
+                            //       <h4 className="text-sm font-semibold mb-2">
+                            //         Services
+                            //       </h4>
+                            //       {/* Nested Services Table */}
+                            //       <Table className="mb-4">
+                            //         <TableHeader>
+                            //           <TableRow>
+                            //             <TableHead>Service Name</TableHead>
+                            //             <TableHead>Description</TableHead>
+                            //             <TableHead>Price ($)</TableHead>
+                            //             <TableHead>Urgent</TableHead>
+                            //           </TableRow>
+                            //         </TableHeader>
+                            //         <TableBody>
+                            //           {row?.services?.map((service) => (
+                            //             <TableRow key={service._id}>
+                            //               <TableCell>{service.name}</TableCell>
+                            //               <TableCell>
+                            //                 {service.description}
+                            //               </TableCell>
+                            //               <TableCell>
+                            //                 &#x20b9;{service.price}
+                            //               </TableCell>
+                            //               <TableCell>
+                            //                 {service.urgent}
+                            //               </TableCell>
+                            //             </TableRow>
+                            //           ))}
+                            //         </TableBody>
+                            //         <TableFooter>
+                            //           <TableRow>
+                            //             <TableCell colSpan={2}>
+                            //               <strong>Total</strong>
+                            //             </TableCell>
+                            //             <TableCell>
+                            //               &#x20b9;{" "}
+                            //               {row?.services
+                            //                 ?.reduce(
+                            //                   (total, service) =>
+                            //                     total + service.price,
+                            //                   0
+                            //                 )
+                            //                 .toFixed(2)}
+                            //             </TableCell>
+                            //           </TableRow>
+                            //         </TableFooter>
+                            //       </Table>
+                            //     </div>
+                            //   </TableCell>
+                            // </TableRow>
+                          )}
                         </React.Fragment>
                       ))}
                     </TableBody>
-                    <TableFooter></TableFooter>
                   </Table>
                 </CardContent>
                 <CardFooter>
-                  <div className="flex justify-between items-center w-full p-4 min-w-[20rem]">
-                    <div>
-                      <p>
-                        Page {currentPage} of {totalPages} (Total items:{" "}
-                        {totalPages})
-                      </p>
-                    </div>
-                    <Pagination className="flex items-center">
-                      <PaginationContent>
-                        <PaginationItem onClick={handlePrevPage}>
-                          <PaginationPrevious href="#" />
-                        </PaginationItem>
-                        {/* Static page numbers can be replaced by dynamic mapping if needed */}
-                        <PaginationItem>
-                          <PaginationLink onClick={() => setCurrentPage(1)}>
-                            {1}
-                          </PaginationLink>
-                        </PaginationItem>
-                        {currentPage + 1 !== totalPages &&
-                          currentPage !== totalPages && (
-                            <PaginationItem>
-                              <PaginationLink
-                                onClick={() => setCurrentPage(currentPage + 1)}
-                              >
-                                {currentPage + 1}
-                              </PaginationLink>
-                            </PaginationItem>
-                          )}
-                        <PaginationItem>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                        {currentPage + 1 === totalPages &&
-                          currentPage === totalPages && (
-                            <PaginationItem>
-                              <PaginationLink
-                                onClick={() => setCurrentPage(totalPages - 1)}
-                              >
-                                {totalPages - 1}
-                              </PaginationLink>
-                            </PaginationItem>
-                          )}
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(totalPages)}
-                          >
-                            {totalPages}
-                          </PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem onClick={handleNextPage}>
-                          <PaginationNext href="#" />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
+                  <div className="text-xs text-muted-foreground">
+                    Showing <strong>{tableColumns.pagination.from}</strong>-
+                    <strong>{tableColumns.pagination.to}</strong> of{" "}
+                    <strong>{tableColumns.pagination.total}</strong>{" "}
+                    registrations
                   </div>
                 </CardFooter>
               </Card>
             </TabsContent>
+            {/* Add more TabsContent as needed */}
           </Tabs>
         </main>
       </div>

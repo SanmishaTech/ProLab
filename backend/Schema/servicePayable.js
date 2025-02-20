@@ -20,7 +20,7 @@ const departmentSchema = new mongoose.Schema({
 
 const servicePayable = new mongoose.Schema({
   associate: { type: mongoose.Schema.Types.ObjectId, ref: "AssociateMaster" },
-  department: [departmentSchema],
+  department: { type: mongoose.Schema.Types.ObjectId, ref: "DepartmentMaster" },
   // Use an array of objects containing testId and price
   test: [testSchema],
   value: { type: Number },

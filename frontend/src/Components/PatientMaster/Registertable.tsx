@@ -8,6 +8,7 @@ import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 const AddItem = () => {
   const navigate = useNavigate();
@@ -44,7 +45,79 @@ export default function Dashboardholiday() {
   const [test, setTest] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>(data); // State for filtered data
   const [filterValue, setFilterValue] = useState<string>(""); // Store selected filter value
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10; // You can change the limit if needed
+  const [search, setSearch] = useState("");
 
+  const fetchPatients = () => {
+    setLoading(true);
+    axios
+      .get(
+        `/api/patientmaster/allpatients/${User?._id}?page=${currentPage}&limit=${limit}?search=${search}`
+      )
+      .then((response) => {
+        // Assuming response.data has a structure like { patients, total, page, totalPages, nextPage, prevPage }
+        setData(response.data);
+        setFilteredData(response.data?.patients);
+        setTotalPages(response.data?.totalPages);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching data:", err);
+        setError(err);
+        setLoading(false);
+      });
+  };
+
+  const fetchProjects = async ({ queryKey }) => {
+    const [_key, { currentPage, search }] = queryKey;
+    const response = await axios.get(
+      `/api/patientmaster/allpatients/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
+    );
+    setTotalPages(response.data?.totalPages);
+    return response.data.patients;
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  // useEffect(() => {
+  //   if (User?._id) {
+  //     fetchPatients();
+  //   }
+  // }, [User?._id, currentPage, search]);
+
+  // const {
+  //   data: PaginatedData,
+  //   error: fetchError,
+  //   isLoading,
+  // } = useQuery(["projects", { currentPage, search }], fetchProjects, {
+  //   keepPreviousData: true,
+  // });
+
+  const {
+    data: PaginatedData,
+    error: fetchError,
+    isLoading,
+  } = useQuery({
+    queryKey: ["projects", { currentPage, search }],
+    queryFn: fetchProjects,
+    enabled: !!User?._id,
+  });
+
+  useEffect(() => {
+    console.log("PA", PaginatedData);
+  }, []);
   useEffect(() => {
     // Fetch data from the API
     const fetchparameter = async () => {
@@ -52,7 +125,6 @@ export default function Dashboardholiday() {
         const response = await axios.get(
           `/api/parameter/allparameter/${User?._id}`
         );
-        console.log(response.data);
         setParameter(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -85,11 +157,7 @@ export default function Dashboardholiday() {
     fetchtest();
   }, []);
   // Define the schema with various input types
-  useEffect(() => {
-    console.log("This is parameter", parameter);
-    console.log("This is parameterGroup", parameterGroup);
-    console.log("This is test", test);
-  }, [parameter, parameterGroup, test]);
+  useEffect(() => {}, [parameter, parameterGroup, test]);
   const typeofschema = {
     // sortBy: { type: "Number", label: "Sort By" },
     // date: { type: "Date", label: "Date" },
@@ -103,24 +171,24 @@ export default function Dashboardholiday() {
     //   ],
     // },
     // isActive: { type: "Checkbox", label: "Is Active" },
-    isbol: { type: "Checkbox", label: "Is bol" },
+    // isbol: { type: "Checkbox", label: "Is bol" },
     // Add more fields as needed
   };
 
   useEffect(() => {
     // Fetch data from the API
-    axios
-      .get(`/api/patientmaster/allpatients/${User?._id}`)
-      .then((response) => {
-        setData(response.data);
-        setFilteredData(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching data:", err);
-        setError(err);
-        setLoading(false);
-      });
+    // axios
+    //   .get(`/api/patientmaster/allpatients/${User?._id}?page=1&limit=10`)
+    //   .then((response) => {
+    //     setData(response.data);
+    //     setFilteredData(response.data?.patients);
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     console.error("Error fetching data:", err);
+    //     setError(err);
+    //     setLoading(false);
+    //   });
 
     // Define the dashboard configuration
     setConfig({
@@ -175,7 +243,6 @@ export default function Dashboardholiday() {
         const response = await axios.get(
           `/api/patientmaster/filter?query=${filterValue}`
         );
-        console.log("Data fetched:", response.data);
         setFilteredData(response.data); // Assuming the response is a single item, wrap it in an array
       } catch (error) {
         console.error("Error fetching data by ID:", error);
@@ -209,20 +276,22 @@ export default function Dashboardholiday() {
 
   // Handler for adding a new item (optional if parent needs to do something)
   const handleAddItem = (newItem: any) => {
-    console.log("New item added:", newItem);
     // Optionally, you can update the data state to include the new item without refetching
     setData((prevData) => [...prevData, newItem]);
   };
 
-  if (loading) return <div className="p-4">Loading...</div>;
+  // if (isLoading) return <div className="p-4">Loading...</div>;
+  if (fetchError)
+    return <div className="p-4 text-red-500">Error loading parameters.</div>;
+  if (!config) return <div className="p-4">Loading configuration...</div>;
+
   if (error)
     return <div className="p-4 text-red-500">Error loading parameters.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = filteredData
-    ? filteredData?.map((item) => {
-        console.log("This is item", item);
+  const mappedTableData = PaginatedData
+    ? PaginatedData?.map((item) => {
         return {
           _id: item?._id,
           firstName: item?.firstName || "First Name not provided",
@@ -248,8 +317,15 @@ export default function Dashboardholiday() {
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
-        filterValue={filterValue}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
+        filterValue={PaginatedData}
         onProductAction={handleProductAction}
+        handleNextPage={handleNextPage}
+        handlePrevPage={handlePrevPage}
+        setSearch={setSearch}
+        Searchitem={search}
         typeofschema={typeofschema}
         AddItem={() => (
           <AddItem typeofschema={typeofschema} onAdd={handleAddItem} />

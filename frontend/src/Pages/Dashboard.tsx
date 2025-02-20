@@ -22,6 +22,7 @@ import DashboardAssociateMaster from "@/Components/AssociateMaster/Registertable
 import DashboardPatientMaster from "@/Components/PatientMaster/Registertable";
 import DashboardTatMaster from "@/Components/TatMaster/Registertable";
 import DashboardTatCard from "@/Components/TatMaster/";
+import ClinicalHistory from "@/Components/ClinicalHistory/Registertable";
 import Dashboardprefix from "@/Components/PrefixMaster/Registertable";
 import Specimen from "@/Components/Specimen/Registertable";
 import DashboardTestcard from "@/Components/Testmaster/TestCard";
@@ -61,6 +62,9 @@ import Makerchecker from "@/Components/MakerChecker/Makerchecker";
 import AssociateType from "@/Components/Associatetype/Registertable";
 import Medicationhistory from "@/Components/MedicationHistory/Registertable";
 import ServiceAdd from "@/Components/ServicePayable/TestCard";
+import TemplateAdd from "@/Components/TemplateMaster/TestCard";
+import Template from "@/Components/TemplateMaster/Registertable";
+import Edittemplate from "@/Components/TemplateMaster/EditTestCard";
 
 const Dashboard = () => {
   const location = useLocation();
@@ -155,7 +159,11 @@ const Dashboard = () => {
         {location.pathname === "/makerchecker" && <Makerchecker />}
         {location.pathname === "/associatetype" && <AssociateType />}
         {location.pathname === "/medicationhistory" && <Medicationhistory />}
+        {location.pathname === "/clinic" && <ClinicalHistory />}
+        {location.pathname === "/template" && <Template />}
+        {location.pathname === "/template/add" && <TemplateAdd />}
 
+        {/\/template\/edit\/\d+/.test(location.pathname) && <Edittemplate />}
         {/\/samplecollection\/collect\/\d+/.test(location.pathname) && (
           <Innnerfile />
         )}

@@ -50,6 +50,8 @@ var makercheckerRoutes = require("./routes/makercheckerRoutes");
 var associatetypeRoutes = require("./routes/associatetypeRoutes");
 var medicationhistoryRoutes = require("./routes/medicationhistoryRoutes");
 var branchsetupRoutes = require("./routes/branchRoutes");
+var clinicHistoryRoutes = require("./routes/clientHistoryRoutes");
+var templateRoutes = require("./routes/templateRoutes");
 
 var app = express();
 const corsOptions = {
@@ -110,6 +112,8 @@ app.use("/api/makerchecker", makercheckerRoutes);
 app.use("/api/associatetype", associatetypeRoutes);
 app.use("/api/medicationhistory", medicationhistoryRoutes);
 app.use("/api/branchsetup", branchsetupRoutes);
+app.use("/api/clinic", clinicHistoryRoutes);
+app.use("/api/template", templateRoutes);
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 

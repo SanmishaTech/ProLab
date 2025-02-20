@@ -65,22 +65,49 @@ const patientMasterController = {
   getServices: async (req, res, next) => {
     try {
       const userId = req.params.userId;
-      console.log("This is userId", userId);
       const usertobefound = new mongoose.Types.ObjectId(userId);
-      const patient = await PatientMaster.find({ userId: usertobefound });
-      // .populate({
-      //   path: "services",
-      //   populate: { path: "services" },
-      // });
 
-      res.status(200).json(patient);
+      // Extract pagination and search parameters from query with defaults
+      let { page = 1, limit = 10, search = "" } = req.query;
+      page = parseInt(page);
+      limit = parseInt(limit);
+      const skip = (page - 1) * limit;
+
+      // Build the query condition
+      const query = { userId: usertobefound };
+      if (search.trim()) {
+        // Using an anchored regex makes the query efficient if you have a normal index on firstName.
+        // This regex is case-insensitive and matches only fields that start with the search term.
+        query.firstName = { $regex: `^${search}`, $options: "i" };
+      }
+
+      // Execute both the paginated query and count in parallel
+      const [patients, total] = await Promise.all([
+        PatientMaster.find(query).skip(skip).limit(limit).lean(),
+        PatientMaster.countDocuments(query),
+      ]);
+
+      const totalPages = Math.ceil(total / limit);
+      const nextPage = page < totalPages ? page + 1 : null;
+      const prevPage = page > 1 ? page - 1 : null;
+
+      res.status(200).json({
+        patients,
+        total,
+        page,
+        totalPages,
+        nextPage,
+        prevPage,
+      });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
+
   getServicesbyId: async (req, res, next) => {
     try {
       const patientID = req.params.patientId;
+
       const services = await PatientMaster.findById(patientID);
       res.status(200).json(services);
     } catch (error) {

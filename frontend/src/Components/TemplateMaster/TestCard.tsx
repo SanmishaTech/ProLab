@@ -7,6 +7,15 @@ import { MoveLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import {
   Card,
   CardContent,
   CardDescription,
@@ -40,7 +49,8 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import MultiSelectorComponent from "./profile";
-import Tablecomponent from "./Tablecomponent";
+import { Trash } from "lucide-react";
+import { Item } from "@radix-ui/react-accordion";
 
 const profileFormSchema = z.object({
   associate: z.string().optional(),
@@ -56,6 +66,7 @@ const profileFormSchema = z.object({
     .optional(),
   value: z.any().optional(),
   userId: z.string().optional(),
+  template: z.string().optional(), // Add this line
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -65,6 +76,30 @@ const defaultValues: Partial<ProfileFormValues> = {
   test: [],
 };
 
+const updatedData = (data: any[]) => {
+  let j = 0;
+  for (let i = 0; i < data.length; i++) {
+    let obj = data[i];
+    if (
+      obj.columnName !== "" &&
+      obj.columnName !== null &&
+      obj.columnName !== undefined &&
+      obj.columnType !== "" &&
+      obj.columnType !== null &&
+      obj.columnType !== undefined &&
+      obj.sortOrder !== "" &&
+      obj.sortOrder !== null &&
+      obj.sortOrder !== undefined
+    ) {
+      // Move the valid object to the 'j'th position
+      data[j] = obj;
+      j++;
+    }
+  }
+  // Truncate the array to remove extra elements (including empty objects)
+  data.length = j;
+  return data;
+};
 function ProfileForm() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -83,10 +118,10 @@ function ProfileForm() {
   const [updatedtests, setUpdatedtests] = useState<any[]>([]);
   const [percentagevalue, setPercentagevalue] = useState<any[]>([]);
   const [conflictchecks, setconflictchecks] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<any[]>([{}]);
 
   const { watch } = form;
   const watchedAssociate = watch("associate");
-  const watchDepartment = watch("department");
   // const watchedAssociate = form.watch("associate");
 
   // Whenever "associate" changes, trigger this useEffect
@@ -96,9 +131,7 @@ function ProfileForm() {
     const fetchProfile = async () => {
       try {
         const response = await axios.get(
-          `/api/service/getassociate/${watchedAssociate}/${
-            User?._id
-          }?departmentId=${watchDepartment ? watchDepartment : ""}`
+          `/api/service/getassociate/${watchedAssociate}/${User?._id}`
         );
         console.log("Fetched on associate change:", response.data);
         setconflictchecks(response.data);
@@ -126,7 +159,7 @@ function ProfileForm() {
       }
     };
     fetchProfile();
-  }, [watchedAssociate, watchDepartment, User?._id]);
+  }, [watchedAssociate, User?._id]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -172,25 +205,21 @@ function ProfileForm() {
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
+    const updatedata = updatedData(templates);
     const formattedData = {
-      associate: data.associate,
-      department: data.department,
-      test: updatedtests?.map((item) => ({
-        testId: item._id,
-        price: item.price,
-        percentage: percentagevalue,
-      })),
+      data: updatedata || [],
+      template: data.template,
       userId: User?._id,
     };
 
     try {
-      const response = await axios.post(`/api/service`, formattedData);
-      console.log("Service saved:", response.data);
-      toast.success("Service Payable Created Successfully");
-      navigate("/service");
+      const response = await axios.post(`/api/template`, formattedData);
+      console.log("Template saved:", response.data);
+      toast.success("Template Payable Created Successfully");
+      navigate("/template");
     } catch (error) {
-      console.error("Error saving service:", error);
-      toast.error("Failed to create Service Payable");
+      console.error("Error saving template:", error);
+      toast.error("Failed to create template Payable");
     }
   }
 
@@ -241,6 +270,10 @@ function ProfileForm() {
     }
   };
 
+  useEffect(() => {
+    console.log("Templates", templates);
+  }, [templates]);
+
   return (
     <Form {...form}>
       <form
@@ -252,80 +285,122 @@ function ProfileForm() {
           <FormField
             className="flex-1"
             control={form.control}
-            name="associate"
+            name="template"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Associate</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="w-full"
-                >
-                  <FormControl className="w-full">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Associate" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {associates?.map((associate) => {
-                      return (
-                        <SelectItem value={associate?._id}>
-                          {associate.firstName}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
+                <FormLabel>Template</FormLabel>
+                <Input placeholder="Template..." {...field} />
                 <FormDescription>
-                  Select Associate you want to use.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            className="flex-1"
-            control={form.control}
-            name="department"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Department</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="w-full"
-                >
-                  <FormControl className="w-full">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Department type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {department?.map((department) => {
-                      return (
-                        <SelectItem value={department?._id}>
-                          {department.name}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  Select Department you want to use.
+                  Select Template you want to use.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <div className="flex w-full">
-          <Tablecomponent
-            data={testmaster}
-            setUpdatedtests={setUpdatedtests}
-            setPercentagevalue={setPercentagevalue}
-            conflictchecks={conflictchecks}
-            onUpdateTests={handleUpdateTests}
-          />
+        <div className="bg-background">
+          <div className="overflow-hidden rounded-lg border border-border bg-background">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="h-9 py-2">Column Header</TableHead>
+                  <TableHead className="h-9 py-2">Column Type</TableHead>
+                  <TableHead className="h-9 py-2">Sort Order</TableHead>
+                  <TableHead className="h-9 py-2">Remove</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {templates.map((template, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="py-2 font-medium">
+                      <Input
+                        placeholder="Name..."
+                        value={template.columnName}
+                        onChange={(e) => {
+                          const newTemplates = [...templates];
+                          newTemplates[index].columnName = e.target.value;
+                          setTemplates(newTemplates);
+                          // If editing the last row and the value is non-empty, add a new row
+                          if (
+                            index === templates.length - 1 &&
+                            e.target.value.trim() !== ""
+                          ) {
+                            setTemplates((prev) => [
+                              ...prev,
+                              {
+                                columnName: "",
+                                columnType: null,
+                                sortOrder: "",
+                              },
+                            ]);
+                          }
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <Select
+                        value={template.columnType || ""}
+                        onValueChange={(value) => {
+                          const newTemplates = [...templates];
+                          newTemplates[index].columnType = value;
+                          setTemplates(newTemplates);
+                        }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Value">Value</SelectItem>
+                          {/* Add more options as needed */}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <Input
+                        placeholder="Sort Order..."
+                        value={template.sortOrder}
+                        onChange={(e) => {
+                          const newTemplates = [...templates];
+                          newTemplates[index].sortOrder = e.target.value;
+                          setTemplates(newTemplates);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <Button
+                        type="button"
+                        className="h-8 w-8 p-0"
+                        onClick={() => {
+                          // Remove the row at the given index
+                          const newTemplates = templates.filter(
+                            (_, idx) => idx !== index
+                          );
+                          setTemplates(newTemplates);
+                        }}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <>
+            <Button
+              type="button"
+              className="m-2 mt-5"
+              onClick={() => {
+                // Add a new row
+                setTemplates((prev) => [
+                  ...prev,
+                  { columnName: "", columnType: null, sortOrder: "" },
+                ]);
+              }}
+            >
+              Add Profile
+            </Button>
+          </>
         </div>
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
@@ -342,7 +417,7 @@ export default function SettingsProfilePage() {
   return (
     <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
       <Button
-        onClick={() => navigate("/service")}
+        onClick={() => navigate("/template")}
         className="ml-4 flex gap-2 m-8 mb-4"
       >
         <MoveLeft className="w-5 text-white" />
@@ -350,8 +425,8 @@ export default function SettingsProfilePage() {
       </Button>
 
       <CardHeader>
-        <CardTitle>Service Payable</CardTitle>
-        <CardDescription>Service Payable</CardDescription>
+        <CardTitle>Template Master</CardTitle>
+        <CardDescription>Template master</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6 ">
@@ -359,6 +434,10 @@ export default function SettingsProfilePage() {
           <ProfileForm />
         </div>
       </CardContent>
+      {/* <CardFooter className="flex justify-between">
+        <Button variant="outline">Cancel</Button>
+        <Button>Deploy</Button>
+      </CardFooter> */}
     </Card>
   );
 }

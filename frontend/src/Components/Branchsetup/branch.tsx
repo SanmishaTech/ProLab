@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -20,14 +20,36 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 import axios from "axios";
 
 const LabMasterForm = () => {
+  const [defaultdata, setDefaultdata] = useState({});
   const User = localStorage.getItem("user");
   const user = JSON.parse(User || "{}");
   const form = useForm({
     defaultValues: {},
   });
+  const { reset } = form;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axios
+        .get(`/api/branchsetup/allbarcode/${user._id}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          console.log("Sucess", response.data);
+          setDefaultdata(response.data[0]);
+          reset(response.data[0]);
+        });
+      // console.log("Response", response.data);
+    };
+    fetchData();
+  }, []);
 
   const onSubmit = async (data) => {
     console.log(data);
@@ -41,6 +63,7 @@ const LabMasterForm = () => {
       })
       .then((response) => {
         console.log("Sucess", response.data);
+        toast.success("Sucessfully Updated");
       });
   };
 
@@ -133,7 +156,7 @@ const LabMasterForm = () => {
                 {/* Location Details */}
                 <FormField
                   control={form.control}
-                  name="pincode"
+                  name="pinCode"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Pincode</FormLabel>
@@ -144,7 +167,6 @@ const LabMasterForm = () => {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="country"
@@ -154,6 +176,7 @@ const LabMasterForm = () => {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -178,6 +201,7 @@ const LabMasterForm = () => {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -204,6 +228,7 @@ const LabMasterForm = () => {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -329,7 +354,7 @@ const LabMasterForm = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="alternativeemailId"
+                  name="alternateEmailId"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Alternative Email ID</FormLabel>
@@ -350,6 +375,7 @@ const LabMasterForm = () => {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>

@@ -7,11 +7,11 @@ const upload = multer({ dest: "uploads/" });
 router.post("/", servicePayableController.createThread);
 router.get("/allservicepayable/:userId", servicePayableController.getServices);
 router.get("/reference/:referenceId", servicePayableController.getServicesbyId);
-router.post(
-  "/upload-csv",
-  upload.single("file"),
-  servicePayableController.uploadCSV
-);
+// router.post(
+//   "/upload-csv",
+//   upload.single("file"),
+//   servicePayableController.uploadCSV
+// );
 router.get(
   "/getassociate/:associateId/:userId",
   servicePayableController.getAssociate

@@ -10,31 +10,31 @@ const ServicePayableController = {
   createThread: async (req, res, next) => {
     try {
       const { associate, department, test, value, userId } = req.body;
+      const associatetobefound = new mongoose.Types.ObjectId(associate);
+      const departmenttobefound = new mongoose.Types.ObjectId(department);
+      const Usertobefound = new mongoose.Types.ObjectId(userId);
+      // const testtobefound = mongoose.Types.ObjectId(test);
 
-      const findexistingservice = await ServicePayable.findOne({
-        associate,
+      const findexistingservice = await ServicePayable.find({
+        associate: associatetobefound,
+        // department: departmenttobefound,
 
-        userId,
+        userId: Usertobefound,
       });
-      if (findexistingservice) {
+      console.log(findexistingservice);
+      if (findexistingservice && findexistingservice.length > 0) {
         const updatetests = await ServicePayable.findOneAndUpdate(
-          {
-            associate,
-            userId,
-          },
-          {
-            associate,
-            department,
-            test,
-            value,
-            userId,
-          }
+          { _id: findexistingservice._id }, // Use the first document's ID
+          { associate, department, test, value, userId },
+          { new: true } // Option to return the updated document
         );
         return res.json({
-          message: "Patients created successfully",
+          message: "Patients Updated successfully",
           service: updatetests,
         });
       }
+
+      console.log("NOt in loop");
 
       const newService = new ServicePayable({
         associate,
@@ -43,6 +43,7 @@ const ServicePayableController = {
         value,
         userId,
       });
+      // console.log(newService);
       const newServics = await newService.save();
 
       res.json({
@@ -97,6 +98,11 @@ const ServicePayableController = {
       const assocaitetobefound = new mongoose.Types.ObjectId(associateId);
       const userId = req.params.userId;
       const usertobefound = new mongoose.Types.ObjectId(userId);
+      let departmenttobefound;
+      const departmentId = req.query.departmentId;
+      if (departmentId) {
+        departmenttobefound = new mongoose.Types.ObjectId(departmentId);
+      }
       const services = await ServicePayable.find({
         associate: assocaitetobefound,
         userId: usertobefound,
@@ -106,7 +112,21 @@ const ServicePayableController = {
         })
         .populate({
           path: "test",
+          populate: {
+            path: "testId",
+          },
         });
+      if (departmenttobefound !== undefined) {
+        services.forEach((service) => {
+          service.test = service.test.filter((item) => {
+            // If testId.department is an ObjectId, use .equals:
+            // return item.testId.department.equals(departmenttobefound);
+            // Alternatively, if comparing strings:
+            // console.log(item.testId.department?.toString() === departmentId);
+            return item.testId?.department?.toString() === departmentId;
+          });
+        });
+      }
 
       res.status(200).json(services);
     } catch (error) {
@@ -147,91 +167,6 @@ const ServicePayableController = {
       }
 
       res.json({ message: "Service deleted successfully.", newService });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-  uploadCSV: async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: "No file uploaded" });
-      }
-
-      const results = [];
-      fs.createReadStream(req.file.path)
-        .pipe(csv())
-        .on("data", (data) => results.push(data))
-        .on("end", async () => {
-          try {
-            console.log("CSV data", results);
-
-            const formattedData = await Promise.all(
-              results.map(async (row) => {
-                const associate = await Associate.findOne({
-                  firstName: row.associate,
-                }).exec();
-                const test = await Test.findOne({ name: row.test }).exec();
-                const userId = await User.findOne({
-                  username: row.userId,
-                }).exec();
-
-                if (!associate || !test) {
-                  // Skip rows with missing associate or test
-                  return null;
-                }
-
-                const existingRecord = await ServicePayable.findOne({
-                  associate: associate._id,
-                  test: test._id,
-                  userId: userId?._id,
-                }).exec();
-
-                if (existingRecord) {
-                  // Update existing record
-                  await ServicePayable.findOneAndUpdate(
-                    {
-                      associate: associate._id,
-                      test: test._id,
-                      userId: userId?._id,
-                    },
-                    {
-                      value: row?.value,
-                    }
-                  );
-                  return null; // Do not include this record for insertion
-                } else {
-                  // Prepare new record for insertion
-                  return {
-                    associate: associate._id,
-                    test: test._id,
-                    value: row?.value,
-                    userId: userId?._id,
-                  };
-                }
-              })
-            );
-
-            // Filter out null values
-            const validData = formattedData.filter((item) => item !== null);
-
-            if (validData.length > 0) {
-              // Insert new records
-              await ServicePayable.insertMany(validData);
-            }
-
-            // Clean up: delete the uploaded file
-            fs.unlinkSync(req.file.path);
-
-            res.json({
-              message: "CSV processed successfully",
-              updated: results.length - validData.length, // Count of updated records
-              inserted: validData.length, // Count of inserted records
-            });
-          } catch (error) {
-            // Handle errors gracefully
-            res.status(500).json({ error: error.message });
-          }
-        });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

@@ -14,7 +14,7 @@ import {
   Smile,
   User,
 } from "lucide-react";
-
+import ClinicalHistory from "./Components/ClinicalHistory/Registertable";
 import {
   CommandDialog,
   CommandEmpty,
@@ -163,6 +163,10 @@ function App() {
         <Route path="/makerchecker" element={<Dashboard />} />
         <Route path="/associatetype" element={<Dashboard />} />
         <Route path="/medicationhistory" element={<Dashboard />} />
+        <Route path="/clinic" element={<Dashboard />} />
+        <Route path="/template" element={<Dashboard />} />
+        <Route path="/template/add" element={<Dashboard />} />
+        <Route path="/template/edit/:id" element={<Dashboard />} />
       </Routes>
     </>
   );
