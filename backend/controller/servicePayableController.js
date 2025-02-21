@@ -116,19 +116,90 @@ const ServicePayableController = {
             path: "testId",
           },
         });
-      if (departmenttobefound !== undefined) {
-        services.forEach((service) => {
-          service.test = service.test.filter((item) => {
+      if (!departmentId) {
+        return res.status(200).json(services);
+      }
+      if (departmentId !== undefined && services.length > 0) {
+        services[0].test = services[0]?.test?.filter((item) => {
+          // If testId.department is an ObjectId, use .equals:
+          // return item.testId.department.equals(departmenttobefound);
+          // Alternatively, if comparing strings:
+          // console.log(item?.testId?.department.toString());
+          return item && item.testId?.department?.toString() === departmentId;
+        });
+      }
+      // res.status(200).json(services);
+
+      console.log(services[0].test?.length);
+      if (services[0].test?.length > 0) {
+        let tests = await Test.find({
+          userId: usertobefound,
+        });
+
+        let filtertestsnotfoundinServices = tests.filter((item) =>
+          services[0].test.some((service) => service.testId?._id !== item._id)
+        );
+        if (departmentId !== undefined) {
+          filtertestsnotfoundinServices = filtertestsnotfoundinServices.filter(
+            (item) => {
+              // If testId.department is an ObjectId, use .equals:
+              // return item.testId.department.equals(departmenttobefound);
+              // Alternatively, if comparing strings:
+              // console.log(item?.testId?.department.toString());
+              return item && item?.department?.toString() === departmentId;
+            }
+          );
+        }
+
+        // console.log("Updated services", services[0].test);
+
+        console.log(filtertestsnotfoundinServices);
+        const updatedservices = {
+          associate: services[0].associate,
+          department: services[0].department,
+          test: filtertestsnotfoundinServices.map((item) => {
+            return {
+              testId: item,
+              price: services[0].test.find(
+                (service) =>
+                  service.testId?._id.toString() === item._id.toString()
+              )?.price,
+              percentage: item.percentage,
+            };
+          }),
+          // value: services[0].value,
+          userId: services[0].userId,
+        };
+
+        res.status(200).json([updatedservices]);
+      } else {
+        console.log("Not found");
+        let tests = await Test.find({
+          userId: usertobefound,
+        });
+        const servic = {
+          associate: associateId,
+          test: tests.map((item) => {
+            return {
+              testId: item,
+              price: item.price,
+              percentage: item.percentage,
+            };
+          }),
+        };
+
+        if (departmentId !== undefined) {
+          servic.test = servic?.test?.filter((item) => {
             // If testId.department is an ObjectId, use .equals:
             // return item.testId.department.equals(departmenttobefound);
             // Alternatively, if comparing strings:
-            // console.log(item.testId.department?.toString() === departmentId);
-            return item.testId?.department?.toString() === departmentId;
+            // console.log(item?.testId?.department.toString());
+            return item && item.testId?.department?.toString() === departmentId;
           });
-        });
-      }
+        }
 
-      res.status(200).json(services);
+        res.status(200).json([servic]);
+      }
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

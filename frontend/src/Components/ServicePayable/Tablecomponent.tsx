@@ -19,20 +19,23 @@ interface Props {
   setUpdatedtests: (tests: Test[]) => void;
   setPercentagevalue: (value: number) => void;
   conflictchecks?: Array<{
-    type: 'associate' | 'department';
+    type: "associate" | "department";
     value: number;
     isPercentage: boolean;
   }>;
-  onUpdateTests?: (testsToUpdate: Test[], discountPercentage: number) => Promise<void>;
+  onUpdateTests?: (
+    testsToUpdate: Test[],
+    discountPercentage: number
+  ) => Promise<void>;
 }
 
-const columns: Array<{key: keyof Test; header: string}> = [
+const columns: Array<{ key: keyof Test; header: string }> = [
   { key: "name", header: "Name" },
   { key: "email", header: "Email" },
   { key: "price", header: "Price" },
 ];
 
-const fields: Array<{key: keyof Test; label: string; type: string}> = [
+const fields: Array<{ key: keyof Test; label: string; type: string }> = [
   { key: "name", label: "Name", type: "text" },
   { key: "email", label: "Email", type: "email" },
   { key: "price", label: "Price", type: "number" },
@@ -49,11 +52,14 @@ export default function Tablecomponent({
   const [selectedItems, setSelectedItems] = useState<Test[]>([]);
   const [bulkEditPercentage, setBulkEditPercentage] = useState<number>(0);
   const [showConflictModal, setShowConflictModal] = useState<boolean>(false);
-  const [conflictItems, setConflictItems] = useState<{ item: Test; selected: boolean }[]>([]);
+  const [conflictItems, setConflictItems] = useState<
+    { item: Test; selected: boolean }[]
+  >([]);
 
   useEffect(() => {
     // Initialize with original prices
-    const usersWithOriginal = data.map((user) => ({
+    console.log("countingid ", data);
+    const usersWithOriginal = data?.map((user) => ({
       ...user,
       id: user._id, // Ensure id is set
       originalPrice: user.originalPrice || user.price, // Use existing originalPrice or current price
@@ -67,10 +73,7 @@ export default function Tablecomponent({
 
   const handleAdd = (newUser: Test) => {
     const newId = Math.max(...users.map((u) => Number(u._id))) + 1;
-    setUsers((prev) => [
-      ...prev,
-      { ...newUser, _id: newId, id: newId },
-    ]);
+    setUsers((prev) => [...prev, { ...newUser, _id: newId, id: newId }]);
   };
 
   const handleDelete = (usersToDelete: Test[]) => {
@@ -91,10 +94,10 @@ export default function Tablecomponent({
       if (selectedItems.some((selected) => selected._id === user._id)) {
         const originalPrice = user.originalPrice || user.price;
         const discount = originalPrice * (discountPercentage / 100);
-        return { 
-          ...user, 
+        return {
+          ...user,
           price: originalPrice - discount,
-          originalPrice: originalPrice // Preserve original price
+          originalPrice: originalPrice, // Preserve original price
         };
       }
       return user;
@@ -106,33 +109,34 @@ export default function Tablecomponent({
     if (onUpdateTests) {
       // Get selected items from conflicts
       const selectedConflictItems = conflictItems
-        .filter(conflict => conflict.selected)
-        .map(conflict => conflict.item);
+        .filter((conflict) => conflict.selected)
+        .map((conflict) => conflict.item);
 
       // Get items without conflicts
-      const nonConflictItems = selectedItems.filter(item => 
-        !conflictItems.some(conflict => conflict.item._id === item._id)
+      const nonConflictItems = selectedItems.filter(
+        (item) =>
+          !conflictItems.some((conflict) => conflict.item._id === item._id)
       );
 
       // Combine selected conflict items with non-conflict items
       const itemsToUpdate = [...selectedConflictItems, ...nonConflictItems];
-      
+
       if (itemsToUpdate.length > 0) {
         // First apply the bulk edit locally
         const updatedUsers = users.map((user) => {
           if (itemsToUpdate.some((item) => item._id === user._id)) {
             const originalPrice = user.originalPrice || user.price;
             const discount = originalPrice * (bulkEditPercentage / 100);
-            return { 
-              ...user, 
+            return {
+              ...user,
               price: originalPrice - discount,
-              originalPrice: originalPrice // Preserve original price
+              originalPrice: originalPrice, // Preserve original price
             };
           }
           return user;
         });
         setUsers(updatedUsers);
-        
+
         // Then update in the backend
         try {
           await onUpdateTests(itemsToUpdate, bulkEditPercentage);
@@ -140,7 +144,7 @@ export default function Tablecomponent({
           console.error("Error updating tests:", error);
         }
       }
-      
+
       setShowConflictModal(false);
       setSelectedItems([]);
       setBulkEditPercentage(0);

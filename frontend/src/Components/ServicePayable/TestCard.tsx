@@ -83,6 +83,7 @@ function ProfileForm() {
   const [updatedtests, setUpdatedtests] = useState<any[]>([]);
   const [percentagevalue, setPercentagevalue] = useState<any[]>([]);
   const [conflictchecks, setconflictchecks] = useState<any[]>([]);
+  let alltests;
 
   const { watch } = form;
   const watchedAssociate = watch("associate");
@@ -100,27 +101,47 @@ function ProfileForm() {
             User?._id
           }?departmentId=${watchDepartment ? watchDepartment : ""}`
         );
-        console.log("Fetched on associate change:", response.data);
-        setconflictchecks(response.data);
+        console.log("Fetched on associate change:", response.data[0].test);
+        const updatedtestadded = response.data[0]?.test.map((item) => {
+          let updatedtest = item.testId;
+          let newitem = {
+            testId: {
+              ...updatedtest,
+              price: item.price || item?.testId?.price,
+              originalPrice: item?.testId?.price || item.price,
+            },
+            price: item.price,
+            percentagevalue: item.percentage,
+          };
+          return newitem;
+        });
+
+        const testspecialarrray = updatedtestadded.map((item) => {
+          return item.testId;
+        });
+        console.log("Updatedtestadded", updatedtestadded);
+        setconflictchecks(updatedtestadded);
+        setUpdatedtests(testspecialarrray);
+        settestmaster(testspecialarrray);
 
         // Update the test values if they exist
-        if (response.data && response.data.length > 0) {
-          const associateTests = response.data[0]?.test || [];
-          const updatedTestMaster = testmaster.map((test) => {
-            const savedTest = associateTests.find(
-              (at) => at.testId === test._id
-            );
-            if (savedTest) {
-              return {
-                ...test,
-                price: savedTest.price,
-                originalPrice: test.price, // Keep original price for reference
-              };
-            }
-            return test;
-          });
-          settestmaster(updatedTestMaster);
-        }
+        // if (response.data && response.data.length > 0) {
+        //   const associateTests = response.data[0]?.test || [];
+        //   const updatedTestMaster = testmaster.map((test) => {
+        //     const savedTest = associateTests.find(
+        //       (at) => at.testId === test._id
+        //     );
+        //     if (savedTest) {
+        //       return {
+        //         ...test,
+        //         price: savedTest.price,
+        //         originalPrice: test.price, // Keep original price for reference
+        //       };
+        //     }
+        //     return test;
+        //   });
+        //   settestmaster(updatedTestMaster);
+        // }
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -149,8 +170,9 @@ function ProfileForm() {
         const response = await axios.get(
           `/api/testmaster/alltestmaster/${User?._id}`
         );
-        console.log(response.data);
+        console.log("This is tetdata", response.data);
         settestmaster(response.data);
+        alltests = response.data;
       } catch (error) {
         console.error("Error fetching specimen:", error);
       }
