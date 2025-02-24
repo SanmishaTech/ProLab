@@ -50,26 +50,6 @@ export default function Dashboardholiday() {
   const limit = 10; // You can change the limit if needed
   const [search, setSearch] = useState("");
 
-  const fetchPatients = () => {
-    setLoading(true);
-    axios
-      .get(
-        `/api/patientmaster/allpatients/${User?._id}?page=${currentPage}&limit=${limit}?search=${search}`
-      )
-      .then((response) => {
-        // Assuming response.data has a structure like { patients, total, page, totalPages, nextPage, prevPage }
-        setData(response.data);
-        setFilteredData(response.data?.patients);
-        setTotalPages(response.data?.totalPages);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching data:", err);
-        setError(err);
-        setLoading(false);
-      });
-  };
-
   const fetchProjects = async ({ queryKey }) => {
     const [_key, { currentPage, search }] = queryKey;
     const response = await axios.get(

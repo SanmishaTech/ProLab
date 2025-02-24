@@ -13,7 +13,7 @@ import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "@/darktheme/CustomTheme";
-
+import { HeroUIProvider } from "@heroui/react";
 // Create a new query client
 
 const queryClient = new QueryClient();
@@ -23,9 +23,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Provider store={store}>
         <React.StrictMode>
-          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-            <App />
-          </ThemeProvider>
+          <HeroUIProvider>
+            <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+              <App />
+            </ThemeProvider>
+          </HeroUIProvider>
         </React.StrictMode>
       </Provider>
     </BrowserRouter>

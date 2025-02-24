@@ -4,9 +4,9 @@ const mongoose = require("mongoose");
 const Servicescontroller = {
   createThread: async (req, res, next) => {
     try {
-      const { clinic, userId } = req.body;
+      const { clinicaldata, userId } = req.body;
       const newService = new ClinicalHistory({
-        clinic,
+        clinicaldata,
         userId,
       });
       const newServics = await newService.save();
@@ -45,12 +45,12 @@ const Servicescontroller = {
   updateThreads: async (req, res, next) => {
     try {
       const doctorId = req.params.departmentId;
-      const { clinic, userId } = req.body;
+      const { clinicaldata, userId } = req.body;
 
       const newService = await ClinicalHistory.findByIdAndUpdate(
         doctorId,
         {
-          clinic,
+          clinicaldata,
           userId,
         },
         { new: true }

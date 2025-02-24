@@ -9,14 +9,6 @@ const testSchema = new mongoose.Schema({
   price: { type: Number },
   percentage: { type: Number },
 });
-const departmentSchema = new mongoose.Schema({
-  department: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "DepartmentMaster",
-  },
-  price: { type: Number },
-  percentage: { type: Number },
-});
 
 const servicePayable = new mongoose.Schema({
   associate: { type: mongoose.Schema.Types.ObjectId, ref: "AssociateMaster" },

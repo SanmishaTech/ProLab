@@ -21,13 +21,14 @@ const ServicePayableController = {
 
         userId: Usertobefound,
       });
-      console.log(findexistingservice);
+      console.log("tests", test);
       if (findexistingservice && findexistingservice.length > 0) {
         const updatetests = await ServicePayable.findOneAndUpdate(
-          { _id: findexistingservice._id }, // Use the first document's ID
+          { _id: findexistingservice[0]._id }, // Use the first document's ID
           { associate, department, test, value, userId },
           { new: true } // Option to return the updated document
         );
+        console.log(updatetests);
         return res.json({
           message: "Patients Updated successfully",
           service: updatetests,
@@ -117,7 +118,44 @@ const ServicePayableController = {
           },
         });
       if (!departmentId) {
-        return res.status(200).json(services);
+        // console.log(testsinservices);
+        let tests = await Test.find({
+          userId: usertobefound,
+        });
+        // console.log(tests);
+        const filtertestsnotfoundinServices = tests.map((item) => {
+          // Find the matching service
+          const matchingService = services[0].test.find(
+            (service) => service.testId._id.toString() === item._id.toString()
+          );
+
+          if (matchingService) {
+            return {
+              testId: item,
+              price: matchingService.price,
+              percentage: matchingService.percentage,
+            };
+          } else {
+            return {
+              testId: item,
+              price: item.price,
+              percentage: item.percentage,
+            };
+          }
+        });
+
+        // console.log(
+        //   "Filte",
+        //   // JSON.stringify(filtertestsnotfoundinServices, null, 4)
+        // );
+        const newservice = {
+          associate: services[0].associate,
+          department: services[0].department,
+          test: filtertestsnotfoundinServices,
+          userId: services[0].userId,
+        };
+
+        return res.status(200).json([newservice]);
       }
       if (departmentId !== undefined && services.length > 0) {
         services[0].test = services[0]?.test?.filter((item) => {

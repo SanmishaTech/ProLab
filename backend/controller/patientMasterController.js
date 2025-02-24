@@ -75,10 +75,12 @@ const patientMasterController = {
 
       // Build the query condition
       const query = { userId: usertobefound };
+      console.log("Search", search, query);
       if (search.trim()) {
-        // Using an anchored regex makes the query efficient if you have a normal index on firstName.
-        // This regex is case-insensitive and matches only fields that start with the search term.
-        query.firstName = { $regex: `^${search}`, $options: "i" };
+        query.$or = [
+          { firstName: { $regex: `^${search}`, $options: "i" } },
+          { mobile: { $regex: `^${search}`, $options: "i" } },
+        ];
       }
 
       // Execute both the paginated query and count in parallel

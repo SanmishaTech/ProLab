@@ -2,7 +2,7 @@
 const mongoose = require("mongoose");
 
 const ClinicalHistorySchema = new mongoose.Schema({
-  clinic: { type: String, default: false },
+  clinicaldata: { type: String, default: false },
 
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });

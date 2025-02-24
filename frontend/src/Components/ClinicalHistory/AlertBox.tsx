@@ -1,44 +1,62 @@
+import { useState, useEffect } from "react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import axios from "axios";
-import { Button } from "@/components/ui/button";
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  useDisclosure,
+} from "@heroui/react";
 
-export default function AlertDialogbox({ url }) {
+import axios from "axios";
+// import { Button } from "@/components/ui/button";
+
+export default function AlertDialogbox({
+  url,
+  backdrop = "blur",
+  isOpen,
+  onOpen,
+}) {
   console.log("This is Delete url", url);
   const DeleteApi = async () => {
     console.log("This is Delete url", `/api/${url}`);
-    await axios.delete(`/api/${url}`);
+    await axios.delete(`/api/clinic/delete/${url}`);
     window.location.reload();
   };
+  const onClose = () => {
+    onOpen();
+  };
+
+  useEffect(() => {
+    console.log("Fetching idasdsadasdasd", isOpen);
+  }, [isOpen]);
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" className="w-full">
-          Delete
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={DeleteApi}>Continue</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <>
+      <Modal backdrop={backdrop} isOpen={isOpen} onClose={onClose}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Delete Item
+              </ModalHeader>
+              <ModalBody>
+                This action cannot be undone. This will permanently delete your
+                account and remove your data from our servers.
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={DeleteApi}>
+                  Confirm
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
   );
 }

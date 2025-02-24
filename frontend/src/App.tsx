@@ -137,6 +137,7 @@ function App() {
         <Route path="/machinemaster" element={<Dashboard />} />
         <Route path="/machinelinkmaster" element={<Dashboard />} />
         <Route path="/containerLinkMaster" element={<Dashboard />} />
+        <Route path="/ratecard" element={<Dashboard />} />
 
         <Route path="/discountmaster" element={<Dashboard />} />
         <Route path="/rolemaster" element={<Dashboard />} />
@@ -164,6 +165,7 @@ function App() {
         <Route path="/associatetype" element={<Dashboard />} />
         <Route path="/medicationhistory" element={<Dashboard />} />
         <Route path="/clinic" element={<Dashboard />} />
+        <Route path="/clinic/add" element={<Dashboard />} />
         <Route path="/template" element={<Dashboard />} />
         <Route path="/template/add" element={<Dashboard />} />
         <Route path="/template/edit/:id" element={<Dashboard />} />

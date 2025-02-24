@@ -1,6 +1,15 @@
-// components/AddItem.tsx
+import { useState, useEffect } from "react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Avatar,
+  useDisclosure,
+} from "@heroui/react";
 
-import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -32,7 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-
+import { FilePenLine } from "lucide-react";
 import axios from "axios";
 
 interface AddItemProps {
@@ -41,11 +49,18 @@ interface AddItemProps {
   editid: string;
 }
 
-const AddItem: React.FC<AddItemProps> = ({
-  onAdd,
-  typeofschema = {},
+export default function App({
+  isOpen,
+  onClose,
+  onOpen,
   editid,
-}) => {
+  typeofschema,
+  editfetch,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onOpen: () => void;
+}) {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
@@ -55,6 +70,7 @@ const AddItem: React.FC<AddItemProps> = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    console.log("Fetching id", editid);
     if (editid) {
       axios
         .get(`/api/clinic/reference/${editid}`)
@@ -69,7 +85,7 @@ const AddItem: React.FC<AddItemProps> = ({
       setFormData({});
       setHandleopen(false);
     };
-  }, [editid]);
+  }, [editid, isOpen]);
   const handleAdd = async () => {
     setLoading(true);
     try {
@@ -250,32 +266,30 @@ const AddItem: React.FC<AddItemProps> = ({
   };
 
   return (
-    <Dialog open={handleopen} onOpenChange={setHandleopen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full">
-          Edit
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Edit item</DialogTitle>
-          <DialogDescription>
-            Enter the details of the item you want to edit.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          {error && <p className="text-red-500">{error}</p>}
-          {addFields(typeofschema)}
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handleAdd} type="button" disabled={loading}>
-            {loading ? "Submitting..." : "Submit"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Modal backdrop="blur" isOpen={isOpen} onClose={onClose}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">Edit</ModalHeader>
+              <ModalBody>
+                <div className="grid gap-4 py-4">
+                  {error && <p className="text-red-500">{error}</p>}
+                  {addFields(typeofschema)}
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={handleAdd} disabled={loading}>
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
   );
-};
-
-export default AddItem;
+}
