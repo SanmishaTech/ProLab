@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Form,
   FormControl,
@@ -129,6 +130,7 @@ function ProfileForm({ formData }) {
     defaultValues,
     mode: "onChange",
   });
+  const queryClient = useQueryClient();
   const { id } = useParams();
 
   const { reset } = form;
@@ -144,6 +146,8 @@ function ProfileForm({ formData }) {
     // console.log("Sas", data);
     await axios.put(`/api/associatemaster/update/${id}`, data).then((res) => {
       toast.success("Associate Master Updated Successfully");
+      queryClient.invalidateQueries({ queryKey: ["associatemaster"] });
+
       navigate("/associatemaster");
     });
   }
@@ -432,7 +436,7 @@ function ProfileForm({ formData }) {
         </div>
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
-            Update profile
+            Save
           </Button>
         </div>
       </form>

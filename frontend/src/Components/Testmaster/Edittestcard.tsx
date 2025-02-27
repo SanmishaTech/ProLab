@@ -42,6 +42,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useParams } from "react-router-dom";
 import MultiSelectorComponent from "./profile";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+
 const profileFormSchema = z.object({
   template: z.string().optional(),
   name: z.string().optional(),
@@ -90,6 +92,8 @@ function ProfileForm({ formData }) {
   const [associates, setAssociates] = useState([]);
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     const fetchSpecimen = async () => {
       try {
@@ -157,6 +161,8 @@ function ProfileForm({ formData }) {
     await axios.put(`/api/testmaster/update/${id}`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Test Master Updated Successfully");
+      queryClient.invalidateQueries({ queryKey: ["testmaster"] });
+
       navigate("/testmaster");
     });
   }
@@ -590,7 +596,7 @@ function ProfileForm({ formData }) {
         </div>
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
-            Update profile
+            Save Test
           </Button>
         </div>
       </form>

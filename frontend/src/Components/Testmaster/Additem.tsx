@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
 interface AddItemProps {
@@ -48,14 +48,16 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const [error, setError] = useState("");
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const queryClient = useQueryClient();
   const handleAdd = async () => {
     setLoading(true);
     try {
       formData.userId = User?._id;
       await axios.post(`/api/testmasterlink`, formData);
-      onAdd(formData); // Notify parent component
-      setFormData({});
+      // onAdd(formData); // Notify parent component
+      // setFormData({});
+      queryClient.invalidateQueries({ queryKey: ["testmaster"] });
+
       setHandleopen(false);
       setError("");
     } catch (err) {

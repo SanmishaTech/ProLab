@@ -4,6 +4,8 @@ import Dashboard from "./Dashboardreuse";
 import AddItem from "./Additem";
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
+import { useFetchData } from "@/fetchcomponents/Fetchapi";
+import { toast } from "sonner";
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
@@ -12,22 +14,47 @@ export default function Dashboardholiday() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const typeofschema = {
-    Reason: "String",
+    name: {
+      type: "String",
+      label: "Reason",
+    },
   };
+
+  const {
+    data: data1,
+    isLoading: isLoading1,
+    isFetching: isFetching1,
+    isError: isError1,
+  } = useFetchData({
+    endpoint: `/api/reason/allreason/${User?._id}`,
+    params: {
+      queryKey: ["reason"],
+      queryKeyId: User?._id,
+      retry: 5,
+      refetchOnWindowFocus: true,
+      onSuccess: (res) => {
+        toast.success("Successfully Fetched Data");
+        console.log("This is res", res);
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    },
+  });
   useEffect(() => {
     // Fetch data from the API
-    axios
-      .get(`/api/reason/allreason/${User?._id}`)
-      .then((response) => {
-        setData(response.data);
+    // axios
+    //   .get(`/api/reason/allreason/${User?._id}`)
+    //   .then((response) => {
+    //     setData(response.data);
 
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching data:", err);
-        setError(err);
-        setLoading(false);
-      });
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     console.error("Error fetching data:", err);
+    //     setError(err);
+    //     setLoading(false);
+    //   });
 
     // Define the dashboard configuration
     setConfig({
@@ -92,15 +119,15 @@ export default function Dashboardholiday() {
     }
   };
 
-  if (loading) return <div className="p-4">Loading...</div>;
+  if (isLoading1) return <div className="p-4">Loading...</div>;
   if (error)
     return <div className="p-4 text-red-500">Error loading registrations.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Ensure data is an array and contains items
   const mappedTableData =
-    Array.isArray(data) && data.length > 0
-      ? data.map((item) => {
+    Array.isArray(data1) && data1.length > 0
+      ? data1.map((item) => {
           const services = item?.services || [];
           const paidAmount = item?.paymentMode?.paidAmount || 0;
 

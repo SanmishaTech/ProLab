@@ -41,6 +41,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import MultiSelectorComponent from "./profile";
+import { useQueryClient } from "@tanstack/react-query";
 
 const profileFormSchema = z.object({
   template: z.string().optional(),
@@ -83,7 +84,7 @@ function ProfileForm() {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
   const [associates, setAssociates] = useState<any[]>([]);
-
+  const queryClient = useQueryClient();
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -139,6 +140,8 @@ function ProfileForm() {
     await axios.post(`/api/testmaster`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Test Master Created Successfully");
+      queryClient.invalidateQueries({ queryKey: ["testmaster"] });
+
       navigate("/testmaster");
     });
   }
@@ -551,7 +554,7 @@ function ProfileForm() {
         </div>
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
-            Add Profile
+            Add Test
           </Button>
         </div>
       </form>

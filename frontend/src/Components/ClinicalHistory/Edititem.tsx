@@ -42,6 +42,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { FilePenLine } from "lucide-react";
 import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AddItemProps {
   onAdd: (item: any) => void;
@@ -68,6 +69,7 @@ export default function App({
   const [error, setError] = useState("");
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     console.log("Fetching id", editid);
@@ -93,10 +95,12 @@ export default function App({
       await axios.put(`/api/clinic/update/${editid}`, formData).then((res) => {
         console.log("ppaapppppp", res.data);
         // onAdd(res.data.newService);
-        setFormData(res.data);
+        // setFormData(res.data);
+        queryClient.invalidateQueries({ queryKey: ["clinic"] });
+        onClose();
         setHandleopen(false);
         setError("");
-        window.location.reload();
+        // window.location.reload();
       });
     } catch (err) {
       setError("Failed to add parameter group. Please try again.");

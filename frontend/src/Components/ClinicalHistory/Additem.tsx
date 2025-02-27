@@ -1,6 +1,6 @@
 // components/AddItem.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,13 +10,25 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Avatar,
+  useDisclosure,
+} from "@heroui/react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Popover,
   PopoverContent,
@@ -40,23 +52,33 @@ interface AddItemProps {
   typeofschema: Record<string, any>;
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
+const AddItem: React.FC<AddItemProps> = ({
+  onAdd,
+  typeofschema,
+  setHandleopen,
+  handleopen,
+}) => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
   const [formData, setFormData] = useState<any>({});
   const [error, setError] = useState("");
-  const [handleopen, setHandleopen] = useState(false);
+  // const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleAdd = async () => {
     setLoading(true);
     try {
       formData.userId = User?._id;
       await axios.post(`/api/clinic`, formData);
-      onAdd(formData); // Notify parent component
-
-      window.location.reload();
+      // onAdd(formData); // Notify parent component
+      // setFormData({
+      //   name: formData.test.name,
+      //   description: formData.parameterGroup.name,
+      //   adn: formData.parameter.name,
+      // });
+      queryClient.invalidateQueries({ queryKey: ["clinic"] });
       setFormData({});
       setHandleopen(false);
       setError("");
@@ -228,30 +250,42 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
     return allFieldsToRender;
   };
 
+  useEffect(() => {
+    console.log("Handleopen", handleopen);
+  }, [handleopen]);
   return (
-    <Dialog open={handleopen} onOpenChange={setHandleopen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Add Clinic </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Add New Clinic </DialogTitle>
-          <DialogDescription>
-            Enter the details of the Clinic you want to add.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          {error && <p className="text-red-500">{error}</p>}
-          {addFields(typeofschema)}
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handleAdd} type="button" disabled={loading}>
-            {loading ? "Submitting..." : "Submit"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Modal
+        backdrop="blur"
+        isOpen={handleopen}
+        onClose={setHandleopen}
+        isDismissable={false}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Add Item
+              </ModalHeader>
+              <ModalBody>
+                <div className="grid gap-4 py-4">
+                  {error && <p className="text-red-500">{error}</p>}
+                  {addFields(typeofschema)}
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={handleAdd} disabled={loading}>
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 

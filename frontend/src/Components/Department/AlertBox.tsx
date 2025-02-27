@@ -8,7 +8,7 @@ import {
   Button,
   useDisclosure,
 } from "@heroui/react";
-
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 // import { Button } from "@/components/ui/button";
 
@@ -18,14 +18,18 @@ export default function AlertDialogbox({
   isOpen,
   onOpen,
 }) {
+  const onClose = () => {
+    onOpen();
+  };
+
   console.log("This is Delete url", url);
+  const queryClient = useQueryClient();
   const DeleteApi = async () => {
     console.log("This is Delete url", `/api/${url}`);
     await axios.delete(`/api/department/delete/${url}`);
-    window.location.reload();
-  };
-  const onClose = () => {
-    onOpen();
+    // window.location.reload();
+    onClose();
+    queryClient.invalidateQueries({ queryKey: ["department"] });
   };
 
   useEffect(() => {

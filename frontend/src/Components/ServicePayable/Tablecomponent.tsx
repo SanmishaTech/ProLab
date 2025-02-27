@@ -31,13 +31,13 @@ interface Props {
 
 const columns: Array<{ key: keyof Test; header: string }> = [
   { key: "name", header: "Name" },
-  { key: "email", header: "Email" },
+  { key: "email", header: "Date" },
   { key: "price", header: "Price" },
 ];
 
 const fields: Array<{ key: keyof Test; label: string; type: string }> = [
   { key: "name", label: "Name", type: "text" },
-  { key: "email", label: "Email", type: "email" },
+  { key: "email", label: "Date", type: "email" },
   { key: "price", label: "Price", type: "number" },
 ];
 

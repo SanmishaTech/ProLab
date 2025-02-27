@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
+import { useQueryClient } from "@tanstack/react-query";
 
 const profileFormSchema = z.object({
   corporateCode: z.string().optional(),
@@ -44,37 +45,37 @@ const profileFormSchema = z.object({
   discount: z.string().optional(),
   value: z.number().optional(),
   country: z
-   .string()
-   .min(2, {
-     message: "Country must be at least 2 characters.",
-   })
-   .max(30, {
-     message: "Country must not be longer than 30 characters.",
-   }),
- state: z
-   .string()
-   .min(2, {
-     message: "State must be at least 2 characters.",
-   })
-   .max(30, {
-     message: "State must not be longer than 30 characters.",
-   }),
- city: z
-   .string()
-   .min(2, {
-     message: "City must be at least 2 characters.",
-   })
-   .max(30, {
-     message: "City must not be longer than 30 characters.",
-   }),
- address: z
-   .string()
-   .min(2, {
-     message: "Address must be at least 2 characters.",
-   })
-   .max(550, {
-     message: "Address must not be longer than 550 characters.",
-   }),
+    .string()
+    .min(2, {
+      message: "Country must be at least 2 characters.",
+    })
+    .max(30, {
+      message: "Country must not be longer than 30 characters.",
+    }),
+  state: z
+    .string()
+    .min(2, {
+      message: "State must be at least 2 characters.",
+    })
+    .max(30, {
+      message: "State must not be longer than 30 characters.",
+    }),
+  city: z
+    .string()
+    .min(2, {
+      message: "City must be at least 2 characters.",
+    })
+    .max(30, {
+      message: "City must not be longer than 30 characters.",
+    }),
+  address: z
+    .string()
+    .min(2, {
+      message: "Address must be at least 2 characters.",
+    })
+    .max(550, {
+      message: "Address must not be longer than 550 characters.",
+    }),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -100,10 +101,13 @@ function ProfileForm({ formData }) {
 
   const navigate = useNavigate();
 
+  const queryClient = useQueryClient();
   async function onSubmit(data: ProfileFormValues) {
     // console.log("Sas", data);
     await axios.put(`/api/corporatemaster/update/${id}`, data).then((res) => {
       toast.success("Corporate Master Updated Successfully");
+      queryClient.invalidateQueries({ queryKey: ["corporatemaster"] });
+
       navigate("/corporate");
     });
   }
@@ -116,8 +120,6 @@ function ProfileForm({ formData }) {
       >
         {" "}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-         
-          
           <FormField
             control={form.control}
             name="corporateCode"
@@ -148,7 +150,6 @@ function ProfileForm({ formData }) {
           />
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-          
           <FormField
             className="flex-1"
             control={form.control}
@@ -242,10 +243,6 @@ function ProfileForm({ formData }) {
           />
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 max-w-full p-4">
-
-
-        
-       
           <FormField
             control={form.control}
             name="address"
@@ -261,7 +258,7 @@ function ProfileForm({ formData }) {
             )}
           />
 
-<FormField
+          <FormField
             className="flex-1"
             control={form.control}
             name="discount"
@@ -279,7 +276,7 @@ function ProfileForm({ formData }) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                     <SelectItem value="value">Value</SelectItem>
+                    <SelectItem value="value">Value</SelectItem>
                     <SelectItem value="percentage">Percentage</SelectItem>
                   </SelectContent>
                 </Select>
@@ -289,8 +286,6 @@ function ProfileForm({ formData }) {
             )}
           />
 
-          
-          
           <FormField
             control={form.control}
             name="value"

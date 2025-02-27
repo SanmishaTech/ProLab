@@ -5,6 +5,7 @@ import { z } from "zod";
 import { MoveLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -133,6 +134,7 @@ function ProfileForm() {
   //     name: "urls",
   //     control: form.control,
   //   });
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
@@ -142,6 +144,8 @@ function ProfileForm() {
     data.userId = User?._id;
     await axios.post(`/api/associatemaster`, data).then((res) => {
       console.log("ppappappa", res.data);
+      queryClient.invalidateQueries({ queryKey: ["associatemaster"] });
+
       toast.success("Associate Master Created Successfully");
       // navigate("/associatemaster");
       window.history.back();

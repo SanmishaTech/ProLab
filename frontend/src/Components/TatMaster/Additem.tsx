@@ -11,14 +11,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { Select, SelectItem } from "@heroui/react";
 
 import axios from "axios";
 
@@ -127,7 +128,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
             <Label htmlFor="selectTest" className="text-right">
               Select Test
             </Label>
-            <Select
+            {/* <Select
               id="selectTest"
               name="selectTest"
               value={formData.selectTest}
@@ -136,7 +137,8 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select Test" />
+                <SelectValue placeholder="Select Test" />                                yu
+                
               </SelectTrigger>
               <SelectContent>
                 {services?.map((service) => (
@@ -145,6 +147,20 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
                   </SelectItem>
                 ))}
               </SelectContent>
+            </Select> */}
+            <Select
+              className="max-w-xs"
+              label="Favorite Animal"
+              placeholder="Select an animal"
+              selectedKeys={formData.selectTest}
+              variant="bordered"
+              onSelectionChange={(value) =>
+                setFormData((prev) => ({ ...prev, selectTest: value }))
+              }
+            >
+              {services.map((animal) => (
+                <SelectItem key={animal._id}>{animal.name}</SelectItem>
+              ))}
             </Select>
           </div>
 
@@ -164,6 +180,24 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
               variant="inverted"
               maxCount={7}
             />
+            <Select
+              className="max-w-xs"
+              label="Favorite Animal"
+              placeholder="Select an animal"
+              selectedKeys={selectedFrameworks}
+              selectionMode="multiple"
+              onChange={(values) => {
+                setSelectedFrameworks(values);
+                setFormData((prevData: any) => ({
+                  ...prevData,
+                  weekday: values.map((value) => value.toLowerCase()), // Mapping to lowercase days
+                }));
+              }}
+            >
+              {frameworksList.map((animal) => (
+                <SelectItem key={animal.key}>{animal.label}</SelectItem>
+              ))}
+            </Select>
           </div>
 
           {/* <div>
@@ -181,7 +215,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
 
           {/* Start Time */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-4">
+            {/* <div className="flex items-center gap-4">
               <Label htmlFor="startTime" className="text-right">
                 Start Time
               </Label>
@@ -204,10 +238,10 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
 
             {/* End Time */}
-            <div className="flex items-center gap-4">
+            {/* <div className="flex items-center gap-4">
               <Label htmlFor="endTime" className="text-right">
                 End Time
               </Label>
@@ -230,7 +264,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
           </div>
 
           {/* Hours Needed */}

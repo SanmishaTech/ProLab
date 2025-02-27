@@ -45,12 +45,13 @@ const ContainerController = {
   updateThreads: async (req, res, next) => {
     try {
       const doctorId = req.params.departmentId;
-      const { container } = req.body;
+      const { container, userId } = req.body;
 
-      const newService = await Department.findByIdAndUpdate(
+      const newService = await Container.findByIdAndUpdate(
         doctorId,
         {
           container,
+          userId,
         },
         { new: true }
       );
@@ -66,7 +67,7 @@ const ContainerController = {
   deleteThread: async (req, res, next) => {
     try {
       const doctorId = req.params.specimenId;
-      const newService = await Department.findByIdAndDelete(doctorId);
+      const newService = await Container.findByIdAndDelete(doctorId);
       if (!newService) {
         return res.status(404).json({ message: "Service not found." });
       }

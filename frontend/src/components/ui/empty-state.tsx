@@ -19,8 +19,6 @@ export function EmptyState({
   description,
   icons = [],
   action,
-  Item,
-  typeofschema,
   className,
 }: EmptyStateProps) {
   return (
@@ -73,10 +71,6 @@ export function EmptyState({
           {action.label}
         </Button>
       )} */}
-      <Item
-        className={cn("mt-4", "shadow-sm active:shadow-none")}
-        typeofschema={typeofschema}
-      />
     </div>
   );
 }

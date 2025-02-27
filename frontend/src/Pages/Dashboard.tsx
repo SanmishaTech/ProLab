@@ -66,7 +66,9 @@ import TemplateAdd from "@/Components/TemplateMaster/TestCard";
 import Template from "@/Components/TemplateMaster/Registertable";
 import Edittemplate from "@/Components/TemplateMaster/EditTestCard";
 import Ratecard from "@/Components/Ratecard/TestCard";
+import Paymentmode from "@/Components/Paymentmode/Registertable";
 // import ClinicAdd from "@/Components/ClinicalHistory/testcard";
+import UnitMaster from "@/Components/UnitMaster/Registertable";
 
 const Dashboard = () => {
   const location = useLocation();
@@ -166,6 +168,8 @@ const Dashboard = () => {
         {location.pathname === "/template" && <Template />}
         {location.pathname === "/template/add" && <TemplateAdd />}
         {location.pathname === "/ratecard" && <Ratecard />}
+        {location.pathname === "/paymentmode" && <Paymentmode />}
+        {location.pathname === "/unitmaster" && <UnitMaster />}
 
         {/\/template\/edit\/\d+/.test(location.pathname) && <Edittemplate />}
         {/\/samplecollection\/collect\/\d+/.test(location.pathname) && (

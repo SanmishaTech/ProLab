@@ -4,6 +4,9 @@ import Dashboard from "./Dashboardreuse";
 import AddItem from "./Additem";
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
+import { useFetchData } from "@/fetchcomponents/Fetchapi";
+import { toast } from "sonner";
+
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
@@ -13,22 +16,47 @@ export default function Dashboardholiday() {
   const [error, setError] = useState(null);
 
   const typeofschema = {
-    container: "String",
+    container: {
+      type: "String",
+      label: "Container",
+    },
   };
+
+  const {
+    data: data1,
+    isLoading: isLoading1,
+    isFetching: isFetching1,
+    isError: isError1,
+  } = useFetchData({
+    endpoint: `/api/container/allcontainer/${User?._id}`,
+    params: {
+      queryKey: ["container"],
+      queryKeyId: User?._id,
+      retry: 5,
+      refetchOnWindowFocus: true,
+      onSuccess: (res) => {
+        toast.success("Successfully Fetched Data");
+        console.log("This is res", res);
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    },
+  });
 
   useEffect(() => {
     // Fetch data from the API
-    axios
-      .get(`/api/container/allcontainer/${User?._id}`)
-      .then((response) => {
-        setData(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching data:", err);
-        setError(err);
-        setLoading(false);
-      });
+    // axios
+    //   .get(`/api/container/allcontainer/${User?._id}`)
+    //   .then((response) => {
+    //     setData(response.data);
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     console.error("Error fetching data:", err);
+    //     setError(err);
+    //     setLoading(false);
+    //   });
 
     // Define the dashboard configuration
     setConfig({
@@ -93,13 +121,13 @@ export default function Dashboardholiday() {
     }
   };
 
-  if (loading) return <div className="p-4">Loading...</div>;
+  if (isLoading1) return <div className="p-4">Loading...</div>;
   if (error)
     return <div className="p-4 text-red-500">Error loading registrations.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data?.map((item) => {
+  const mappedTableData = data1?.map((item) => {
     const services = item?.services || [];
     const paidAmount = item?.paymentMode?.paidAmount || 0;
 

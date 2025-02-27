@@ -61,7 +61,7 @@ const Servicescontroller = {
   deleteThread: async (req, res, next) => {
     try {
       const patientId = req.params.parameterId;
-      const newService = await Parameter.findByIdAndDelete(patientId);
+      const newService = await Reference.findByIdAndDelete(patientId);
       if (!newService) {
         return res.status(404).json({ message: "Service not found." });
       }

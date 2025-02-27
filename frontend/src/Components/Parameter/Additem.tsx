@@ -10,85 +10,102 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Avatar,
+  useDisclosure,
+} from "@heroui/react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectLabel,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+import { Select, SelectItem } from "@heroui/react";
+
+import { Checkbox } from "@/components/ui/checkbox";
 
 import axios from "axios";
 
 interface AddItemProps {
-  onAdd: (item: {
-    id: string;
-    name: string;
-    unit: string;
-    fieldType: string;
-  }) => void;
+  onAdd: (item: any) => void;
+  typeofschema: Record<string, any>;
 }
 
 const AddItem: React.FC<AddItemProps> = ({
   onAdd,
   typeofschema,
-  className,
+  setHandleopen,
+  handleopen,
 }) => {
   const user = localStorage.getItem("user");
-  const User = JSON.parse(user);
-  const [SelectedValue, setSelectedValue] = useState("");
-  const [services, setServices] = useState<any[]>([]);
+  const User = JSON.parse(user || "{}");
+
+  const [formData, setFormData] = useState<any>({});
   const [error, setError] = useState("");
-  const [handleopen, setHandleopen] = useState(false);
-  const [name, setName] = useState("");
-  const [date, setDate] = useState<Date | null>(null);
-  const [description, setdescription] = useState("");
-  const [formData, setFormData] = useState({});
+  // const [handleopen, setHandleopen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+
   const handleAdd = async () => {
-    // const service = services.find((s) => s.name === SelectedValue);
-    formData.userId = User?._id;
-    await axios.post("/api/parameter", formData).then(() => {
-      window.location.reload();
-    });
-    setName("");
-    setDate(null);
-    // Reset form fields
-    setHandleopen(false);
+    setLoading(true);
+    try {
+      formData.userId = User?._id;
+      await axios.post(`/api/parameter`, formData);
+      // onAdd(formData); // Notify parent component
+      // setFormData({
+      //   name: formData.test.name,
+      //   description: formData.parameterGroup.name,
+      //   adn: formData.parameter.name,
+      // });
+      queryClient.invalidateQueries({ queryKey: ["parameter"] });
+      setFormData({});
+      setHandleopen(false);
+      setError("");
+    } catch (err) {
+      setError("Some Error Occured. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  function capitalizeText(text) {
+  // Capitalize the first letter of each word for labels
+  function capitalizeText(text: string) {
     return text.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
+  // Handle input changes dynamically
   const handleChange = (name: string, value: any) => {
     setFormData((prevData: any) => ({
       ...prevData,
       [name]: value,
     }));
   };
-  const handlecheckbox = (key, value) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [key]: value, // Directly updating the key with its new value
-    }));
-  };
 
+  // Dynamically render form fields based on the schema
   const addFields = (schema: Record<string, any>) => {
     const allFieldsToRender = [];
 
@@ -174,27 +191,33 @@ const AddItem: React.FC<AddItemProps> = ({
 
         case "Select":
           allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
+            <div
+              key={key}
+              className="grid grid-cols-4 items-center gap-4 min-w-[20rem]"
+            >
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
-              <Select onValueChange={(value) => handleChange(key, value)}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue
-                    placeholder={`Select ${label.toLowerCase()}`}
-                    value={formData[key] || ""}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>{label}</SelectLabel>
-                    {value.options.map((option: any) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
+              <Select
+                className="min-w-[18rem]"
+                label={label}
+                placeholder="Select an option"
+                // Wrap the selected value in a Set; if there's no value, pass an empty Set
+                selectedKeys={
+                  formData[key] ? new Set([formData[key]]) : new Set()
+                }
+                // Extract the first (and only) value from the Set when the selection changes
+                onSelectionChange={(selected) => {
+                  const selectedValue =
+                    selected.size > 0 ? Array.from(selected)[0] : "";
+                  handleChange(key, selectedValue);
+                }}
+              >
+                {value.options.map((option: any) => (
+                  <SelectItem key={option.value} textValue={option.label}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </Select>
             </div>
           );
@@ -211,14 +234,14 @@ const AddItem: React.FC<AddItemProps> = ({
                 <Checkbox
                   id={key}
                   checked={formData[key] || false}
-                  onCheckedChange={(checked) => handlecheckbox(key, checked)}
+                  onCheckedChange={(checked) => handleChange(key, checked)}
                 />
-                {/* <label
+                <label
                   htmlFor={key}
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   {label}
-                </label> */}
+                </label>
               </div>
             </div>
           );
@@ -236,83 +259,41 @@ const AddItem: React.FC<AddItemProps> = ({
   };
 
   useEffect(() => {
-    console.log("className", className);
-  }, [className]);
+    console.log("Handleopen", handleopen);
+  }, [handleopen]);
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline">Add Parameters</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Add New Parameters</DialogTitle>
-          <DialogDescription>
-            Enter the details of the Parameters you want to add to the order.
-          </DialogDescription>
-        </DialogHeader>
-        <div className={cn("grid gap-4 py-4", className)}>
-          {error && <p className="text-red-500">{error}</p>}
-          {addFields(typeofschema)}
-          {/* <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Namea
-            </Label>
-            <Input
-              id="name"
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter name"
-              value={name}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Unit
-            </Label>
-            <Input
-              id="name"
-              onChange={(e) => setdescription(e.target.value)}
-              placeholder="Enter description"
-              value={description}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Date
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[280px] justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+    <>
+      <Modal
+        backdrop="blur"
+        isOpen={handleopen}
+        onClose={setHandleopen}
+        isDismissable={false}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Add Item
+              </ModalHeader>
+              <ModalBody>
+                <div className="grid gap-4 py-4">
+                  {error && <p className="text-red-500">{error}</p>}
+                  {addFields(typeofschema)}
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div> */}
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handleAdd} type="button">
-            Submit
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+                <Button color="primary" onPress={handleAdd} disabled={loading}>
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 

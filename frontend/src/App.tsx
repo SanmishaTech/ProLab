@@ -169,6 +169,8 @@ function App() {
         <Route path="/template" element={<Dashboard />} />
         <Route path="/template/add" element={<Dashboard />} />
         <Route path="/template/edit/:id" element={<Dashboard />} />
+        <Route path="/paymentmode" element={<Dashboard />} />
+        <Route path="/unitmaster" element={<Dashboard />} />
       </Routes>
     </>
   );

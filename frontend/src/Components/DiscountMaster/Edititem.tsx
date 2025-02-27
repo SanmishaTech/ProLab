@@ -1,6 +1,15 @@
-// components/AddItem.tsx
+import { useState, useEffect } from "react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Avatar,
+  useDisclosure,
+} from "@heroui/react";
 
-import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -22,18 +30,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectLabel,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FilePenLine } from "lucide-react";
 
+import { Select, SelectItem } from "@heroui/react";
 import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AddItemProps {
   onAdd: (item: any) => void;
@@ -41,11 +52,19 @@ interface AddItemProps {
   editid: string;
 }
 
-const AddItem: React.FC<AddItemProps> = ({
-  onAdd,
-  typeofschema = {},
+export default function App({
+  isOpen,
+  onClose,
+  onOpen,
   editid,
-}) => {
+  typeofschema,
+  onOpenChange,
+  editfetch,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onOpen: () => void;
+}) {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
@@ -53,17 +72,14 @@ const AddItem: React.FC<AddItemProps> = ({
   const [error, setError] = useState("");
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const queryClient = useQueryClient();
   useEffect(() => {
+    console.log("Fetching id", editid);
     if (editid) {
       axios
         .get(`/api/discountmaster/reference/${editid}`)
         .then((res) => {
-          setFormData({
-            ...res.data,
-            name: res.data.name?._id,
-            test: res.data.test?._id,
-          });
+          setFormData(res.data);
         })
         .catch((err) => {
           console.error("Error fetching data:", err);
@@ -73,23 +89,25 @@ const AddItem: React.FC<AddItemProps> = ({
       setFormData({});
       setHandleopen(false);
     };
-  }, [editid]);
+  }, [editid, isOpen]);
   const handleAdd = async () => {
     setLoading(true);
     try {
+      formData.userId = User?._id;
       await axios
         .put(`/api/discountmaster/update/${editid}`, formData)
         .then((res) => {
-          console.log("ppaapppppp", res.data);
+          // console.log("ppaapppppp", res.data);
+          queryClient.invalidateQueries({ queryKey: ["discountmaster"] });
+          onClose();
           // onAdd(res.data.newService);
-          setFormData(res.data.newService);
+          // setFormData(res.data);
           setHandleopen(false);
           setError("");
-
-          window.location.reload();
+          // window.location.reload();
         });
     } catch (err) {
-      setError("Failed to add Discount Master. Please try again.");
+      setError("Failed to add parameter group. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -161,10 +179,7 @@ const AddItem: React.FC<AddItemProps> = ({
 
         case "Date":
           allFieldsToRender.push(
-            <div
-              key={key}
-              className="flex justify-center mr-44 items-center gap-4"
-            >
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
@@ -173,7 +188,7 @@ const AddItem: React.FC<AddItemProps> = ({
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-[50%] justify-start text-left font-normal",
+                      "w-full justify-start text-left font-normal",
                       !formData[key] && "text-muted-foreground"
                     )}
                   >
@@ -202,54 +217,60 @@ const AddItem: React.FC<AddItemProps> = ({
 
         case "Select":
           allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
+            <div
+              key={key}
+              className="grid grid-cols-4 items-center gap-4 min-w-[20rem]"
+            >
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
-              {console.log("ppappa", formData[key])}
               <Select
-                // value={formData[key] || ""}
-                defaultValue={formData[key] || ""}
-                onValueChange={(value) => handleChange(key, value)}
+                className="min-w-[18rem]"
+                label={label}
+                placeholder="Select an option"
+                // Wrap the selected value in a Set; if there's no value, pass an empty Set
+                selectedKeys={
+                  formData[key] ? new Set([formData[key]]) : new Set()
+                }
+                // Extract the first (and only) value from the Set when the selection changes
+                onSelectionChange={(selected) => {
+                  const selectedValue =
+                    selected.size > 0 ? Array.from(selected)[0] : "";
+                  handleChange(key, selectedValue);
+                }}
               >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue
-                    placeholder={`Select ${label.toLowerCase()}`}
-                    // value={formData[key]}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>{label}</SelectLabel>
-                    {value.options.map((option: any) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
+                {value.options.map((option: any) => (
+                  <SelectItem key={option.value} textValue={option.label}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </Select>
             </div>
           );
           break;
 
-        // case "Checkbox":
-        //   allFieldsToRender.push(
-        //     <div
-        //       style={{ justifyContent: "space-evenly" }}
-        //       key={key}
-        //       className="flex items-center space-x-4"
-        //     >
-        //       <Label htmlFor={key}>{label}</Label>
-
-        //       <Checkbox
-        //         id={key}
-        //         checked={formData[key] || false}
-        //         onCheckedChange={(checked) => handleChange(key, checked)}
-        //       />
-        //     </div>
-        //   );
-        //   break;
+        case "Checkbox":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              <div className="col-span-3 flex items-center space-x-2">
+                <Checkbox
+                  id={key}
+                  checked={formData[key] || false}
+                  onCheckedChange={(checked) => handleChange(key, checked)}
+                />
+                <label
+                  htmlFor={key}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {label}
+                </label>
+              </div>
+            </div>
+          );
+          break;
 
         // Add more cases for different field types as needed
 
@@ -262,33 +283,42 @@ const AddItem: React.FC<AddItemProps> = ({
     return allFieldsToRender;
   };
 
+  useEffect(() => {
+    console.log(typeofschema);
+    console.log(formData);
+  }, [formData, typeofschema]);
+
   return (
-    <Dialog open={handleopen} onOpenChange={setHandleopen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full">
-          Edit
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Edit item</DialogTitle>
-          <DialogDescription>
-            Enter the details of the item you want to edit.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          {error && <p className="text-red-500">{error}</p>}
-          {addFields(typeofschema)}
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handleAdd} type="button" disabled={loading}>
-            {loading ? "Submitting..." : "Submit"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Modal
+        backdrop="blur"
+        isDismissable={false}
+        isOpen={isOpen}
+        onClose={onClose}
+        onOpenChange={onOpenChange}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">Edit</ModalHeader>
+              <ModalBody>
+                <div className="grid gap-4 py-4">
+                  {error && <p className="text-red-500">{error}</p>}
+                  {addFields(typeofschema)}
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={handleAdd} disabled={loading}>
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
   );
-};
-
-export default AddItem;
+}

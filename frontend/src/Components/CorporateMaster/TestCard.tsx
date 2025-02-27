@@ -34,6 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Separator } from "@/components/ui/separator";
 
@@ -95,12 +96,15 @@ function ProfileForm() {
   const navigate = useNavigate();
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
+  const queryClient = useQueryClient();
   async function onSubmit(data: ProfileFormValues) {
     console.log("ppappappa");
     data.userId = User?._id;
     await axios.post(`/api/corporatemaster`, data).then((res) => {
       console.log("ppappappa", res.data);
       toast.success("Corporate Master Created Successfully");
+      queryClient.invalidateQueries({ queryKey: ["corporatemaster"] });
+
       navigate("/corporate");
     });
   }

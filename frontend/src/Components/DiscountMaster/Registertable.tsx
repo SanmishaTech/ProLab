@@ -7,6 +7,8 @@ import AddItem from "./Additem"; // Corrected import path
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { useFetchData } from "@/fetchcomponents/Fetchapi";
+import { toast } from "sonner";
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -78,20 +80,42 @@ export default function Dashboardholiday() {
     // Add more fields as needed
   };
 
+  const {
+    data: data1,
+    isLoading: isLoading1,
+    isFetching: isFetching1,
+    isError: isError1,
+  } = useFetchData({
+    endpoint: `/api/discountmaster/alldiscount/${User?._id}`,
+    params: {
+      queryKey: ["discountmaster"],
+      queryKeyId: User?._id,
+      retry: 5,
+      refetchOnWindowFocus: true,
+      onSuccess: (res) => {
+        toast.success("Successfully Fetched Data");
+        console.log("This is res", res);
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    },
+  });
+
   useEffect(() => {
     // Fetch data from the API
-    axios
-      .get(`/api/discountmaster/alldiscount/${User?._id}`)
-      .then((response) => {
-        setData(response.data);
-        setFilteredData(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching data:", err);
-        setError(err);
-        setLoading(false);
-      });
+    // axios
+    //   .get(`/api/discountmaster/alldiscount/${User?._id}`)
+    //   .then((response) => {
+    //     setData(response.data);
+    //     setFilteredData(response.data);
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     console.error("Error fetching data:", err);
+    //     setError(err);
+    //     setLoading(false);
+    //   });
 
     // Define the dashboard configuration
     setConfig({
@@ -138,9 +162,11 @@ export default function Dashboardholiday() {
     console.log(`Filter changed: ${filterValue}`);
     setFilterValue(filterValue); // Store the selected filter value
     if (filterValue === "") {
-      setFilteredData(data); // If no filter, show all data
+      setFilteredData(data1); // If no filter, show all data
     } else {
-      const filtered = data.filter((item) => item.discountType === filterValue);
+      const filtered = data1.filter(
+        (item) => item.discountType === filterValue
+      );
       setFilteredData(filtered); // Filter data based on the selected discountType
     }
     // Implement filtering logic here, possibly refetching data with filters applied
@@ -174,14 +200,14 @@ export default function Dashboardholiday() {
     setData((prevData) => [...prevData, newItem]);
   };
 
-  if (loading) return <div className="p-4">Loading...</div>;
+  if (isLoading1) return <div className="p-4">Loading...</div>;
   if (error)
     return <div className="p-4 text-red-500">Error loading machines.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  if (!data) return [];
-  const mappedTableData = filteredData?.map((item) => {
+  if (!data1) return [];
+  const mappedTableData = data1?.map((item) => {
     return {
       _id: item?._id,
       discountType: item?.discountType || "Discount Type not provided",

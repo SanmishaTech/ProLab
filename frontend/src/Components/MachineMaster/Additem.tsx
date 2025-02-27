@@ -1,6 +1,6 @@
 // components/AddItem.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,13 +10,25 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Avatar,
+  useDisclosure,
+} from "@heroui/react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Popover,
   PopoverContent,
@@ -40,28 +52,38 @@ interface AddItemProps {
   typeofschema: Record<string, any>;
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
+const AddItem: React.FC<AddItemProps> = ({
+  onAdd,
+  typeofschema,
+  setHandleopen,
+  handleopen,
+}) => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
   const [formData, setFormData] = useState<any>({});
   const [error, setError] = useState("");
-  const [handleopen, setHandleopen] = useState(false);
+  // const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleAdd = async () => {
     setLoading(true);
     try {
       formData.userId = User?._id;
-      await axios.post(`/api/machinemaster`, formData).then((res) => {
-        console.log("Machine created successfully", res.data);
-        setFormData(res.data.service);
-        window.location.reload();
-      });
+      await axios.post(`/api/machinemaster`, formData);
+      // onAdd(formData); // Notify parent component
+      // setFormData({
+      //   name: formData.test.name,
+      //   description: formData.parameterGroup.name,
+      //   adn: formData.parameter.name,
+      // });
+      queryClient.invalidateQueries({ queryKey: ["machinemaster"] });
+      setFormData({});
       setHandleopen(false);
       setError("");
     } catch (err) {
-      setError("Failed to add Machine Master. Please try again.");
+      setError("Failed to add parameter. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -194,28 +216,28 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
           break;
 
         // Add this case in the addFields method
-        // case "Checkbox":
-        //   allFieldsToRender.push(
-        //     <div key={key} className="grid grid-cols-4 items-center gap-4">
-        //       <Label htmlFor={key} className="text-right">
-        //         {label}
-        //       </Label>
-        //       <div className="col-span-3 flex items-center space-x-2">
-        //         <Checkbox
-        //           id={key}
-        //           checked={formData[key] || false}
-        //           onCheckedChange={(checked) => handleChange(key, checked)}
-        //         />
-        //         <label
-        //           htmlFor={key}
-        //           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        //         >
-        //           {label}
-        //         </label>
-        //       </div>
-        //     </div>
-        //   );
-        //   break;
+        case "Checkbox":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              <div className="col-span-3 flex items-center space-x-2">
+                <Checkbox
+                  id={key}
+                  checked={formData[key] || false}
+                  onCheckedChange={(checked) => handleChange(key, checked)}
+                />
+                <label
+                  htmlFor={key}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {label}
+                </label>
+              </div>
+            </div>
+          );
+          break;
 
         // Add more cases for different field types as needed
 
@@ -228,30 +250,37 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
     return allFieldsToRender;
   };
 
+  useEffect(() => {
+    console.log("Handleopen", handleopen);
+  }, [handleopen]);
   return (
-    <Dialog open={handleopen} onOpenChange={setHandleopen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Add Machine Master</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Add New Machine Master</DialogTitle>
-          <DialogDescription>
-            Enter the details of the Machine Master you want to add.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          {error && <p className="text-red-500">{error}</p>}
-          {addFields(typeofschema)}
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handleAdd} type="button" disabled={loading}>
-            {loading ? "Submitting..." : "Submit"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Modal backdrop="blur" isOpen={handleopen} onClose={setHandleopen}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Add Item
+              </ModalHeader>
+              <ModalBody>
+                <div className="grid gap-4 py-4">
+                  {error && <p className="text-red-500">{error}</p>}
+                  {addFields(typeofschema)}
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={handleAdd} disabled={loading}>
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 

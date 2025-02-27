@@ -283,8 +283,8 @@ function ProfileForm() {
             control={form.control}
             name="default"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Age from</FormLabel>
+              <FormItem className="w-full flex gap-2 items-center text-center">
+                <FormLabel>Select All Tests</FormLabel>
                 <FormControl>
                   <Checkbox
                     id="default"
@@ -295,7 +295,6 @@ function ProfileForm() {
                     }
                   />
                 </FormControl>
-                <FormDescription>What is Age from?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

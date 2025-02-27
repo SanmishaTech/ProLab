@@ -137,7 +137,6 @@ export default function Dashboardholiday() {
     fetchtest();
   }, []);
   // Define the schema with various input types
-  useEffect(() => {}, [parameter, parameterGroup, test]);
   const typeofschema = {
     // sortBy: { type: "Number", label: "Sort By" },
     // date: { type: "Date", label: "Date" },

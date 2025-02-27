@@ -8,6 +8,8 @@ import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
+import { useFetchData } from "@/fetchcomponents/Fetchapi";
+import { toast } from "sonner";
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -109,21 +111,59 @@ export default function Dashboardholiday() {
       type: "String",
       label: "Alternate Description",
     },
+    interpretation: {
+      type: "Checkbox",
+      label: "show interpretation?",
+    },
+    approval: {
+      type: "Checkbox",
+      label: "Departmentwise Approval?",
+    },
+    referenceNo: {
+      type: "Checkbox",
+      label: "Generate reference Number",
+    },
   };
 
+  const {
+    data: data1,
+    isLoading: isLoading1,
+    isFetching: isFetching1,
+    isError: isError1,
+  } = useFetchData({
+    endpoint: `/api/department/alldepartment/${User?._id}`,
+    params: {
+      queryKey: ["department"],
+      queryKeyId: User?._id,
+      retry: 5,
+      refetchOnWindowFocus: true,
+      onSuccess: (res) => {
+        toast.success("Successfully Fetched Data");
+        console.log("This is res", res);
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    },
+  });
+
   useEffect(() => {
-    // Fetch data from the API
-    axios
-      .get(`/api/department/alldepartment/${User?._id}`)
-      .then((response) => {
-        setData(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching data:", err);
-        setError(err);
-        setLoading(false);
-      });
+    console.log("This is data1", data1);
+  }, [data1]);
+
+  useEffect(() => {
+    // Fetch data1 from the API
+    // axios
+    //   .get(`/api/department/alldepartment/${User?._id}`)
+    //   .then((response) => {
+    //     setData(response.data);
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     console.error("Error fetching data:", err);
+    //     setError(err);
+    //     setLoading(false);
+    //   });
 
     // Define the dashboard configuration
     setConfig({
@@ -196,21 +236,21 @@ export default function Dashboardholiday() {
   const handleAddItem = (newItem: any) => {
     console.log("New item added:", newItem);
     // Optionally, you can update the data state to include the new item without refetching
-    if (data.includes(newItem)) {
+    if (data1.includes(newItem)) {
       console.log("exists");
     } else {
       setData((prevData) => [...prevData, newItem]);
     }
   };
 
-  if (loading) return <div className="p-4">Loading...</div>;
+  if (isLoading1) return <div className="p-4">Loading...</div>;
   if (error)
     return <div className="p-4 text-red-500">Error loading parameters.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data
-    ? data?.map((item) => {
+  const mappedTableData = data1
+    ? data1?.map((item) => {
         console.log("This is item", item);
         return {
           _id: item?._id,
@@ -232,7 +272,8 @@ export default function Dashboardholiday() {
         userAvatar={config.userAvatar}
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
-        onAddProduct={handleAddProduct}
+        onAddProduct={handleAddItem}
+        data={data1}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}

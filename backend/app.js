@@ -52,6 +52,8 @@ var medicationhistoryRoutes = require("./routes/medicationhistoryRoutes");
 var branchsetupRoutes = require("./routes/branchRoutes");
 var clinicHistoryRoutes = require("./routes/clientHistoryRoutes");
 var templateRoutes = require("./routes/templateRoutes");
+var paymentmodeRoutes = require("./routes/paymentmode");
+var unitmasterRoutes = require("./routes/unitmaster");
 
 var app = express();
 const corsOptions = {
@@ -114,6 +116,8 @@ app.use("/api/medicationhistory", medicationhistoryRoutes);
 app.use("/api/branchsetup", branchsetupRoutes);
 app.use("/api/clinic", clinicHistoryRoutes);
 app.use("/api/template", templateRoutes);
+app.use("/api/paymentmode", paymentmodeRoutes);
+app.use("/api/unitmaster", unitmasterRoutes);
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 

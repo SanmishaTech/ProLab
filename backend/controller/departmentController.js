@@ -4,11 +4,22 @@ const mongoose = require("mongoose");
 const Servicescontroller = {
   createThread: async (req, res, next) => {
     try {
-      const { name, description, adn, userId } = req.body;
+      const {
+        name,
+        description,
+        adn,
+        interpretation,
+        approval,
+        referenceNo,
+        userId,
+      } = req.body;
       const newService = new Department({
         name,
         description,
         adn,
+        interpretation,
+        approval,
+        referenceNo,
         userId,
       });
       const newServics = await newService.save();
@@ -47,7 +58,15 @@ const Servicescontroller = {
   updateThreads: async (req, res, next) => {
     try {
       const doctorId = req.params.departmentId;
-      const { name, description, adn, userId } = req.body;
+      const {
+        name,
+        description,
+        adn,
+        interpretation,
+        approval,
+        referenceNo,
+        userId,
+      } = req.body;
 
       const newService = await Department.findByIdAndUpdate(
         doctorId,
@@ -55,6 +74,10 @@ const Servicescontroller = {
           name,
           description,
           adn,
+          interpretation,
+          approval,
+          referenceNo,
+          userId,
         },
         { new: true }
       );
