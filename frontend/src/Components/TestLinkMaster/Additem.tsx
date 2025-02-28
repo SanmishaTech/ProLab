@@ -81,6 +81,7 @@ const AddItem: React.FC<AddItemProps> = ({
       //   adn: formData.parameter.name,
       // });
       queryClient.invalidateQueries({ queryKey: ["machinelinkmaster"] });
+      window.location.reload();
       setFormData({});
       setHandleopen(false);
       setError("");

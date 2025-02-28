@@ -271,7 +271,7 @@ export default function Dashboard({
                   color="primary"
                   variant="solid"
                   startContent={<PlusCircle size={16} />}
-                  onPress={() => navigate("/patientmaster/add")}
+                  onPress={() => navigate("/testmaster/add")}
                   className="h-9"
                 >
                   Add New
@@ -370,8 +370,7 @@ export default function Dashboard({
                                             description="Edit this item"
                                             onPress={() =>
                                               navigate(
-                                                "/patientmaster/edit/" +
-                                                  row?._id
+                                                "/testmaster/edit/" + row?._id
                                               )
                                             }
                                             startContent={

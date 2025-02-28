@@ -27,7 +27,7 @@ export default function AlertDialogbox({
   const DeleteApi = async () => {
     console.log("This is Delete url", `/api/${url}`);
     await axios.delete(`/api/machinelinkmaster/delete/${url}`);
-    // window.location.reload();
+    window.location.reload();
     onClose();
     queryClient.invalidateQueries({ queryKey: ["machinelinkmaster"] });
   };

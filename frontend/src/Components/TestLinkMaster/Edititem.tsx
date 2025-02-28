@@ -107,6 +107,7 @@ export default function App({
           // onAdd(res.data.newService);
           // setFormData(res.data);
           setHandleopen(false);
+          window.location.reload();
           setError("");
           // window.location.reload();
         });
