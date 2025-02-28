@@ -310,7 +310,6 @@ export default function Dashboard({
                   description="You can create a new form to add to your pages."
                   icons={[FileText, FileSymlink, Files]}
                   // Item={AddItem}
-                  typeofschema={typeofschema}
                 />
               ) : (
                 <Card className="bg-card border border-border shadow-sm overflow-hidden">
