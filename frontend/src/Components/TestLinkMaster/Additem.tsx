@@ -10,29 +10,41 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Select, SelectItem } from "@heroui/react";
+
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Avatar,
+  useDisclosure,
+} from "@heroui/react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import { MultipleSelect } from "@/components/ui/multiple-select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectLabel,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import axios from "axios";
@@ -42,38 +54,38 @@ interface AddItemProps {
   typeofschema: Record<string, any>;
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
+const AddItem: React.FC<AddItemProps> = ({
+  onAdd,
+  typeofschema,
+  setHandleopen,
+  handleopen,
+}) => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
   const [formData, setFormData] = useState<any>({});
   const [error, setError] = useState("");
-  const [handleopen, setHandleopen] = useState(false);
+  // const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
-  const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
+  const queryClient = useQueryClient();
 
   const handleAdd = async () => {
     setLoading(true);
     try {
-      setFormData({
-        ...formData,
-        parameter: selectedParameters,
-      });
-      console.log("selectedparameters", selectedParameters);
-      await axios.post(`/api/testmasterlink`, {
-        test: formData.test,
-        parameterGroup: formData.parameterGroup,
-        parameter: selectedParameters,
-        userId: User?._id,
-      });
-      onAdd(formData); // Notify parent component
+      formData.userId = User?._id;
+      await axios.post(`/api/machinelinkmaster`, formData);
+      // onAdd(formData); // Notify parent component
+      // setFormData({
+      //   name: formData.test.name,
+      //   description: formData.parameterGroup.name,
+      //   adn: formData.parameter.name,
+      // });
+      queryClient.invalidateQueries({ queryKey: ["machinelinkmaster"] });
       setFormData({});
       setHandleopen(false);
-      window.location.reload();
       setError("");
     } catch (err) {
-      setError("Failed to add Test Parameter Link . Please try again.");
+      setError("Failed to add parameter. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -92,26 +104,6 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
       [name]: value,
     }));
   };
-
-  useEffect(() => {
-    const fetchparameter = async () => {
-      try {
-        const response = await axios.get(
-          `/api/parameter/allparameter/${User?._id}`
-        );
-        // console.log(response.data);
-        const convertData = response.data.map((framework) => ({
-          key: framework?._id,
-          name: framework?.name,
-        }));
-        console.log("converted data", convertData);
-        setSelectedFrameworks(convertData);
-      } catch (error) {
-        console.error("Error fetching services:", error);
-      }
-    };
-    fetchparameter();
-  }, []);
 
   // Dynamically render form fields based on the schema
   const addFields = (schema: Record<string, any>) => {
@@ -199,27 +191,33 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
 
         case "Select":
           allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
+            <div
+              key={key}
+              className="grid grid-cols-4 items-center gap-4 min-w-[20rem]"
+            >
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
-              <Select onValueChange={(value) => handleChange(key, value)}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue
-                    placeholder={`Select ${label.toLowerCase()}`}
-                    value={formData[key] || ""}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>{label}</SelectLabel>
-                    {value.options.map((option: any) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
+              <Select
+                className="min-w-[18rem]"
+                label={label}
+                placeholder="Select an option"
+                // Wrap the selected value in a Set; if there's no value, pass an empty Set
+                selectedKeys={
+                  formData[key] ? new Set([formData[key]]) : new Set()
+                }
+                // Extract the first (and only) value from the Set when the selection changes
+                onSelectionChange={(selected) => {
+                  const selectedValue =
+                    selected.size > 0 ? Array.from(selected)[0] : "";
+                  handleChange(key, selectedValue);
+                }}
+              >
+                {value.options.map((option: any) => (
+                  <SelectItem key={option.value} textValue={option.label}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </Select>
             </div>
           );
@@ -260,47 +258,42 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
     return allFieldsToRender;
   };
 
+  useEffect(() => {
+    console.log("Handleopen", handleopen);
+  }, [handleopen]);
   return (
-    <Dialog open={handleopen} onOpenChange={setHandleopen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Add Test Parameter Link </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Add New Test Parameter Link </DialogTitle>
-          <DialogDescription>
-            Enter the details of the Test Parameter Link you want to add.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          {error && <p className="text-red-500">{error}</p>}
-          {addFields(typeofschema)}
-          <div className="grid grid-cols-4 items-center gap-4 max-w-1xl">
-            <Label className="text-right">Select Parameters</Label>
-            <MultipleSelect
-              className="col-span-1 max-w-1xl"
-              tags={selectedFrameworks}
-              onChange={(value) => {
-                console.log("value", value);
-                setSelectedParameters(value.map((item) => item.key));
-              }}
-              // defaultValue={selectedFrameworks}
-              placeholder="Select frameworks"
-              variant="inverted"
-              animation={2}
-              width="405px"
-              maxCount={2}
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handleAdd} type="button" disabled={loading}>
-            {loading ? "Submitting..." : "Submit"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Modal
+        backdrop="blur"
+        isOpen={handleopen}
+        onClose={setHandleopen}
+        isDismissable={false}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Add Item
+              </ModalHeader>
+              <ModalBody>
+                <div className="grid gap-4 py-4">
+                  {error && <p className="text-red-500">{error}</p>}
+                  {addFields(typeofschema)}
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={handleAdd} disabled={loading}>
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 

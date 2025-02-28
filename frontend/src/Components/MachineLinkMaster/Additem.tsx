@@ -10,6 +10,8 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Select, SelectItem } from "@heroui/react";
+
 import {
   Modal,
   ModalContent,
@@ -34,15 +36,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectLabel,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import axios from "axios";
@@ -189,27 +191,33 @@ const AddItem: React.FC<AddItemProps> = ({
 
         case "Select":
           allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
+            <div
+              key={key}
+              className="grid grid-cols-4 items-center gap-4 min-w-[20rem]"
+            >
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
-              <Select onValueChange={(value) => handleChange(key, value)}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue
-                    placeholder={`Select ${label.toLowerCase()}`}
-                    value={formData[key] || ""}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>{label}</SelectLabel>
-                    {value.options.map((option: any) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
+              <Select
+                className="min-w-[18rem]"
+                label={label}
+                placeholder="Select an option"
+                // Wrap the selected value in a Set; if there's no value, pass an empty Set
+                selectedKeys={
+                  formData[key] ? new Set([formData[key]]) : new Set()
+                }
+                // Extract the first (and only) value from the Set when the selection changes
+                onSelectionChange={(selected) => {
+                  const selectedValue =
+                    selected.size > 0 ? Array.from(selected)[0] : "";
+                  handleChange(key, selectedValue);
+                }}
+              >
+                {value.options.map((option: any) => (
+                  <SelectItem key={option.value} textValue={option.label}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </Select>
             </div>
           );

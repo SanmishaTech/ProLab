@@ -83,12 +83,12 @@ function ProfileForm() {
   const [updatedtests, setUpdatedtests] = useState<any[]>([]);
   const [percentagevalue, setPercentagevalue] = useState<any[]>([]);
   const [conflictchecks, setconflictchecks] = useState<any[]>([]);
-  let alltests;
+  const [searchfilter, setsearchfilter] = useState("");
+  const [FilteredTestData, setFilteredTestData] = useState<any[]>([]);
 
   const { watch } = form;
   const watchedAssociate = watch("associate");
   const watchDepartment = watch("department");
-  // const watchedAssociate = form.watch("associate");
 
   // Whenever "associate" changes, trigger this useEffect
   useEffect(() => {
@@ -123,25 +123,6 @@ function ProfileForm() {
         setconflictchecks(updatedtestadded);
         setUpdatedtests(testspecialarrray);
         settestmaster(testspecialarrray);
-
-        // Update the test values if they exist
-        // if (response.data && response.data.length > 0) {
-        //   const associateTests = response.data[0]?.test || [];
-        //   const updatedTestMaster = testmaster.map((test) => {
-        //     const savedTest = associateTests.find(
-        //       (at) => at.testId === test._id
-        //     );
-        //     if (savedTest) {
-        //       return {
-        //         ...test,
-        //         price: savedTest.price,
-        //         originalPrice: test.price, // Keep original price for reference
-        //       };
-        //     }
-        //     return test;
-        //   });
-        //   settestmaster(updatedTestMaster);
-        // }
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -172,7 +153,6 @@ function ProfileForm() {
         );
         console.log("This is tetdata", response.data);
         settestmaster(response.data);
-        alltests = response.data;
       } catch (error) {
         console.error("Error fetching specimen:", error);
       }
@@ -191,6 +171,7 @@ function ProfileForm() {
     fetchDepartment();
     fetchSpecimen();
   }, []);
+
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
@@ -263,13 +244,21 @@ function ProfileForm() {
     }
   };
 
+  // Filter the test data based on the search query.
+  // Adjust "name" to whichever property you wish to filter on.
+  useEffect(() => {
+    const filteredData = testmaster.filter((item) => {
+      return item.name.toLowerCase().includes(searchfilter.toLowerCase());
+    });
+    setFilteredTestData(filteredData);
+  }, [searchfilter]);
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8 pb-[2rem]"
       >
-        {" "}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-full p-4">
           <FormField
             className="flex-1"
@@ -289,13 +278,11 @@ function ProfileForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {associates?.map((associate) => {
-                      return (
-                        <SelectItem value={associate?._id}>
-                          {associate.firstName}
-                        </SelectItem>
-                      );
-                    })}
+                    {associates?.map((associate) => (
+                      <SelectItem key={associate._id} value={associate._id}>
+                        {associate.firstName}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormDescription>
@@ -323,13 +310,11 @@ function ProfileForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {department?.map((department) => {
-                      return (
-                        <SelectItem value={department?._id}>
-                          {department.name}
-                        </SelectItem>
-                      );
-                    })}
+                    {department?.map((dept) => (
+                      <SelectItem key={dept._id} value={dept._id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormDescription>
@@ -340,18 +325,27 @@ function ProfileForm() {
             )}
           />
         </div>
+        <div className="flex items-center justify-end">
+          <Input
+            type="search"
+            placeholder="Search..."
+            className="w-full rounded-full bg-slate-100 pl-10 border-muted focus-visible:ring-primary border-muted"
+            value={searchfilter}
+            onChange={(e) => setsearchfilter(e.target.value)}
+          />
+        </div>
         <div className="flex w-full">
           <Tablecomponent
-            data={testmaster}
+            data={FilteredTestData}
             setUpdatedtests={setUpdatedtests}
             setPercentagevalue={setPercentagevalue}
             conflictchecks={conflictchecks}
             onUpdateTests={handleUpdateTests}
           />
         </div>
-        <div className="flex justify-end w-full ">
+        <div className="flex justify-end w-full">
           <Button className="self-center mr-8" type="submit">
-            Add Profile
+            Add Servicepayable
           </Button>
         </div>
       </form>
@@ -362,7 +356,7 @@ function ProfileForm() {
 export default function SettingsProfilePage() {
   const navigate = useNavigate();
   return (
-    <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
+    <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4">
       <Button
         onClick={() => navigate("/service")}
         className="ml-4 flex gap-2 m-8 mb-4"
@@ -376,7 +370,7 @@ export default function SettingsProfilePage() {
         <CardDescription>Service Payable</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6 ">
+        <div className="space-y-6">
           <Separator />
           <ProfileForm />
         </div>

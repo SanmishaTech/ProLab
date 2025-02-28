@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useFetchData } from "@/fetchcomponents/Fetchapi";
+import { toast } from "sonner";
 
 const AddItem = () => {
   const navigate = useNavigate();
@@ -61,12 +63,15 @@ export default function Dashboardholiday() {
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
+      console.log("This is current page", currentPage);
       setCurrentPage((prev) => prev + 1);
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
+      console.log("This is prev page", currentPage);
+
       setCurrentPage((prev) => prev - 1);
     }
   };
@@ -85,14 +90,39 @@ export default function Dashboardholiday() {
   //   keepPreviousData: true,
   // });
 
+  // const {
+  //   data: PaginatedData,
+  //   error: fetchError,
+  //   isLoading,
+  // } = useQuery({
+  //   queryKey: ["projects", { currentPage, search }],
+  //   queryFn: fetchProjects,
+  //   enabled: !!User?._id,
+  // });
+
   const {
     data: PaginatedData,
-    error: fetchError,
-    isLoading,
-  } = useQuery({
-    queryKey: ["projects", { currentPage, search }],
-    queryFn: fetchProjects,
-    enabled: !!User?._id,
+    isLoading: isLoading1,
+    isFetching: isFetching1,
+    isError: fetchError,
+  } = useFetchData({
+    endpoint: `/api/patientmaster/allpatients/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
+    params: {
+      queryKey: ["projects", { currentPage, search }],
+      // queryKeyId: User?._id,
+      queryFn: fetchProjects,
+      enabled: !!User?._id,
+
+      retry: 5,
+      refetchOnWindowFocus: true,
+      onSuccess: (res) => {
+        toast.success("Successfully Fetched Data");
+        console.log("This is res", res);
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    },
   });
 
   useEffect(() => {
@@ -121,20 +151,20 @@ export default function Dashboardholiday() {
         console.error("Error fetching data:", error);
       }
     };
-    const fetchtest = async () => {
-      try {
-        const response = await axios.get(
-          `/api/testmaster/alltestmaster/${User?._id}`
-        );
-        console.log(response.data);
-        setTest(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+    // const fetchtest = async () => {
+    //   try {
+    //     const response = await axios.get(
+    //       `/api/testmaster/alltestmaster/${User?._id}`
+    //     );
+    //     console.log(response.data);
+    //     setTest(response.data);
+    //   } catch (error) {
+    //     console.error("Error fetching data:", error);
+    //   }
+    // };
     fetchparameter();
     fetchparametergroup();
-    fetchtest();
+    // fetchtest();
   }, []);
   // Define the schema with various input types
   const typeofschema = {

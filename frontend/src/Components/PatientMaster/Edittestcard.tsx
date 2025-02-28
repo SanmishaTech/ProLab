@@ -245,6 +245,8 @@ function ProfileForm({ formData }) {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="baby">Baby</SelectItem>
+                    <SelectItem value="B/0">B/0</SelectItem>
+                    <SelectItem value="master">Master</SelectItem>
                     <SelectItem value="dr">Dr</SelectItem>
                     <SelectItem value="mr">Mr</SelectItem>
                     <SelectItem value="mrs">Mrs</SelectItem>

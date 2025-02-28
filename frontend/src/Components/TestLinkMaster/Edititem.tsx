@@ -1,6 +1,15 @@
-// components/AddItem.tsx
+import { useState, useEffect } from "react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Avatar,
+  useDisclosure,
+} from "@heroui/react";
 
-import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -22,31 +30,41 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectLabel,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MultipleSelect } from "@/components/ui/multiple-select";
+import { FilePenLine } from "lucide-react";
 
+import { Select, SelectItem } from "@heroui/react";
 import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AddItemProps {
   onAdd: (item: any) => void;
   typeofschema: Record<string, any>;
-  editid?: string;
+  editid: string;
 }
 
-const AddItem: React.FC<AddItemProps> = ({
-  onAdd,
-  typeofschema = {},
+export default function App({
+  isOpen,
+  onClose,
+  onOpen,
   editid,
-}) => {
+  typeofschema,
+  onOpenChange,
+  editfetch,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onOpen: () => void;
+}) {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user || "{}");
 
@@ -54,114 +72,51 @@ const AddItem: React.FC<AddItemProps> = ({
   const [error, setError] = useState("");
   const [handleopen, setHandleopen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
-  const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
-  const [defaultdata, setDefaultdata] = useState<any>({});
+  const queryClient = useQueryClient();
   useEffect(() => {
+    console.log("Fetching id", editid);
     if (editid) {
-      setLoading(true);
-      console.log("Fetching data for editid:", editid);
-
       axios
-        .get(`/api/testmasterlink/reference/${editid}`)
+        .get(`/api/machinelinkmaster/reference/${editid}`)
         .then((res) => {
-          console.log("Fetched data:", res.data);
-
-          const initialFormData = {
+          setFormData({
+            ...res.data,
+            name: res.data.name?._id,
             test: res.data.test?._id,
-            parameterGroup: res.data.parameterGroup?._id,
-            parameter:
-              res.data.parameter?.map((p) => {
-                return {
-                  key: p._id,
-                  name: p.name,
-                };
-              }) || [],
-          };
-
-          console.log("Setting initial form data:", res.data);
-          setFormData(initialFormData);
-
-          if (res.data.parameter) {
-            const parameterIds = res.data.parameter.map((p) => p._id);
-            console.log("Setting selected parameters:", parameterIds);
-            setSelectedParameters(parameterIds);
-            const converteddata = res.data.parameter.map((p) => {
-              return {
-                key: p._id,
-                name: p.name,
-              };
-            });
-            console.log("converted data", converteddata);
-            setDefaultdata(converteddata);
-          }
+          });
         })
         .catch((err) => {
           console.error("Error fetching data:", err);
-          setError(err.response?.data?.message || "Error fetching data");
-        })
-        .finally(() => {
-          setLoading(false);
         });
     }
     return () => {
       setFormData({});
       setHandleopen(false);
     };
-  }, [editid]);
+  }, [editid, isOpen]);
   const handleAdd = async () => {
     setLoading(true);
     try {
-      if (
-        !formData.test ||
-        !formData.parameterGroup ||
-        !selectedParameters.length
-      ) {
-        setError("Please fill in all required fields");
-        setLoading(false);
-        return;
-      }
-
-      const updateData = {
-        test: formData.test,
-        parameterGroup: formData.parameterGroup,
-        parameter: selectedParameters,
-      };
-
-      if (!editid) {
-        setError("No item selected for editing");
-        return;
-      }
-
-      const response = await axios.put(
-        `/api/testmasterlink/update/${editid}`,
-        updateData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.data) {
-        // Close dialog and refresh page immediately
-        setHandleopen(false);
-        window.location.reload();
-      }
-    } catch (err: any) {
-      console.error("Update error:", err);
-      const errorMessage =
-        err.response?.data?.message || err.message || "Failed to update";
-      setError(errorMessage);
+      formData.userId = User?._id;
+      await axios
+        .put(`/api/machinelinkmaster/update/${editid}`, formData)
+        .then((res) => {
+          // console.log("ppaapppppp", res.data);
+          queryClient.invalidateQueries({ queryKey: ["machinelinkmaster"] });
+          onClose();
+          // onAdd(res.data.newService);
+          // setFormData(res.data);
+          setHandleopen(false);
+          setError("");
+          // window.location.reload();
+        });
+    } catch (err) {
+      setError("Failed to add parameter group. Please try again.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log("Current formData:", formData);
-    console.log("Current selectedParameters:", selectedParameters);
-  }, [formData, selectedParameters]);
 
   // Capitalize the first letter of each word for labels
   function capitalizeText(text: string) {
@@ -170,41 +125,11 @@ const AddItem: React.FC<AddItemProps> = ({
 
   // Handle input changes dynamically
   const handleChange = (name: string, value: any) => {
-    console.log(`Handling change for ${name}:`, value);
-    setFormData((prevData: any) => {
-      const newData = {
-        ...prevData,
-        [name]: value,
-      };
-      console.log("Updated formData:", newData);
-      return newData;
-    });
+    setFormData((prevData: any) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
-  useEffect(() => {
-    const fetchparameter = async () => {
-      try {
-        const response = await axios.get(
-          `/api/parameter/allparameter/${User?._id}`
-        );
-        console.log(response.data);
-        const convertData = response.data.map((framework) => ({
-          key: framework?._id,
-          name: framework?.name,
-        }));
-        console.log("converted data", convertData);
-        setSelectedFrameworks(convertData);
-      } catch (error) {
-        console.error("Error fetching services:", error);
-      }
-    };
-    fetchparameter();
-  }, []);
-
-  // Add this useEffect to monitor form data changes
-  useEffect(() => {
-    console.log("typeofschema:", typeofschema);
-    console.log("Current formData:", formData);
-  }, [formData, typeofschema]);
 
   // Dynamically render form fields based on the schema
   const addFields = (schema: Record<string, any>) => {
@@ -296,52 +221,60 @@ const AddItem: React.FC<AddItemProps> = ({
 
         case "Select":
           allFieldsToRender.push(
-            <div key={key} className="grid grid-cols-4 items-center gap-4">
+            <div
+              key={key}
+              className="grid grid-cols-4 items-center gap-4 min-w-[20rem]"
+            >
               <Label htmlFor={key} className="text-right">
                 {label}
               </Label>
               <Select
-                value={formData[key] || ""}
-                onValueChange={(value) => {
-                  console.log(`Selecting ${key}:`, value);
-                  handleChange(key, value);
+                className="min-w-[18rem]"
+                label={label}
+                placeholder="Select an option"
+                // Wrap the selected value in a Set; if there's no value, pass an empty Set
+                selectedKeys={
+                  formData[key] ? new Set([formData[key]]) : new Set()
+                }
+                // Extract the first (and only) value from the Set when the selection changes
+                onSelectionChange={(selected) => {
+                  const selectedValue =
+                    selected.size > 0 ? Array.from(selected)[0] : "";
+                  handleChange(key, selectedValue);
                 }}
               >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>{label}</SelectLabel>
-                    {value.options?.map((option: any) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
+                {value.options.map((option: any) => (
+                  <SelectItem key={option.value} textValue={option.label}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </Select>
             </div>
           );
           break;
 
-        // case "Checkbox":
-        //   allFieldsToRender.push(
-        //     <div
-        //       style={{ justifyContent: "space-evenly" }}
-        //       key={key}
-        //       className="flex items-center space-x-4"
-        //     >
-        //       <Label htmlFor={key}>{label}</Label>
-
-        //       <Checkbox
-        //         id={key}
-        //         checked={formData[key] || false}
-        //         onCheckedChange={(checked) => handleChange(key, checked)}
-        //       />
-        //     </div>
-        //   );
-        //   break;
+        case "Checkbox":
+          allFieldsToRender.push(
+            <div key={key} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={key} className="text-right">
+                {label}
+              </Label>
+              <div className="col-span-3 flex items-center space-x-2">
+                <Checkbox
+                  id={key}
+                  checked={formData[key] || false}
+                  onCheckedChange={(checked) => handleChange(key, checked)}
+                />
+                <label
+                  htmlFor={key}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {label}
+                </label>
+              </div>
+            </div>
+          );
+          break;
 
         // Add more cases for different field types as needed
 
@@ -354,61 +287,42 @@ const AddItem: React.FC<AddItemProps> = ({
     return allFieldsToRender;
   };
 
+  useEffect(() => {
+    console.log(typeofschema);
+    console.log(formData);
+  }, [formData, typeofschema]);
+
   return (
-    <Dialog open={handleopen} onOpenChange={setHandleopen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full">
-          Edit
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Edit item</DialogTitle>
-          <DialogDescription>Make changes to your item here.</DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          {error && (
-            <div className="text-red-500 text-sm px-4 py-2 bg-red-50 rounded">
-              {error}
-            </div>
+    <>
+      <Modal
+        backdrop="blur"
+        isDismissable={false}
+        isOpen={isOpen}
+        onClose={onClose}
+        onOpenChange={onOpenChange}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">Edit</ModalHeader>
+              <ModalBody>
+                <div className="grid gap-4 py-4">
+                  {error && <p className="text-red-500">{error}</p>}
+                  {addFields(typeofschema)}
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={handleAdd} disabled={loading}>
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
           )}
-          {loading && (
-            <div className="text-blue-500 text-sm px-4 py-2 bg-blue-50 rounded">
-              Loading...
-            </div>
-          )}
-          {addFields(typeofschema)}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Select Parameters</Label>
-            <MultipleSelect
-              className="col-span-3"
-              tags={selectedFrameworks}
-              width="405px"
-              onChange={(values) => {
-                console.log("MultiSelect values changed:", values);
-                setSelectedParameters(values.map((item) => item.key));
-              }}
-              // value={selectedParameters.filter((item) =>
-              //   selectedFrameworks.some((framework) => framework.key === item)
-              // )}
-              defaultValue={defaultdata}
-              placeholder="Select parameters"
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button
-            onClick={handleAdd}
-            disabled={loading}
-            className={loading ? "opacity-50 cursor-not-allowed" : ""}
-          >
-            {loading ? "Updating..." : "Update"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </ModalContent>
+      </Modal>
+    </>
   );
-};
-
-export default AddItem;
+}

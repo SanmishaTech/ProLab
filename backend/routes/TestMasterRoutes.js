@@ -7,6 +7,6 @@ router.get("/alltestmaster/:userId", testMasterController.getServices);
 router.get("/reference/:testmasterId", testMasterController.getServicesbyId);
 router.put("/update/:testmasterId", testMasterController.updateThreads);
 router.delete("/delete/:testmasterId", testMasterController.deleteThread);
-router.get("/search/:name/:userId", testMasterController.searchbyName);
+router.get("/search/:userId", testMasterController.searchbyName);
 
 module.exports = router;

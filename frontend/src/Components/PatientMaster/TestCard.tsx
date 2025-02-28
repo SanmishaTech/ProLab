@@ -300,6 +300,8 @@ function ProfileForm() {
                   <SelectContent>
                     <SelectItem value="baby">Baby</SelectItem>
                     <SelectItem value="dr">Dr</SelectItem>
+                    <SelectItem value="B/0">B/0</SelectItem>
+                    <SelectItem value="master">Master</SelectItem>
                     <SelectItem value="mr">Mr</SelectItem>
                     <SelectItem value="mrs">Mrs</SelectItem>
                     <SelectItem value="ms">Ms</SelectItem>

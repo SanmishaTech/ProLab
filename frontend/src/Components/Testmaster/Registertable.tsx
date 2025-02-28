@@ -44,20 +44,48 @@ export default function Dashboardholiday() {
   const [parameter, setParameter] = useState<any[]>([]);
   const [parameterGroup, setParameterGroup] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10; // You can change the limit if needed
+  const [search, setSearch] = useState("");
+
+  const fetchProjects = async ({ queryKey }) => {
+    const [_key, { currentPage, search }] = queryKey;
+    const response = await axios.get(
+      `/api/testmaster/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
+    );
+    setTotalPages(response.data?.totalPages);
+    return response.data.patients;
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      console.log("This is current page", currentPage);
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      console.log("This is prev page", currentPage);
+
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
   useEffect(() => {
     // Fetch data from the API
-    const fetchparameter = async () => {
-      try {
-        const response = await axios.get(
-          `/api/testmaster/alltestmaster/${User?._id}`
-        );
-        console.log(response.data);
-        setParameter(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+    // const fetchparameter = async () => {
+    //   try {
+    //     const response = await axios.get(
+    //       `/api/testmaster/alltestmaster/${User?._id}`
+    //     );
+    //     console.log(response.data);
+    //     setParameter(response.data);
+    //   } catch (error) {
+    //     console.error("Error fetching data:", error);
+    //   }
+    // };
     const fetchparametergroup = async () => {
       try {
         const response = await axios.get(
@@ -78,9 +106,9 @@ export default function Dashboardholiday() {
         console.error("Error fetching data:", error);
       }
     };
-    fetchparameter();
-    fetchparametergroup();
-    fetchtest();
+    // fetchparameter();
+    // fetchparametergroup();
+    // fetchtest();
   }, []);
   // Define the schema with various input types
   useEffect(() => {
@@ -105,16 +133,40 @@ export default function Dashboardholiday() {
     // Add more fields as needed
   };
 
+  // const {
+  //   data: data1,
+  //   isLoading: isLoading1,
+  //   isFetching: isFetching1,
+  //   isError: isError1,
+  // } = useFetchData({
+  //   endpoint: `/api/testmaster/alltestmaster/${User?._id}`,
+  //   params: {
+  //     queryKey: ["testmaster"],
+  //     queryKeyId: User?._id,
+  //     retry: 5,
+  //     refetchOnWindowFocus: true,
+  //     onSuccess: (res) => {
+  //       toast.success("Successfully Fetched Data");
+  //       console.log("This is res", res);
+  //     },
+  //     onError: (error) => {
+  //       toast.error(error.message);
+  //     },
+  //   },
+  // });
   const {
-    data: data1,
+    data: PaginatedData,
     isLoading: isLoading1,
     isFetching: isFetching1,
-    isError: isError1,
+    isError: fetchError,
   } = useFetchData({
-    endpoint: `/api/testmaster/alltestmaster/${User?._id}`,
+    endpoint: `/api/testmaster/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
     params: {
-      queryKey: ["testmaster"],
-      queryKeyId: User?._id,
+      queryKey: ["testmaster", { currentPage, search }],
+      // queryKeyId: User?._id,
+      queryFn: fetchProjects,
+      enabled: !!User?._id,
+
       retry: 5,
       refetchOnWindowFocus: true,
       onSuccess: (res) => {
@@ -215,14 +267,14 @@ export default function Dashboardholiday() {
     setData((prevData) => [...prevData, newItem]);
   };
 
-  if (isLoading1) return <div className="p-4">Loading...</div>;
+  // if (isLoading1) return <div className="p-4">Loading...</div>;
   if (error)
     return <div className="p-4 text-red-500">Error loading parameters.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data1
-    ? data1?.map((item) => {
+  const mappedTableData = PaginatedData
+    ? PaginatedData?.map((item) => {
         console.log("This is item", item);
         return {
           _id: item?._id,
@@ -248,7 +300,15 @@ export default function Dashboardholiday() {
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
+        filterValue={PaginatedData}
         onProductAction={handleProductAction}
+        handleNextPage={handleNextPage}
+        handlePrevPage={handlePrevPage}
+        setSearch={setSearch}
+        Searchitem={search}
         typeofschema={typeofschema}
         AddItem={() => (
           <AddItem typeofschema={typeofschema} onAdd={handleAddItem} />
