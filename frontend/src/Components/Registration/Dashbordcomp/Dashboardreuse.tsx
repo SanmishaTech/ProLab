@@ -259,7 +259,7 @@ export default function Dashboard({
             <div className="flex items-center">
               <TabsList className="bg-accent/60 pb-2 drop-shadow-none">
                 <div className="flex w-full flex-wrap md:flex-nowrap gap-4 pb-2 drop-shadow-none">
-                  <DateRangePicker
+                  {/* <DateRangePicker
                     visibleMonths={2}
                     variant="underlined"
                     label="Date Range"
@@ -273,7 +273,7 @@ export default function Dashboard({
                           }
                         : null
                     }
-                  />
+                  /> */}
                 </div>
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
