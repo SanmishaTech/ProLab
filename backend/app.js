@@ -75,7 +75,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/users", usersRouter);
 // app.use("/api/server", serverRoutes);
-app.use("/api/channel", channelRoutes);
+// app.use("/api/channel", channelRoutes);
 // app.use("/api/chats", chatRoutes);
 app.use("/api/services", ServiceRoutes);
 // app.use("/api/reference", ReferenceRoutes);
