@@ -83,8 +83,9 @@ const AddItem: React.FC<AddItemProps> = ({
       setHandleopen(false);
       setError("");
     } catch (err) {
-      setError("Failed to add parameter. Please try again.");
-      console.error(err);
+      setError("Please Add All the fields ");
+
+      console.log(err.response.data);
     } finally {
       setLoading(false);
     }

@@ -22,6 +22,7 @@ const AddItem = () => {
     </Button>
   );
 };
+
 const Edititem = (id: string) => {
   const navigate = useNavigate();
   const handleAdd = () => {
@@ -44,6 +45,10 @@ export default function Dashboardholiday() {
   const [parameter, setParameter] = useState<any[]>([]);
   const [parameterGroup, setParameterGroup] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10; // You can change the limit if needed
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     // Fetch data from the API
@@ -103,16 +108,65 @@ export default function Dashboardholiday() {
     // Add more fields as needed
   };
 
+  const fetchProjects = async ({ queryKey }) => {
+    const [_key, { currentPage, search }] = queryKey;
+    const response = await axios.get(
+      `/api/associatemaster/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
+    );
+    setTotalPages(response.data?.totalPages);
+    return response.data.patients;
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      console.log("This is current page", currentPage);
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      console.log("This is prev page", currentPage);
+
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  // const {
+  //   data: data1,
+  //   isLoading: isLoading1,
+  //   isFetching: isFetching1,
+  //   isError: isError1,
+  // } = useFetchData({
+  //   endpoint: `/api/associatemaster/allassociates/${User?._id}`,
+  //   params: {
+  //     queryKey: ["associatemaster"],
+  //     queryKeyId: User?._id,
+  //     retry: 5,
+  //     refetchOnWindowFocus: true,
+  //     onSuccess: (res) => {
+  //       toast.success("Successfully Fetched Data");
+  //       console.log("This is res", res);
+  //     },
+  //     onError: (error) => {
+  //       toast.error(error.message);
+  //     },
+  //   },
+  // });
+
   const {
     data: data1,
     isLoading: isLoading1,
     isFetching: isFetching1,
-    isError: isError1,
+    isError: fetchError,
   } = useFetchData({
-    endpoint: `/api/associatemaster/allassociates/${User?._id}`,
+    endpoint: `/api/associatemaster/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
     params: {
-      queryKey: ["associatemaster"],
-      queryKeyId: User?._id,
+      queryKey: ["associatemaster", { currentPage, search }],
+      // queryKeyId: User?._id,
+      queryFn: fetchProjects,
+      enabled: !!User?._id,
+
       retry: 5,
       refetchOnWindowFocus: true,
       onSuccess: (res) => {
@@ -245,10 +299,15 @@ export default function Dashboardholiday() {
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
         Edititem={Edititem}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
+        handleNextPage={handleNextPage}
+        handlePrevPage={handlePrevPage}
         typeofschema={typeofschema}
         AddItem={() => (
           <AddItem typeofschema={typeofschema} onAdd={handleAddItem} />

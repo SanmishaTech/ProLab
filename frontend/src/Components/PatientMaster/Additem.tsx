@@ -52,7 +52,7 @@ const AddItem: React.FC<AddItemProps> = ({ onAdd, typeofschema }) => {
   const handleAdd = async () => {
     setLoading(true);
     try {
-      await axios.post(`/api/testmasterlink`, formData);
+      await axios.post(`/api/patientmaster`, formData);
       onAdd(formData); // Notify parent component
       setFormData({});
       setHandleopen(false);

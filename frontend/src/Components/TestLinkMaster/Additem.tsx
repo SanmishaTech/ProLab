@@ -73,15 +73,15 @@ const AddItem: React.FC<AddItemProps> = ({
     setLoading(true);
     try {
       formData.userId = User?._id;
-      await axios.post(`/api/machinelinkmaster`, formData);
+      await axios.post(`/api/testmasterlink`, formData);
       // onAdd(formData); // Notify parent component
       // setFormData({
       //   name: formData.test.name,
       //   description: formData.parameterGroup.name,
       //   adn: formData.parameter.name,
       // });
-      queryClient.invalidateQueries({ queryKey: ["machinelinkmaster"] });
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ["testmasterlink"] });
+      // window.location.reload();
       setFormData({});
       setHandleopen(false);
       setError("");

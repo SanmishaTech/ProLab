@@ -18,6 +18,10 @@ export default function Dashboardholiday() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10; // You can change the limit if needed
+  const [search, setSearch] = useState("");
 
   // Define the schema with various input types
   const typeofschema = {
@@ -41,16 +45,61 @@ export default function Dashboardholiday() {
     // Add more fields as needed
   };
 
+  // const {
+  //   data: data1,
+  //   isLoading: isLoading1,
+  //   isFetching: isFetching1,
+  //   isError: isError1,
+  // } = useFetchData({
+  //   endpoint: `/api/machinemaster/allmachinemaster/${User?._id}`,
+  //   params: {
+  //     queryKey: ["machinemaster"],
+  //     queryKeyId: User?._id,
+  //     retry: 5,
+  //     refetchOnWindowFocus: true,
+  //     onSuccess: (res) => {
+  //       toast.success("Successfully Fetched Data");
+  //       console.log("This is res", res);
+  //     },
+  //     onError: (error) => {
+  //       toast.error(error.message);
+  //     },
+  //   },
+  // });
+
+  const fetchProjects = async ({ queryKey }) => {
+    const [_key, { currentPage, search }] = queryKey;
+    const response = await axios.get(
+      `/api/machinemaster/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
+    );
+    setTotalPages(response.data?.totalPages);
+    return response.data.patients;
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
   const {
     data: data1,
     isLoading: isLoading1,
     isFetching: isFetching1,
-    isError: isError1,
+    // isError: fetchError,
   } = useFetchData({
-    endpoint: `/api/machinemaster/allmachinemaster/${User?._id}`,
+    endpoint: `/api/machinemaster/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
     params: {
-      queryKey: ["machinemaster"],
-      queryKeyId: User?._id,
+      queryKey: ["machinemaster", { currentPage, search }],
+      // queryKeyId: User?._id,
+      queryFn: fetchProjects,
+      enabled: !!User?._id,
+
       retry: 5,
       refetchOnWindowFocus: true,
       onSuccess: (res) => {
@@ -180,10 +229,15 @@ export default function Dashboardholiday() {
         userAvatar={config.userAvatar}
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
+        handleNextPage={handleNextPage}
+        handlePrevPage={handlePrevPage}
         typeofschema={typeofschema}
         AddItem={() => (
           <AddItem typeofschema={typeofschema} onAdd={handleAddItem} />

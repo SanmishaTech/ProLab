@@ -7,6 +7,8 @@ import AddItem from "./Additem"; // Corrected import path
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { useFetchData } from "@/fetchcomponents/Fetchapi";
+import { toast } from "sonner";
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -19,6 +21,31 @@ export default function Dashboardholiday() {
   const [parameterGroup, setParameterGroup] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10; // You can change the limit if needed
+  const [search, setSearch] = useState("");
+
+  const fetchProjects = async ({ queryKey }) => {
+    const [_key, { currentPage, search }] = queryKey;
+    const response = await axios.get(
+      `/api/testmasterlink/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
+    );
+    setTotalPages(response.data?.totalPages);
+    return response.data.patients;
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
   useEffect(() => {
     // Fetch data from the API
@@ -55,7 +82,7 @@ export default function Dashboardholiday() {
         console.error("Error fetching data:", error);
       }
     };
-    fetchparameter();
+    // fetchparameter();
     fetchparametergroup();
     fetchtest();
   }, []);
@@ -86,19 +113,48 @@ export default function Dashboardholiday() {
     },
   };
 
+  const {
+    data: data1,
+    isLoading: isLoading1,
+    isFetching: isFetching1,
+    // isError: fetchError,
+  } = useFetchData({
+    endpoint: `/api/testmasterlink/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
+    params: {
+      queryKey: ["testmasterlink", { currentPage, search }],
+      // queryKeyId: User?._id,
+      queryFn: fetchProjects,
+      enabled: !!User?._id,
+
+      retry: 5,
+      refetchOnWindowFocus: true,
+      onSuccess: (res) => {
+        toast.success("Successfully Fetched Data");
+        console.log("This is res", res);
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    },
+  });
+
+  useEffect(() => {
+    console.log("Tis", data1);
+  }, [data1]);
+
   useEffect(() => {
     // Fetch data from the API
-    axios
-      .get(`/api/testmasterlink/allLinkmaster/${User?._id}`)
-      .then((response) => {
-        setData(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching data:", err);
-        setError(err);
-        setLoading(false);
-      });
+    // axios
+    //   .get(`/api/testmasterlink/allLinkmaster/${User?._id}`)
+    //   .then((response) => {
+    //     setData(response.data);
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     console.error("Error fetching data:", err);
+    //     setError(err);
+    //     setLoading(false);
+    //   });
 
     // Define the dashboard configuration
     setConfig({
@@ -189,14 +245,14 @@ export default function Dashboardholiday() {
     }
   };
 
-  if (loading) return <div className="p-4">Loading...</div>;
+  if (isLoading1) return <div className="p-4">Loading...</div>;
   if (error)
     return <div className="p-4 text-red-500">Error loading parameters.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
 
   // Map the API data to match the Dashboard component's expected tableData format
-  const mappedTableData = data
-    ? data?.map((item) => {
+  const mappedTableData = data1
+    ? data1?.map((item) => {
         console.log("This is item", item);
         return {
           _id: item?._id,
@@ -220,9 +276,14 @@ export default function Dashboardholiday() {
         tableData={mappedTableData}
         onAddProduct={handleAddProduct}
         onExport={handleExport}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
         typeofschema={typeofschema}
+        handleNextPage={handleNextPage}
+        handlePrevPage={handlePrevPage}
         AddItem={() => (
           <AddItem
             typeofschema={typeofschema}

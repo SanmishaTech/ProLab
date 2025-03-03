@@ -87,7 +87,7 @@ import {
   Tooltip,
   useDisclosure,
 } from "@heroui/react";
-
+import { Skeleton } from "@heroui/react";
 export const description =
   "A reusable registrations dashboard with customizable header and table. Configure breadcrumbs, search, tabs, and table data through props.";
 
@@ -106,8 +106,10 @@ export default function Dashboard({
   setCurrentPage,
   Searchitem,
   currentPage,
+  isFetching1,
   handlePrevPage,
   tableData = [],
+  isLoading,
   onAddProduct = () => {},
   onExport = () => {},
   onFilterChange = () => {},
@@ -422,80 +424,7 @@ export default function Dashboard({
                                   )}
                                 </TableCell>
                               ))}
-
-                              {/* <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => toggleRow(row._id)}
-                                aria-expanded={expandedRows.includes(row._id)}
-                                aria-controls={`services-${row._id}`}
-                              >
-                                {expandedRows.includes(row._id)
-                                  ? "Hide"
-                                  : "Show"}{" "}
-                                Services
-                              </Button>
-                            </TableCell> */}
                             </TableRow>
-                            {expandedRows.includes(row._id) && (
-                              <></>
-                              // <TableRow>
-                              //   <TableCell
-                              //     colSpan={tableColumns.headers.length + 1}
-                              //   >
-                              //     <div className="p-4 bg-muted rounded-md">
-                              //       <h4 className="text-sm font-semibold mb-2">
-                              //         Services
-                              //       </h4>
-                              //       {/* Nested Services Table */}
-                              //       <Table className="mb-4">
-                              //         <TableHead er>
-                              //           <TableRow>
-                              //             <TableHead>Service Name</TableHead>
-                              //             <TableHead>Description</TableHead>
-                              //             <TableHead>Price ($)</TableHead>
-                              //             <TableHead>Urgent</TableHead>
-                              //           </TableRow>
-                              //         </TableHead>
-                              //         <TableBody>
-                              //           {row?.services?.map((service) => (
-                              //             <TableRow key={service._id}>
-                              //               <TableCell>{service.name}</TableCell>
-                              //               <TableCell>
-                              //                 {service.description}
-                              //               </TableCell>
-                              //               <TableCell>
-                              //                 &#x20b9;{service.price}
-                              //               </TableCell>
-                              //               <TableCell>
-                              //                 {service.urgent}
-                              //               </TableCell>
-                              //             </TableRow>
-                              //           ))}
-                              //         </TableBody>
-                              //         <TableFooter>
-                              //           <TableRow>
-                              //             <TableCell colSpan={2}>
-                              //               <strong>Total</strong>
-                              //             </TableCell>
-                              //             <TableCell>
-                              //               &#x20b9;{" "}
-                              //               {row?.services
-                              //                 ?.reduce(
-                              //                   (total, service) =>
-                              //                     total + service.price,
-                              //                   0
-                              //                 )
-                              //                 .toFixed(2)}
-                              //             </TableCell>
-                              //           </TableRow>
-                              //         </TableFooter>
-                              //       </Table>
-                              //     </div>
-                              //   </TableCell>
-                              // </TableRow>
-                            )}
                           </React.Fragment>
                         ))}
                       </TableBody>

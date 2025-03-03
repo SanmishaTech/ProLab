@@ -99,15 +99,15 @@ export default function App({
     try {
       formData.userId = User?._id;
       await axios
-        .put(`/api/machinelinkmaster/update/${editid}`, formData)
+        .put(`/api/testmasterlink/update/${editid}`, formData)
         .then((res) => {
           // console.log("ppaapppppp", res.data);
-          queryClient.invalidateQueries({ queryKey: ["machinelinkmaster"] });
+          queryClient.invalidateQueries({ queryKey: ["testmasterlink"] });
           onClose();
           // onAdd(res.data.newService);
           // setFormData(res.data);
           setHandleopen(false);
-          window.location.reload();
+          // window.location.reload();
           setError("");
           // window.location.reload();
         });

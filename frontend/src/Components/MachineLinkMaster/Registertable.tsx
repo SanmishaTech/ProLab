@@ -20,6 +20,31 @@ export default function Dashboardholiday() {
   const [error, setError] = useState<any>(null);
   const [machine, setMachine] = useState<any[]>([]);
   const [test, setTest] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10; // You can change the limit if needed
+  const [search, setSearch] = useState("");
+
+  const fetchProjects = async ({ queryKey }) => {
+    const [_key, { currentPage, search }] = queryKey;
+    const response = await axios.get(
+      `/api/machinelinkmaster/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
+    );
+    setTotalPages(response.data?.totalPages);
+    return response.data.patients;
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
   useEffect(() => {
     const fetchMachine = async () => {
@@ -83,16 +108,41 @@ export default function Dashboardholiday() {
     // Add more fields as needed
   };
 
+  // const {
+  //   data: data1,
+  //   isLoading: isLoading1,
+  //   isFetching: isFetching1,
+  //   isError: isError1,
+  // } = useFetchData({
+  //   endpoint: `/api/machinelinkmaster/allmachinelinkmaster/${User?._id}`,
+  //   params: {
+  //     queryKey: ["machinelinkmaster"],
+  //     queryKeyId: User?._id,
+  //     retry: 5,
+  //     refetchOnWindowFocus: true,
+  //     onSuccess: (res) => {
+  //       toast.success("Successfully Fetched Data");
+  //       console.log("This is res", res);
+  //     },
+  //     onError: (error) => {
+  //       toast.error(error.message);
+  //     },
+  //   },
+  // });
+
   const {
     data: data1,
     isLoading: isLoading1,
     isFetching: isFetching1,
-    isError: isError1,
+    // isError: fetchError,
   } = useFetchData({
-    endpoint: `/api/machinelinkmaster/allmachinelinkmaster/${User?._id}`,
+    endpoint: `/api/machinelinkmaster/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
     params: {
-      queryKey: ["machinelinkmaster"],
-      queryKeyId: User?._id,
+      queryKey: ["machinelinkmaster", { currentPage, search }],
+      // queryKeyId: User?._id,
+      queryFn: fetchProjects,
+      enabled: !!User?._id,
+
       retry: 5,
       refetchOnWindowFocus: true,
       onSuccess: (res) => {
@@ -217,11 +267,16 @@ export default function Dashboardholiday() {
         searchPlaceholder={config.searchPlaceholder}
         userAvatar={config.userAvatar}
         tableColumns={config.tableColumns}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
         tableData={mappedTableData}
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
+        handleNextPage={handleNextPage}
+        handlePrevPage={handlePrevPage}
         typeofschema={typeofschema}
         AddItem={() => (
           <AddItem typeofschema={typeofschema} onAdd={handleAddItem} />

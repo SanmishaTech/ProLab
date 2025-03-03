@@ -69,6 +69,13 @@ export default function Dashboard({
   tableColumns = {},
   typeofschema,
   tableData = [],
+  handleNextPage,
+  totalPages,
+  setSearch,
+  setCurrentPage,
+  Searchitem,
+  currentPage,
+  handlePrevPage,
   onAddProduct = () => {},
   onExport = () => {},
   onFilterChange = () => {},
@@ -289,7 +296,7 @@ export default function Dashboard({
                   description="You can create a new form to add to your pages."
                   icons={[FileText, FileSymlink, Files]}
                   // Item={AddItem}
-                  // typeofschema={typeofschema}
+                  typeofschema={typeofschema}
                 />
               ) : (
                 <Card className="bg-card border border-border shadow-sm overflow-hidden">
@@ -426,28 +433,36 @@ export default function Dashboard({
                         <>
                           Showing{" "}
                           <strong>
-                            {Math.min(
+                            {/* {Math.min(
                               tableData.length,
                               tableColumns?.pagination?.from || 1
-                            )}
+                            )} */}
+                            {currentPage}
                           </strong>
-                          -
-                          <strong>
-                            {Math.min(
-                              tableData.length,
-                              tableColumns?.pagination?.to || tableData.length
-                            )}
-                          </strong>{" "}
-                          of <strong>{tableData.length}</strong> items
+                          <strong></strong> of <strong>{totalPages}</strong>{" "}
+                          items
                         </>
                       )}
                     </div>
-
                     <div className="flex items-center gap-2">
-                      <Button size="sm" variant="flat" isDisabled={true}>
+                      <Button
+                        onPress={() => handlePrevPage(currentPage)}
+                        size="sm"
+                        variant="flat"
+                        // isDisabled={() => {
+                        //   return currentPage <= 1;
+                        // }}
+                      >
                         Previous
                       </Button>
-                      <Button size="sm" variant="flat" isDisabled={true}>
+                      <Button
+                        onPress={() => handleNextPage(currentPage)}
+                        size="sm"
+                        variant="flat"
+                        // isDisabled={() => {
+                        //   return currentPage === totalPages;
+                        // }}
+                      >
                         Next
                       </Button>
                     </div>

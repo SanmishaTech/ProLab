@@ -194,35 +194,34 @@ const patientMasterController = {
   },
   searchbyName: async (req, res, next) => {
     try {
-      const name = req.params.name;
       const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
 
-      // Use mongoose to find user first if necessary
-      const userwithid = await User.findById(userId);
-      if (!userwithid) {
-        return res.status(404).json({ message: "User not found." });
+      // Extract pagination and search parameters from query with defaults
+      let { page = 1, limit = 10, search = "" } = req.query;
+      console.log(search);
+      page = parseInt(page);
+      limit = parseInt(limit);
+      const skip = (page - 1) * limit;
+
+      // Build the query condition
+      const query = { userId: usertobefound };
+      if (search.trim()) {
+        query.$or = [{ firstName: { $regex: `^${search}`, $options: "i" } }];
       }
 
-      const agg = [
-        {
-          $search: {
-            index: "patient",
-            autocomplete: {
-              query: name,
-              path: "firstName",
-            },
-          },
-        },
-        {
-          $match: {
-            userId: new mongoose.Types.ObjectId(userId), // Match userId with the correct type
-          },
-        },
-      ];
+      // Execute both the paginated query and count in parallel
+      const [patients, total] = await Promise.all([
+        PatientMaster.find(query).skip(skip).limit(limit).lean(),
 
-      const patient = await PatientMaster.aggregate(agg);
-      console.log(patient);
-      res.status(200).json(patient);
+        PatientMaster.countDocuments(query),
+      ]);
+
+      const totalPages = Math.ceil(total / limit);
+      const nextPage = page < totalPages ? page + 1 : null;
+      const prevPage = page > 1 ? page - 1 : null;
+
+      res.status(200).json(patients);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

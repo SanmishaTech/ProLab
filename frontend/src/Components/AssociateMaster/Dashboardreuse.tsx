@@ -45,6 +45,7 @@ import {
 // } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import MultiSelectorComponent from "./profile";
+
 import {
   Table,
   TableBody,
@@ -97,7 +98,15 @@ export default function Dashboard({
   tableColumns = {},
   AddItem,
   Edititem,
+  filterValue,
   typeofschema,
+  handleNextPage,
+  totalPages,
+  setSearch,
+  setCurrentPage,
+  Searchitem,
+  currentPage,
+  handlePrevPage,
   tableData = [],
   onAddProduct = () => {},
   onExport = () => {},
@@ -179,8 +188,8 @@ export default function Dashboard({
                 type="search"
                 placeholder={searchPlaceholder}
                 className="w-full rounded-full bg-background pl-10 border-muted focus-visible:ring-primary"
-                value={searchTerm}
-                onChange={(e) => setsearchTerm(e.target.value)}
+                value={Searchitem}
+                onChange={(e) => setSearch(e.target.value)}
               />
               {searchTerm && (
                 <button
@@ -301,7 +310,6 @@ export default function Dashboard({
                   description="You can create a new form to add to your pages."
                   icons={[FileText, FileSymlink, Files]}
                   // Item={AddItem}
-                  typeofschema={typeofschema}
                 />
               ) : (
                 <Card className="bg-card border border-border shadow-sm overflow-hidden">
@@ -499,28 +507,37 @@ export default function Dashboard({
                         <>
                           Showing{" "}
                           <strong>
-                            {Math.min(
+                            {/* {Math.min(
                               tableData.length,
                               tableColumns?.pagination?.from || 1
-                            )}
+                            )} */}
+                            {currentPage}
                           </strong>
-                          -
-                          <strong>
-                            {Math.min(
-                              tableData.length,
-                              tableColumns?.pagination?.to || tableData.length
-                            )}
-                          </strong>{" "}
-                          of <strong>{tableData.length}</strong> items
+                          <strong></strong> of <strong>{totalPages}</strong>{" "}
+                          items
                         </>
                       )}
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Button size="sm" variant="flat" isDisabled={true}>
+                      <Button
+                        onPress={() => handlePrevPage(currentPage)}
+                        size="sm"
+                        variant="flat"
+                        // isDisabled={() => {
+                        //   return currentPage <= 1;
+                        // }}
+                      >
                         Previous
                       </Button>
-                      <Button size="sm" variant="flat" isDisabled={true}>
+                      <Button
+                        onPress={() => handleNextPage(currentPage)}
+                        size="sm"
+                        variant="flat"
+                        // isDisabled={() => {
+                        //   return currentPage === totalPages;
+                        // }}
+                      >
                         Next
                       </Button>
                     </div>

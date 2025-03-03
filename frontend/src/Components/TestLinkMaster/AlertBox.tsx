@@ -26,10 +26,10 @@ export default function AlertDialogbox({
   const queryClient = useQueryClient();
   const DeleteApi = async () => {
     console.log("This is Delete url", `/api/${url}`);
-    await axios.delete(`/api/machinelinkmaster/delete/${url}`);
-    window.location.reload();
+    await axios.delete(`/api/testmasterlink/delete/${url}`);
+    // window.location.reload();
     onClose();
-    queryClient.invalidateQueries({ queryKey: ["machinelinkmaster"] });
+    queryClient.invalidateQueries({ queryKey: ["testmasterlink"] });
   };
 
   useEffect(() => {
@@ -46,8 +46,8 @@ export default function AlertDialogbox({
                 Delete Item
               </ModalHeader>
               <ModalBody>
-                This action cannot be undone. This will permanently delete your
-                account and remove your data from our servers.
+                This action cannot be undone. This will permanently delete the
+                selected item.
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>

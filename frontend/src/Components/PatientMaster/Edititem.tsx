@@ -74,7 +74,7 @@ const AddItem: React.FC<AddItemProps> = ({
     setLoading(true);
     try {
       await axios
-        .put(`/api/usermaster/update/${editid}`, formData)
+        .put(`/api/patientmaster/update/${editid}`, formData)
         .then((res) => {
           console.log("ppaapppppp", res.data);
           // onAdd(res.data.newService);

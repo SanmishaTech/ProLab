@@ -14,6 +14,10 @@ export default function Dashboardholiday() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10; // You can change the limit if needed
+  const [search, setSearch] = useState("");
 
   const typeofschema = {
     container: {
@@ -22,16 +26,61 @@ export default function Dashboardholiday() {
     },
   };
 
+  const fetchProjects = async ({ queryKey }) => {
+    const [_key, { currentPage, search }] = queryKey;
+    const response = await axios.get(
+      `/api/container/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
+    );
+    setTotalPages(response.data?.totalPages);
+    return response.data.patients;
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  // const {
+  //   data: data1,
+  //   isLoading: isLoading1,
+  //   isFetching: isFetching1,
+  //   isError: isError1,
+  // } = useFetchData({
+  //   endpoint: `/api/container/allcontainer/${User?._id}`,
+  //   params: {
+  //     queryKey: ["container"],
+  //     queryKeyId: User?._id,
+  //     retry: 5,
+  //     refetchOnWindowFocus: true,
+  //     onSuccess: (res) => {
+  //       toast.success("Successfully Fetched Data");
+  //       console.log("This is res", res);
+  //     },
+  //     onError: (error) => {
+  //       toast.error(error.message);
+  //     },
+  //   },
+  // });
+
   const {
     data: data1,
     isLoading: isLoading1,
     isFetching: isFetching1,
-    isError: isError1,
+    // isError: fetchError,
   } = useFetchData({
-    endpoint: `/api/container/allcontainer/${User?._id}`,
+    endpoint: `/api/container/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
     params: {
-      queryKey: ["container"],
-      queryKeyId: User?._id,
+      queryKey: ["container", { currentPage, search }],
+      // queryKeyId: User?._id,
+      queryFn: fetchProjects,
+      enabled: !!User?._id,
+
       retry: 5,
       refetchOnWindowFocus: true,
       onSuccess: (res) => {
@@ -159,10 +208,15 @@ export default function Dashboardholiday() {
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
         onAddProduct={handleAddProduct}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
         AddItem={AddItem}
+        handleNextPage={handleNextPage}
+        handlePrevPage={handlePrevPage}
         typeofschema={typeofschema}
       />
     </div>

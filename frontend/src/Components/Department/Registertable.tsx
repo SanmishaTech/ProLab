@@ -29,7 +29,7 @@ export default function Dashboardholiday() {
   const fetchProjects = async ({ queryKey }) => {
     const [_key, { currentPage, search }] = queryKey;
     const response = await axios.get(
-      `/api/patientmaster/allpatients/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
+      `/api/department/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
     );
     setTotalPages(response.data?.totalPages);
     return response.data.patients;
@@ -125,16 +125,41 @@ export default function Dashboardholiday() {
     },
   };
 
+  // const {
+  //   data: data1,
+  //   isLoading: isLoading1,
+  //   isFetching: isFetching1,
+  //   isError: isError1,
+  // } = useFetchData({
+  //   endpoint: `/api/department/alldepartment/${User?._id}`,
+  //   params: {
+  //     queryKey: ["department"],
+  //     queryKeyId: User?._id,
+  //     retry: 5,
+  //     refetchOnWindowFocus: true,
+  //     onSuccess: (res) => {
+  //       toast.success("Successfully Fetched Data");
+  //       console.log("This is res", res);
+  //     },
+  //     onError: (error) => {
+  //       toast.error(error.message);
+  //     },
+  //   },
+  // });
+
   const {
     data: data1,
     isLoading: isLoading1,
     isFetching: isFetching1,
-    isError: isError1,
+    // isError: fetchError,
   } = useFetchData({
-    endpoint: `/api/department/alldepartment/${User?._id}`,
+    endpoint: `/api/department/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
     params: {
-      queryKey: ["department"],
-      queryKeyId: User?._id,
+      queryKey: ["department", { currentPage, search }],
+      // queryKeyId: User?._id,
+      queryFn: fetchProjects,
+      enabled: !!User?._id,
+
       retry: 5,
       refetchOnWindowFocus: true,
       onSuccess: (res) => {
@@ -277,7 +302,12 @@ export default function Dashboardholiday() {
         onExport={handleExport}
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
         typeofschema={typeofschema}
+        handleNextPage={handleNextPage}
+        handlePrevPage={handlePrevPage}
         AddItem={() => (
           <AddItem typeofschema={typeofschema} onAdd={handleAddItem} />
         )}

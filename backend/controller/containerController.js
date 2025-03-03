@@ -42,6 +42,46 @@ const ContainerController = {
       res.status(500).json({ error: error.message });
     }
   },
+  searchdepartment: async (req, res, next) => {
+    try {
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+
+      // Extract pagination and search parameters from query with defaults
+      let { page = 1, limit = 10, search = "" } = req.query;
+      page = parseInt(page);
+      limit = parseInt(limit);
+      const skip = (page - 1) * limit;
+
+      // Build the query condition
+      const query = { userId: usertobefound };
+      if (search.trim()) {
+        query.$or = [{ container: { $regex: `^${search}`, $options: "i" } }];
+      }
+
+      // Execute both the paginated query and count in parallel
+      const [patients, total] = await Promise.all([
+        Container.find(query).skip(skip).limit(limit).lean(),
+
+        Container.countDocuments(query),
+      ]);
+
+      const totalPages = Math.ceil(total / limit);
+      const nextPage = page < totalPages ? page + 1 : null;
+      const prevPage = page > 1 ? page - 1 : null;
+
+      res.status(200).json({
+        patients,
+        total,
+        page,
+        totalPages,
+        nextPage,
+        prevPage,
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
   updateThreads: async (req, res, next) => {
     try {
       const doctorId = req.params.departmentId;

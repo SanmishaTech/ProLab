@@ -33,7 +33,7 @@ const fetchSuggestions = async (
   //   { id: "10", firstName: "Gatsby" },
   // ];
   const response = await axios.get(
-    `/api/patientmaster/search/${query}/${userId}`
+    `/api/patientmaster/search/${userId}?search=${query}`
   );
 
   return response?.data?.filter((item) =>

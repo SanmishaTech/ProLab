@@ -6,6 +6,7 @@ router.post("/", containerController.createThread);
 router.get("/allcontainer/:userId", containerController.getServices);
 router.get("/reference/:referenceId", containerController.getServicesbyId);
 router.put("/update/:departmentId", containerController.updateThreads);
+router.get("/search/:userId", containerController.searchdepartment);
 router.delete("/delete/:specimenId", containerController.deleteThread);
 
 module.exports = router;

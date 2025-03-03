@@ -204,7 +204,7 @@ function ProfileForm() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
+                      <SelectValue placeholder="Select..." />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -281,7 +281,7 @@ function ProfileForm() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
+                      <SelectValue placeholder="select ..." />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -341,7 +341,7 @@ function ProfileForm() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
+                      <SelectValue placeholder="select ..." />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

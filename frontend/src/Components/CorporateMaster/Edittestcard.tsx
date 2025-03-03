@@ -303,7 +303,7 @@ function ProfileForm({ formData }) {
         </div>
         <div className="flex justify-end w-full ">
           <Button className="self-center mr-8" type="submit">
-            Update profile
+            Save
           </Button>
         </div>
       </form>

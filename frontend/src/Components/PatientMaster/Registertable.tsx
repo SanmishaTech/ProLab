@@ -108,7 +108,7 @@ export default function Dashboardholiday() {
   } = useFetchData({
     endpoint: `/api/patientmaster/allpatients/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
     params: {
-      queryKey: ["projects", { currentPage, search }],
+      queryKey: ["patientmaster", { currentPage, search }],
       // queryKeyId: User?._id,
       queryFn: fetchProjects,
       enabled: !!User?._id,
@@ -331,9 +331,11 @@ export default function Dashboardholiday() {
         totalPages={totalPages}
         filterValue={PaginatedData}
         onProductAction={handleProductAction}
+        isFetching1={isFetching1}
         handleNextPage={handleNextPage}
         handlePrevPage={handlePrevPage}
         setSearch={setSearch}
+        isLoading={isLoading1}
         Searchitem={search}
         typeofschema={typeofschema}
         AddItem={() => (
