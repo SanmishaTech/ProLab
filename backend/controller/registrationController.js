@@ -219,10 +219,9 @@ const Servicescontroller = {
   //     res.status(500).json({ error: error.message });
   //   }
   // },
-
   createThread: async (req, res, next) => {
     try {
-      const {
+      let {
         patientId,
         referral,
         tests,
@@ -237,11 +236,16 @@ const Servicescontroller = {
         userId,
       } = req.body;
 
-      console.log("tests", JSON.stringify(tests));
+      // Validate patientId: if it's an object or invalid, set it to undefined.
+      if (patientId && typeof patientId === "object") {
+        patientId = undefined;
+      } else if (!mongoose.Types.ObjectId.isValid(patientId)) {
+        patientId = undefined;
+      }
 
       if (referral && Array.isArray(referral)) {
         referral.forEach((ref) => {
-          // Set invalid or empty ObjectId fields to undefined or remove them
+          // Check each field in referral and set to undefined if invalid.
           ref.primaryRefferal = mongoose.Types.ObjectId.isValid(
             ref.primaryRefferal
           )
@@ -261,7 +265,7 @@ const Servicescontroller = {
             ? ref.coporateCustomer
             : undefined;
 
-          // Remove undefined fields from the referral object
+          // Remove undefined or empty string fields
           Object.keys(ref).forEach((key) => {
             if (ref[key] === undefined || ref[key] === "") {
               delete ref[key];
@@ -269,7 +273,8 @@ const Servicescontroller = {
           });
         });
       }
-      // Create the new registration with the calculated completion date
+
+      // Create the new registration
       const newRegistration = new Registration({
         patientId,
         referral,
@@ -314,21 +319,8 @@ const Servicescontroller = {
           },
         });
 
-      // Create sample collection entry
-      // const sampleCollection = new SampleCollection({
-      //   registrationId: newRegistration._id,
-      //   patientId: newRegistration.patientId,
-      //   tests: newRegistration.tests.map(test => ({
-      //     test: test.tests,
-      //     status: "pending"
-      //   })),
-      //   userId: newRegistration.userId
-      // });
-      // await sampleCollection.save();
-
       res.status(201).json({
         registration: populatedRegistration,
-        // sampleCollection,
       });
     } catch (error) {
       console.error("Error creating registration:", error);

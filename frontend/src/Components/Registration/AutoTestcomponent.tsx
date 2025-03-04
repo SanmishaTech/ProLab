@@ -37,7 +37,7 @@ const fetchSuggestions = async (
   );
   setAlldata(response?.data);
 
-  return response?.data?.filter((item) =>
+  return response?.data?.tests?.filter((item) =>
     item?.name?.toLowerCase()?.includes(query.toLowerCase())
   );
 };
@@ -125,7 +125,7 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActiveSuggestionIndex((prevIndex) =>
-        Math.min(prevIndex + 1, suggestions?.length - 1)
+        Math.min(prevIndex + 1, suggestions.length - 1)
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
@@ -178,7 +178,7 @@ export default function ApiDrivenInputWithSuggestions({ setPatientForm }) {
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
         </div>
       )}
-      {showSuggestions && suggestions?.length > 0 && (
+      {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
           className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg overflow-hidden"

@@ -8,5 +8,6 @@ router.get("/reference/:testmasterId", testMasterController.getServicesbyId);
 router.put("/update/:testmasterId", testMasterController.updateThreads);
 router.delete("/delete/:testmasterId", testMasterController.deleteThread);
 router.get("/search/:userId", testMasterController.searchbyName);
+router.get("/searchalltest/:userId", testMasterController.searchtests);
 
 module.exports = router;

@@ -52,7 +52,7 @@ export default function Dashboardholiday() {
   const fetchProjects = async ({ queryKey }) => {
     const [_key, { currentPage, search }] = queryKey;
     const response = await axios.get(
-      `/api/testmaster/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
+      `/api/testmaster/searchalltest/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
     );
     setTotalPages(response.data?.totalPages);
     return response.data.patients;
@@ -160,7 +160,7 @@ export default function Dashboardholiday() {
     isFetching: isFetching1,
     isError: fetchError,
   } = useFetchData({
-    endpoint: `/api/testmaster/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
+    endpoint: `/api/testmaster/searchalltest/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
     params: {
       queryKey: ["testmaster", { currentPage, search }],
       // queryKeyId: User?._id,

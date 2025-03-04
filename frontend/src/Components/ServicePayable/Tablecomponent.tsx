@@ -105,52 +105,6 @@ export default function Tablecomponent({
     setUsers(updatedUsers);
   };
 
-  const handleConflictResolution = async () => {
-    if (onUpdateTests) {
-      // Get selected items from conflicts
-      const selectedConflictItems = conflictItems
-        .filter((conflict) => conflict.selected)
-        .map((conflict) => conflict.item);
-
-      // Get items without conflicts
-      const nonConflictItems = selectedItems.filter(
-        (item) =>
-          !conflictItems.some((conflict) => conflict.item._id === item._id)
-      );
-
-      // Combine selected conflict items with non-conflict items
-      const itemsToUpdate = [...selectedConflictItems, ...nonConflictItems];
-
-      if (itemsToUpdate.length > 0) {
-        // First apply the bulk edit locally
-        const updatedUsers = users.map((user) => {
-          if (itemsToUpdate.some((item) => item._id === user._id)) {
-            const originalPrice = user.originalPrice || user.price;
-            const discount = originalPrice * (bulkEditPercentage / 100);
-            return {
-              ...user,
-              price: originalPrice - discount,
-              originalPrice: originalPrice, // Preserve original price
-            };
-          }
-          return user;
-        });
-        setUsers(updatedUsers);
-
-        // Then update in the backend
-        try {
-          await onUpdateTests(itemsToUpdate, bulkEditPercentage);
-        } catch (error) {
-          console.error("Error updating tests:", error);
-        }
-      }
-
-      setShowConflictModal(false);
-      setSelectedItems([]);
-      setBulkEditPercentage(0);
-    }
-  };
-
   return (
     <main className="container">
       <DataTable

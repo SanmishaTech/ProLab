@@ -25,13 +25,15 @@ import {
 } from "@/components/ui/form";
 import { Editor } from "@/Components/Editor/Editor";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+import { Select, SelectItem } from "@heroui/react";
+
 import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
 import { toast } from "sonner";
@@ -43,7 +45,7 @@ import MultiSelectorComponent from "./profile";
 import Tablecomponent from "./Tablecomponent";
 
 const profileFormSchema = z.object({
-  associate: z.string().optional(),
+  associate: z.any().optional(),
   department: z.string().optional(),
   test: z
     .array(
@@ -92,34 +94,45 @@ function ProfileForm() {
 
   // Whenever "associate" changes, trigger this useEffect
   useEffect(() => {
-    console.log("Associate value changed:", watchedAssociate);
+    const arrayValues2 = Array.from(watchedAssociate || []);
+    console.log("Associate value as array:", arrayValues2);
     if (!watchedAssociate) return;
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(
-          `/api/service/getassociate/${watchedAssociate}/${
-            User?._id
-          }?departmentId=${watchDepartment ? watchDepartment : ""}`
+        const response = await axios.post(
+          `/api/service/getassociate/${User?._id}?departmentId=${
+            watchDepartment ? watchDepartment : ""
+          }`,
+          {
+            associate: [
+              ...new Set(
+                arrayValues2.map((item) => item).filter((item) => item !== "")
+              ),
+            ],
+          }
         );
-        console.log("Fetched on associate change:", response.data[0].test);
-        const updatedtestadded = response.data[0]?.test.map((item) => {
+        console.log("Fetched on associate change:", response.data);
+        const updatedtestadded = response.data?.tests.map((item) => {
           let updatedtest = item.testId;
           let newitem = {
             testId: {
               ...updatedtest,
-              price: item.price ?? item?.testId?.price,
+              price: item?.testId?.price,
+              hasConflict: item?.hasConflict,
               originalPrice: item?.testId?.price ?? item.price,
             },
+
             price: item.price,
             percentagevalue: item.percentage,
           };
           return newitem;
         });
+        console.log("UPDATED", updatedtestadded);
 
         const testspecialarrray = updatedtestadded.map((item) => {
           return item.testId;
         });
-        console.log("Updatedtestadded", updatedtestadded);
+        console.log("Updatedtestadded", testspecialarrray);
         setconflictchecks(updatedtestadded);
         setUpdatedtests(testspecialarrray);
         settestmaster(testspecialarrray);
@@ -152,7 +165,7 @@ function ProfileForm() {
           `/api/testmaster/alltestmaster/${User?._id}`
         );
         console.log("This is tetdata", response.data);
-        settestmaster(response.data);
+        // settestmaster(response.data);
       } catch (error) {
         console.error("Error fetching specimen:", error);
       }
@@ -175,8 +188,14 @@ function ProfileForm() {
   const navigate = useNavigate();
 
   async function onSubmit(data: ProfileFormValues) {
+    const arrayValues2 = Array.from(watchedAssociate || []);
+
     const formattedData = {
-      associate: data.associate,
+      associate: [
+        ...new Set(
+          arrayValues2?.map((item) => item)?.filter((item) => item !== "")
+        ),
+      ],
       department: data.department,
       test: updatedtests?.map((item) => ({
         testId: item._id,
@@ -236,7 +255,7 @@ function ProfileForm() {
           }
           return test;
         });
-        settestmaster(updatedTestMaster);
+        // settestmaster(updatedTestMaster);
       }
     } catch (error) {
       console.error("Error updating test values:", error);
@@ -248,10 +267,16 @@ function ProfileForm() {
   // Adjust "name" to whichever property you wish to filter on.
   useEffect(() => {
     const filteredData = testmaster.filter((item) => {
-      return item.name.toLowerCase().includes(searchfilter.toLowerCase());
+      return item?.name?.toLowerCase()?.includes(searchfilter?.toLowerCase());
     });
+    console.log("Filter data", filteredData);
     setFilteredTestData(filteredData);
   }, [searchfilter]);
+
+  // Use form.watch to get the current value of the associate field
+  const selectedAssociates = form.watch("associate") || [];
+
+  // Calculate validSelectedKeys based on the watched value
 
   return (
     <Form {...form}>
@@ -266,59 +291,22 @@ function ProfileForm() {
             name="associate"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Associate</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="w-full"
+                  className="max-w-xs"
+                  label="Favorite Animal"
+                  placeholder="Select an animal"
+                  selectedKeys={field.value}
+                  variant="bordered"
+                  selectionMode="multiple"
+                  onSelectionChange={field.onChange}
                 >
-                  <FormControl className="w-full">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Associate" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {associates?.map((associate) => (
-                      <SelectItem key={associate._id} value={associate._id}>
-                        {associate.firstName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  {associates.map((animal) => (
+                    <SelectItem key={animal._id}>{animal.firstName}</SelectItem>
+                  ))}
                 </Select>
+
                 <FormDescription>
                   Select Associate you want to use.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            className="flex-1"
-            control={form.control}
-            name="department"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Department</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="w-full"
-                >
-                  <FormControl className="w-full">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Department type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {department?.map((dept) => (
-                      <SelectItem key={dept._id} value={dept._id}>
-                        {dept.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  Select Department you want to use.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

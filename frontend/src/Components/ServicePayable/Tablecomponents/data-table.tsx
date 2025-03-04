@@ -178,6 +178,8 @@ function DataTable<
               (check.type === "department" && item.department)
           );
 
+          console.log("Item ppa", item);
+
           return {
             item,
             oldValue: item?.price ?? 0,

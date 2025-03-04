@@ -1,12 +1,5 @@
 const mongoose = require("mongoose");
 
-const patientschema = new mongoose.Schema({
-  patientId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Patient",
-    required: true,
-  },
-});
 const referralschema = new mongoose.Schema({
   primaryRefferal: {
     type: mongoose.Schema.Types.ObjectId,
@@ -15,10 +8,12 @@ const referralschema = new mongoose.Schema({
   secondaryRefferal: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "AssociateMaster",
+    default: null,
   },
   billedTo: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "AssociateMaster",
+    default: null,
   },
   coporateCustomer: {
     type: mongoose.Schema.Types.ObjectId,
@@ -52,7 +47,6 @@ const testSchema = new mongoose.Schema({
   },
   tat: {
     type: Number, // Hours needed for the test
-    required: true,
     default: 24,
   },
   urgent: {
@@ -82,7 +76,6 @@ const testSchema = new mongoose.Schema({
   },
   expectedCompletionTime: {
     type: Date,
-    required: true,
   },
 });
 
@@ -117,11 +110,9 @@ const homevisitschema = new mongoose.Schema({
 const paymentModeschema = new mongoose.Schema({
   paymentMode: {
     type: String,
-    required: true,
   },
   paidAmount: {
     type: Number,
-    required: true,
   },
 });
 
@@ -129,7 +120,6 @@ const paymentDeliverySchema = new mongoose.Schema({
   paymentDeliveryMode: [
     {
       type: String,
-      required: true,
     },
   ],
 });

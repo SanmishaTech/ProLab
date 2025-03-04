@@ -12,10 +12,7 @@ router.get("/reference/:referenceId", servicePayableController.getServicesbyId);
 //   upload.single("file"),
 //   servicePayableController.uploadCSV
 // );
-router.get(
-  "/getassociate/:associateId/:userId",
-  servicePayableController.getAssociate
-);
+router.post("/getassociate/:userId", servicePayableController.getAssociates);
 router.put("/update/:associateId", servicePayableController.updateThreads);
 router.delete("/delete/:specimenId", servicePayableController.deleteThread);
 

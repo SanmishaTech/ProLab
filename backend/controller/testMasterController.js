@@ -238,6 +238,7 @@ const Servicescontroller = {
       res.status(500).json({ error: error.message });
     }
   },
+
   updateThreads: async (req, res, next) => {
     try {
       const doctorId = req.params.testmasterId;
@@ -312,6 +313,46 @@ const Servicescontroller = {
       res.status(500).json({ error: error.message });
     }
   },
+  searchtests: async (req, res, next) => {
+    try {
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+
+      // Extract pagination and search parameters from query with defaults
+      let { page = 1, limit = 10, search = "" } = req.query;
+      page = parseInt(page);
+      limit = parseInt(limit);
+      const skip = (page - 1) * limit;
+
+      // Build the query condition
+      const query = { userId: usertobefound };
+      if (search.trim()) {
+        query.$or = [{ name: { $regex: `^${search}`, $options: "i" } }];
+      }
+
+      // Execute both the paginated query and count in parallel
+      const [patients, total] = await Promise.all([
+        Department.find(query).skip(skip).limit(limit).lean(),
+
+        Department.countDocuments(query),
+      ]);
+
+      const totalPages = Math.ceil(total / limit);
+      const nextPage = page < totalPages ? page + 1 : null;
+      const prevPage = page > 1 ? page - 1 : null;
+
+      res.status(200).json({
+        patients,
+        total,
+        page,
+        totalPages,
+        nextPage,
+        prevPage,
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
   searchbyName: async (req, res, next) => {
     try {
       const userId = req.params.userId;
@@ -351,6 +392,198 @@ const Servicescontroller = {
         nextPage,
         prevPage,
       });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  searchbyName: async (req, res, next) => {
+    try {
+      const name = req.params.name;
+      const userId = req.params.userId;
+      const usertobefound = new mongoose.Types.ObjectId(userId);
+
+      // Use mongoose to find user first if necessary
+      const userwithid = await User.findById(userId);
+      if (!userwithid) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      // const agg = [
+      //   {
+      //     $search: {
+      //       index: "test", // Check if 'lab' is correctly configured in your MongoDB Atlas Search
+      //       autocomplete: {
+      //         query: name,
+      //         path: "name",
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $match: {
+      //       userId: new mongoose.Types.ObjectId(userId), // Match userId with the correct type
+      //     },
+      //   },
+      // ];
+      let { page = 1, limit = 10, search = "" } = req.query;
+      const query = { userId: usertobefound };
+      if (search.trim()) {
+        query.$or = [
+          { name: { $regex: `^${search}`, $options: "i" } },
+          // { mobile: { $regex: `^${search}`, $options: "i" } },
+        ];
+      }
+
+      // Execute both the paginated query and count in parallel
+      const [patient, total] = await Promise.all([
+        Department.find(query).lean(),
+        Department.countDocuments(query),
+      ]);
+
+      // const patient = await Department.aggregate(agg);
+
+      let tat;
+      if (patient[0]?.name) {
+        tat = await Tatmaster.find({
+          userId: usertobefound,
+          selectTest: patient[0]?._id,
+        });
+      }
+      const day = getTodaysDay();
+      const workinghours = await WorkingHours.find({
+        userId: usertobefound,
+      });
+      console.log(
+        "Working hours:",
+        workinghours[0]?.schedule.filter((item) => item.day === day)
+      );
+      const tatfortoday = workinghours[0]?.schedule.filter(
+        (item) => item.day === day
+      );
+      let calculatedurgenttat;
+      let calculatedTat;
+      if (tat && workinghours.length > 0) {
+        const startTime = new Date();
+        const duration = tat[0]?.hoursNeeded || 0;
+        const urgentduration = tat[0]?.urgentHours || 0;
+        const breakHours = tatfortoday[0]?.break;
+        const breakHoursFrom = breakHours?.from.split(":").map(Number);
+        const breakHoursTo = breakHours?.to.split(":").map(Number);
+
+        // Calculate the initial end time
+        let endTime = new Date(startTime.getTime() + duration * 60 * 60 * 1000);
+        let endTimeUrgent = new Date(
+          startTime.getTime() + urgentduration * 60 * 60 * 1000
+        );
+
+        // Log debug information
+        console.log("Start Time:", startTime);
+        console.log("Initial End Time (without break):", endTime);
+        console.log("Break Hours:", breakHours);
+
+        // If break hours are defined, adjust TAT for breaks that fall within the test duration
+        if (breakHoursFrom && breakHoursTo) {
+          const breakStart = new Date(startTime);
+          breakStart.setHours(
+            breakHoursFrom[0],
+            breakHoursFrom[1],
+            breakHoursFrom[2]
+          );
+
+          const breakEnd = new Date(startTime);
+          breakEnd.setHours(breakHoursTo[0], breakHoursTo[1], breakHoursTo[2]);
+
+          console.log("Break Start:", breakStart);
+          console.log("Break End:", breakEnd);
+
+          // Check if the break time overlaps with the test duration
+          if (startTime <= breakEnd && endTime >= breakStart) {
+            const overlapStart = Math.max(
+              startTime.getTime(),
+              breakStart.getTime()
+            );
+            const overlapEnd = Math.min(endTime.getTime(), breakEnd.getTime());
+            const breakDuration =
+              (overlapEnd - overlapStart) / (60 * 60 * 1000); // Convert to hours
+
+            console.log("Overlap Start (ms):", overlapStart);
+            console.log("Overlap End (ms):", overlapEnd);
+            console.log("Break Duration (hours):", breakDuration);
+
+            // Add the break duration to the end time
+            if (breakDuration > 0) {
+              endTime = new Date(
+                endTime.getTime() + breakDuration * 60 * 60 * 1000
+              );
+              console.log("Adjusted End Time (with break):", endTime);
+            }
+          } else {
+            console.log("No overlap between break time and test duration.");
+          }
+        } else {
+          console.log("Break hours not defined or invalid.");
+        }
+
+        if (breakHoursFrom && breakHoursTo) {
+          const breakStart = new Date(startTime);
+          breakStart.setHours(
+            breakHoursFrom[0],
+            breakHoursFrom[1],
+            breakHoursFrom[2]
+          );
+
+          const breakEnd = new Date(startTime);
+          breakEnd.setHours(breakHoursTo[0], breakHoursTo[1], breakHoursTo[2]);
+
+          console.log("Break Start:", breakStart);
+          console.log("Break End:", breakEnd);
+
+          // Check if the break time overlaps with the test duration
+          if (startTime <= breakEnd && endTimeUrgent >= breakStart) {
+            const overlapStart = Math.max(
+              startTime.getTime(),
+              breakStart.getTime()
+            );
+            const overlapEnd = Math.min(
+              endTimeUrgent.getTime(),
+              breakEnd.getTime()
+            );
+            const breakDuration =
+              (overlapEnd - overlapStart) / (60 * 60 * 1000); // Convert to hours
+
+            console.log("Overlap Start (ms):", overlapStart);
+            console.log("Overlap End (ms):", overlapEnd);
+            console.log("Break Duration (hours):", breakDuration);
+
+            // Add the break duration to the end time
+            if (breakDuration > 0) {
+              endTimeUrgent = new Date(
+                endTimeUrgent.getTime() + breakDuration * 60 * 60 * 1000
+              );
+              console.log("Adjusted End Time (with break):", endTimeUrgent);
+            }
+          } else {
+            console.log("No overlap between break time and test duration.");
+          }
+        } else {
+          console.log("Break hours not defined or invalid.");
+        }
+
+        // Final calculated TAT
+        calculatedTat = endTime;
+        calculatedurgenttat = endTimeUrgent;
+        console.log("Final Calculated TAT:", calculatedTat);
+        console.log("Final Calculated urgent TAT:", calculatedurgenttat);
+      }
+
+      console.log("This is tat", calculatedTat);
+      const combinebothdata = {
+        tests: patient,
+        tat: tat,
+        calculatedTat: calculatedTat,
+        calculatedurgenttat: calculatedurgenttat,
+      };
+      res.status(200).json(combinebothdata);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

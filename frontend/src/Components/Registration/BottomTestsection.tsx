@@ -390,6 +390,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     }
 
     try {
+      console.log("This is top component", topComp);
       // Prepare tests with TAT information
       const testsWithTAT = items.map((item) => ({
         tests: item.id,
@@ -401,7 +402,7 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
       }));
 
       const response = await axios.post("/api/registration", {
-        patientId: topComp?.patientId,
+        patientId: topComp?.patientId?._id,
         referral: topComp?.referralId,
         tests: testsWithTAT,
         totaltestprice: calculateSubtotal(),
@@ -601,10 +602,10 @@ const Order: React.FC<OrderProps> = ({ setOrderComp, topComp }) => {
     try {
       console.log("This is AddTestTable", AddTestTable);
       const data = {
-        patientId: topComp.patientId,
+        patientId: topComp?.patientId?._id,
         referral: {
-          primaryRefferal: topComp.referral?.primaryRefferedBy,
-          secondaryRefferal: topComp.referral?.secondaryRefferedBy,
+          primaryRefferal: topComp.referral?.primaryRefferedBy || undefined,
+          secondaryRefferal: topComp.referral?.secondaryRefferedBy || undefined,
           billedTo: topComp.referral?.billedTo || undefined,
           corporateCustomer: topComp.referral?.corporateCustomer || undefined,
           clinicHistory: topComp.referral?.clinicHistory,
