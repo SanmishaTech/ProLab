@@ -10,47 +10,47 @@ const ServicePayableController = {
   createThread: async (req, res, next) => {
     try {
       const { associate, department, test, value, userId } = req.body;
-      const associatetobefound = new mongoose.Types.ObjectId(associate);
-      const departmenttobefound = new mongoose.Types.ObjectId(department);
       const Usertobefound = new mongoose.Types.ObjectId(userId);
-      // const testtobefound = mongoose.Types.ObjectId(test);
+      const results = [];
 
-      const findexistingservice = await ServicePayable.find({
-        associate: associatetobefound,
-
-        userId: Usertobefound,
-      });
-      if (findexistingservice && findexistingservice.length > 0) {
-        const updatetests = await ServicePayable.findOneAndUpdate(
-          { _id: findexistingservice[0]._id }, // Use the first document's ID
-          { associate, department, test, value, userId },
-          { new: true } // Option to return the updated document
-        );
-        console.log(updatetests);
-        return res.json({
-          message: "Patients Updated successfully",
-          service: updatetests,
+      for (const item of associate) {
+        const associatetobefound = new mongoose.Types.ObjectId(item);
+        console.log("Associate", associatetobefound);
+        const findexistingservice = await ServicePayable.find({
+          associate: associatetobefound,
+          userId: Usertobefound,
         });
+        console.log("Find existing", findexistingservice);
+
+        if (findexistingservice && findexistingservice.length > 0) {
+          console.log("Existing");
+          const updatedService = await ServicePayable.findOneAndUpdate(
+            { _id: findexistingservice[0]._id },
+            { associate: item, department, test, value, userId },
+            { new: true }
+          );
+          results.push(updatedService);
+        } else {
+          console.log("Non existing ");
+          const newService = new ServicePayable({
+            associate: item,
+            department,
+            test,
+            value,
+            userId,
+          });
+          const new_SR = await newService.save();
+          results.push(new_SR);
+        }
       }
 
-      const newService = new ServicePayable({
-        associate,
-        department,
-        test,
-        value,
-        userId,
-      });
-      // console.log(newService);
-      const newServics = await newService.save();
-
-      res.json({
-        message: "Patients created successfully",
-        service: newServics,
-      });
+      // Send a single response with the aggregated results
+      return res.status(200).json(results);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
+
   getServices: async (req, res, next) => {
     try {
       const userId = req.params.userId;
@@ -88,119 +88,106 @@ const ServicePayableController = {
       res.status(500).json({ error: error.message });
     }
   },
-
   getAssociates: async (req, res, next) => {
     try {
-      const associates = req.body.associate; // Changed to array
+      const associates = req.body.associate;
       const userId = req.params.userId;
-      const usertobefound = new mongoose.Types.ObjectId(userId);
       const departmentId = req.query.departmentId;
-      const departmenttobefound = departmentId
-        ? new mongoose.Types.ObjectId(departmentId)
-        : null;
 
-      // console.log(associates);
-      // Process all associates
-
-      const servicePromises = await associates?.map(async (associateId) => {
-        const associateObjectId = new mongoose.Types.ObjectId(associateId);
-        // console.log(associateObjectId);
-        const services = await ServicePayable.find({
-          associate: associateObjectId,
-          userId: usertobefound,
-        })
-          .populate({
-            path: "associate",
-          })
-          .populate({
-            path: "test",
-            populate: {
-              path: "testId",
-            },
-          });
-        // console.log(services);
-
-        return services;
+      // Fetch all relevant tests first
+      const tests = await Test.find({
+        userId: new mongoose.Types.ObjectId(userId),
+        ...(departmentId && {
+          department: new mongoose.Types.ObjectId(departmentId),
+        }),
       });
 
-      // console.log("Execute", servicePromises);
+      // Create test map with all associates pre-populated
+      const testMap = new Map(
+        tests.map((test) => [
+          test._id.toString(),
+          {
+            testId: test,
+            defaultPrice: test.price,
+            defaultPercentage: test.percentage,
+            prices: new Map(
+              associates.map((associateId) => [
+                associateId,
+                {
+                  price: test.price, // Default price
+                  percentage: test.percentage, // Default percentage
+                },
+              ])
+            ),
+            hasConflict: false,
+          },
+        ])
+      );
+
+      // Process services for all associates
+      const servicePromises = associates.map(async (associateId) => {
+        return ServicePayable.find({
+          associate: new mongoose.Types.ObjectId(associateId),
+          userId: new mongoose.Types.ObjectId(userId),
+        }).populate({
+          path: "test",
+          populate: { path: "testId" },
+        });
+      });
+
       const allServices = await Promise.all(servicePromises);
-      console.log(allServices);
 
-      // Get all tests once
-      let tests = await Test.find({
-        userId: usertobefound,
-        ...(departmentId && { department: departmenttobefound }),
-      });
-
-      // Create test map with price conflicts
-      const testMap = new Map();
-
-      tests.forEach((test) => {
-        const testEntry = {
-          testId: test,
-          defaultPrice: test.price,
-          defaultPercentage: test.percentage,
-          prices: new Map(), // Map of associate IDs to their prices
-          hasConflict: false,
-        };
-        testMap.set(test._id.toString(), testEntry);
-      });
-
-      // Populate prices from services
+      // Update prices from services
       allServices.forEach((services, index) => {
         const associateId = associates[index];
         services.forEach((service) => {
           service.test.forEach((serviceTest) => {
             const testId = serviceTest.testId?._id?.toString();
-            if (testId && testMap.has(testId)) {
-              const testEntry = testMap.get(testId);
-              const existingPrice = testEntry.prices.get(associateId);
+            if (!testId || !testMap.has(testId)) return;
 
-              if (
-                existingPrice &&
-                (existingPrice !== serviceTest.price ||
-                  existingPercentage !== serviceTest.percentage)
-              ) {
-                testEntry.hasConflict = true;
-              }
+            const testEntry = testMap.get(testId);
+            const currentPrice = serviceTest.price ?? testEntry.defaultPrice;
+            const currentPercentage =
+              serviceTest.percentage ?? testEntry.defaultPercentage;
 
-              testEntry.prices.set(associateId, {
-                price: serviceTest.price || testEntry.defaultPrice,
-                percentage:
-                  serviceTest.percentage || testEntry.defaultPercentage,
-              });
-            }
+            testEntry.prices.set(associateId, {
+              price: currentPrice,
+              percentage: currentPercentage,
+            });
           });
         });
       });
 
-      // Check for conflicts
-      const results = Array.from(testMap.values())?.map((testEntry) => {
-        const conflicts = [];
+      // Detect conflicts
+      const results = Array.from(testMap.values()).map((testEntry) => {
         let basePrice = null;
         let basePercentage = null;
+        const conflictAssociates = new Set();
 
-        testEntry.prices.forEach((value, associateId) => {
+        testEntry.prices.forEach(({ price, percentage }, associateId) => {
           if (basePrice === null) {
-            basePrice = value.price;
-            basePercentage = value.percentage;
-          } else if (
-            value.price !== basePrice ||
-            value.percentage !== basePercentage
-          ) {
-            conflicts.push(associateId);
-            testEntry.hasConflict = true;
+            basePrice = price;
+            basePercentage = percentage;
+            // console.log(price, percentage);
+          } else if (price !== basePrice || percentage !== basePercentage) {
+            // conflictAssociates.add(associateId);
+            // Add previous associates to conflicts too
+            console.log(associateId);
+            testEntry.prices.forEach((_, key) => {
+              if (key !== associateId) conflictAssociates.add(key);
+            });
           }
         });
-
+        console.log();
         return {
           ...testEntry,
+          prices: Object.fromEntries(testEntry.prices),
+          hasConflict: conflictAssociates.size > 0,
           conflicts:
-            conflicts.length > 0
+            conflictAssociates.size > 0
               ? {
-                  message: "Price/percentage conflict detected",
-                  associates: conflicts,
+                  message: "Price/percentage discrepancy",
+                  associates: Array.from(conflictAssociates),
                   basePrice,
                   basePercentage,
                 }
@@ -218,7 +205,6 @@ const ServicePayableController = {
       res.status(500).json({ error: error.message });
     }
   },
-
   updateThreads: async (req, res, next) => {
     try {
       const patientId = req.params.associateId;

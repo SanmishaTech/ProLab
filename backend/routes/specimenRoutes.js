@@ -6,6 +6,7 @@ router.post("/", specimenController.createThread);
 router.get("/allspecimen/:userId", specimenController.getServices);
 router.get("/reference/:departmentId", specimenController.getServicesbyId);
 router.put("/update/:departmentId", specimenController.updateThreads);
+router.get("/search/:userId", specimenController.searchdepartment);
 router.delete("/delete/:specimenId", specimenController.deleteThread);
 
 module.exports = router;

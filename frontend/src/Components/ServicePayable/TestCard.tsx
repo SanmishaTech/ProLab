@@ -43,6 +43,7 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import MultiSelectorComponent from "./profile";
 import Tablecomponent from "./Tablecomponent";
+import AlertDialogbox from "./conflictassociate/conflict";
 
 const profileFormSchema = z.object({
   associate: z.any().optional(),
@@ -87,6 +88,8 @@ function ProfileForm() {
   const [conflictchecks, setconflictchecks] = useState<any[]>([]);
   const [searchfilter, setsearchfilter] = useState("");
   const [FilteredTestData, setFilteredTestData] = useState<any[]>([]);
+  const [conflictData, setConflictData] = useState();
+  const [conflictopen, setconflictopen] = useState(true);
 
   const { watch } = form;
   const watchedAssociate = watch("associate");
@@ -112,14 +115,20 @@ function ProfileForm() {
           }
         );
         console.log("Fetched on associate change:", response.data);
+
+        setConflictData(response.data);
+        setconflictopen(true);
+
         const updatedtestadded = response.data?.tests.map((item) => {
           let updatedtest = item.testId;
           let newitem = {
             testId: {
+              defaultPrice: item?.defaultPrice,
+              conflicts: item?.prices,
               ...updatedtest,
               price: item?.testId?.price,
               hasConflict: item?.hasConflict,
-              originalPrice: item?.testId?.price ?? item.price,
+              originalPrice: item?.defaultPrice ?? item.testId?.price,
             },
 
             price: item.price,
@@ -127,13 +136,14 @@ function ProfileForm() {
           };
           return newitem;
         });
+        setConflictData(updatedtestadded);
         console.log("UPDATED", updatedtestadded);
 
         const testspecialarrray = updatedtestadded.map((item) => {
           return item.testId;
         });
         console.log("Updatedtestadded", testspecialarrray);
-        setconflictchecks(updatedtestadded);
+        setconflictchecks(testspecialarrray);
         setUpdatedtests(testspecialarrray);
         settestmaster(testspecialarrray);
       } catch (error) {
@@ -331,6 +341,11 @@ function ProfileForm() {
             onUpdateTests={handleUpdateTests}
           />
         </div>
+        <AlertDialogbox
+          isOpen={conflictopen}
+          onOpen={setconflictopen}
+          conflictData={conflictData}
+        />
         <div className="flex justify-end w-full">
           <Button className="self-center mr-8" type="submit">
             Add Servicepayable

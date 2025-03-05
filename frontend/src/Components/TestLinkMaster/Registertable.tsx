@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useFetchData } from "@/fetchcomponents/Fetchapi";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -34,6 +35,10 @@ export default function Dashboardholiday() {
     setTotalPages(response.data?.totalPages);
     return response.data.patients;
   };
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["testmasterlink"] });
+  }, []);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {

@@ -529,6 +529,7 @@ function DataTable<
                               onCheckedChange={() => toggleConflictItem(index)}
                             />
                           </td>
+                          {console.log("conflict Resolution", conflict)}
                           <td className="py-3 px-4">
                             {conflict.item?.name ?? "Unnamed Item"}
                           </td>

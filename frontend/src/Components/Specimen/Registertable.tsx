@@ -6,6 +6,7 @@ import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { useFetchData } from "@/fetchcomponents/Fetchapi";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -14,6 +15,10 @@ export default function Dashboardholiday() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10; // You can change the limit if needed
+  const [search, setSearch] = useState("");
 
   const typeofschema = {
     specimen: {
@@ -22,16 +27,65 @@ export default function Dashboardholiday() {
     },
   };
 
+  const fetchProjects = async ({ queryKey }) => {
+    const [_key, { currentPage, search }] = queryKey;
+    const response = await axios.get(
+      `/api/specimen/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`
+    );
+    setTotalPages(response.data?.totalPages);
+    return response.data.patients;
+  };
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["specimen"] });
+  }, []);
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  // const {
+  //   data: data1,
+  //   isLoading: isLoading1,
+  //   isFetching: isFetching1,
+  //   isError: isError1,
+  // } = useFetchData({
+  //   endpoint: `/api/specimen/allspecimen/${User?._id}`,
+  //   params: {
+  //     queryKey: ["specimen"],
+  //     queryKeyId: User?._id,
+  //     retry: 5,
+  //     refetchOnWindowFocus: true,
+  //     onSuccess: (res) => {
+  //       toast.success("Successfully Fetched Data");
+  //       console.log("This is res", res);
+  //     },
+  //     onError: (error) => {
+  //       toast.error(error.message);
+  //     },
+  //   },
+  // });
+
   const {
     data: data1,
     isLoading: isLoading1,
     isFetching: isFetching1,
-    isError: isError1,
+    // isError: fetchError,
   } = useFetchData({
-    endpoint: `/api/specimen/allspecimen/${User?._id}`,
+    endpoint: `/api/specimen/search/${User?._id}?page=${currentPage}&limit=${limit}&search=${search}`,
     params: {
-      queryKey: ["specimen"],
-      queryKeyId: User?._id,
+      queryKey: ["specimen", { currentPage, search }],
+      // queryKeyId: User?._id,
+      queryFn: fetchProjects,
+      enabled: !!User?._id,
+
       retry: 5,
       refetchOnWindowFocus: true,
       onSuccess: (res) => {
@@ -160,10 +214,15 @@ export default function Dashboardholiday() {
         userAvatar={userAvatar}
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
         onAddProduct={handleAddProduct}
         onExport={handleExport}
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
+        handleNextPage={handleNextPage}
+        handlePrevPage={handlePrevPage}
         AddItem={AddItem}
         typeofschema={typeofschema}
       />

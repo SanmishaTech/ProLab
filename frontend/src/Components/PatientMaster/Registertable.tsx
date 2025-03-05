@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useFetchData } from "@/fetchcomponents/Fetchapi";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AddItem = () => {
   const navigate = useNavigate();
@@ -51,6 +52,7 @@ export default function Dashboardholiday() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10; // You can change the limit if needed
   const [search, setSearch] = useState("");
+  const queryClient = useQueryClient();
 
   const fetchProjects = async ({ queryKey }) => {
     const [_key, { currentPage, search }] = queryKey;
@@ -60,6 +62,9 @@ export default function Dashboardholiday() {
     setTotalPages(response.data?.totalPages);
     return response.data.patients;
   };
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["patientmaster"] });
+  }, []);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -125,9 +130,6 @@ export default function Dashboardholiday() {
     },
   });
 
-  useEffect(() => {
-    console.log("PA", PaginatedData);
-  }, []);
   useEffect(() => {
     // Fetch data from the API
     const fetchparameter = async () => {

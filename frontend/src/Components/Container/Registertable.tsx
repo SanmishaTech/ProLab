@@ -6,6 +6,7 @@ import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
 import { useFetchData } from "@/fetchcomponents/Fetchapi";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
@@ -34,6 +35,10 @@ export default function Dashboardholiday() {
     setTotalPages(response.data?.totalPages);
     return response.data.patients;
   };
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["container"] });
+  }, []);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {

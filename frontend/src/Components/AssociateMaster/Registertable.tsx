@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useFetchData } from "@/fetchcomponents/Fetchapi";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AddItem = () => {
   const navigate = useNavigate();
@@ -116,7 +117,10 @@ export default function Dashboardholiday() {
     setTotalPages(response.data?.totalPages);
     return response.data.patients;
   };
-
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["associatemaster"] });
+  }, []);
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       console.log("This is current page", currentPage);

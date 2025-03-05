@@ -198,7 +198,7 @@ const patientMasterController = {
       const usertobefound = new mongoose.Types.ObjectId(userId);
 
       // Extract pagination and search parameters from query with defaults
-      let { page = 1, limit = 10, search = "" } = req.query;
+      let { page = 1, limit = 20, search = "" } = req.query;
       console.log(search);
       page = parseInt(page);
       limit = parseInt(limit);
