@@ -91,6 +91,7 @@ function ProfileForm() {
   const [conflictData, setConflictData] = useState();
   const [conflictopen, setconflictopen] = useState(false);
   const [Selectopen, setSelectopen] = useState(false);
+  const [SelectedAssociate, setSelectedAssociate] = useState(null);
 
   const { watch } = form;
   const watchedAssociate = watch("associate");
@@ -347,6 +348,7 @@ function ProfileForm() {
             setUpdatedtests={setUpdatedtests}
             setPercentagevalue={setPercentagevalue}
             conflictchecks={conflictchecks}
+            setSelectedAssociate={setSelectedAssociate}
             onUpdateTests={handleUpdateTests}
           />
         </div>

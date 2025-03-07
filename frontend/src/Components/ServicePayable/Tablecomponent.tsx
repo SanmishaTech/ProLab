@@ -46,6 +46,7 @@ export default function Tablecomponent({
   setUpdatedtests,
   setPercentagevalue,
   conflictchecks,
+  setSelectedAssociate,
   onUpdateTests,
 }: Props) {
   const [users, setUsers] = useState<Test[]>([]);
@@ -115,6 +116,7 @@ export default function Tablecomponent({
         onEdit={handleEdit}
         onBulkEdit={handleBulkEdit}
         onDelete={handleDelete}
+        setSelectedAssociate={setSelectedAssociate}
         itemsPerPage={10}
         selectedItems={selectedItems}
         onSelectedItemsChange={setSelectedItems}

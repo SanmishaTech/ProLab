@@ -78,6 +78,7 @@ function DataTable<
   selectedItems,
   onSelectedItemsChange,
   conflictchecks,
+  setSelectedAssociate,
 }: DataTableProps<T>) {
   const [sortColumn, setSortColumn] = useState<keyof T | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);

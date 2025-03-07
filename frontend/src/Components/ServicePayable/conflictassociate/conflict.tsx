@@ -6,11 +6,10 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  useDisclosure,
 } from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function AlertDialogbox({
   url,
@@ -23,7 +22,8 @@ export default function AlertDialogbox({
   // Track which test rows are expanded
   const [openTests, setOpenTests] = useState({});
 
-  // Track which associates are selected for conflict resolution
+  // Instead of storing a boolean value, we now store metadata objects for selected associates.
+  // When an associate is not selected, its key is absent.
   const [selectedAssociates, setSelectedAssociates] = useState({});
 
   const queryClient = useQueryClient();
@@ -36,31 +36,18 @@ export default function AlertDialogbox({
       onOpen(false);
     }
   };
+
   useEffect(() => {
-    console.log("conflictData", selectedAssociates);
+    // Optional: Log the current metadata for selected associates for debugging.
+    console.log("Selected Associates Metadata:", selectedAssociates);
   }, [selectedAssociates]);
 
-  // Initialize selected associates when conflict data changes
+  // When conflictData changes, clear out the selection.
   useEffect(() => {
-    if (conflictData?.tests) {
-      const initialSelections = {};
-
-      // Initialize all associates as unselected
-      conflictData.tests.forEach((test, index) => {
-        if (test.conflictAssociates) {
-          test.conflictAssociates.forEach((associate) => {
-            const associateId = getAssociateKey(test, associate, index);
-            initialSelections[associateId] = false;
-          });
-        }
-      });
-
-      setSelectedAssociates(initialSelections);
-    }
+    setSelectedAssociates({});
   }, [conflictData]);
 
   // Toggle expansion of a test row
-  // Toggle expansion of a test row with unique key:
   const toggleTestRow = (uniqueTestKey) => {
     setOpenTests((prev) => ({
       ...prev,
@@ -68,37 +55,66 @@ export default function AlertDialogbox({
     }));
   };
 
-  // Toggle selection of a specific associate
-  const toggleAssociateSelection = (associateId) => {
-    setSelectedAssociates((prev) => ({
-      ...prev,
-      [associateId]: !prev[associateId],
-    }));
+  // Toggle selection of a specific associate.
+  // Now we also pass in the test, associate, and index so we can save extra metadata.
+  const toggleAssociateSelection = (associateId, test, associate, index) => {
+    setSelectedAssociates((prev) => {
+      if (prev[associateId]) {
+        // If already selected, remove it.
+        const newSelections = { ...prev };
+        delete newSelections[associateId];
+        return newSelections;
+      } else {
+        // Otherwise, add a metadata object.
+        return {
+          ...prev,
+          [associateId]: {
+            testId: test?.testId?._id || test?.testId?.name,
+            testName: test?.testId?.name || "Unnamed Test",
+            associate,
+            index,
+          },
+        };
+      }
+    });
   };
 
-  // Toggle selection for all associates in a specific test
+  // Toggle selection for all associates in a specific test.
   const toggleAllTestAssociates = (test, isSelected) => {
     if (test?.conflictAssociates) {
       const updatedSelections = { ...selectedAssociates };
-
       test.conflictAssociates.forEach((associate, index) => {
         const associateId = getAssociateKey(test, associate, index);
-        updatedSelections[associateId] = isSelected;
+        if (isSelected) {
+          updatedSelections[associateId] = {
+            testId: test?.testId?._id || test?.testId?.name,
+            testName: test?.testId?.name || "Unnamed Test",
+            associate,
+            index,
+          };
+        } else {
+          delete updatedSelections[associateId];
+        }
       });
-
       setSelectedAssociates(updatedSelections);
     }
   };
 
-  // Toggle selection for all associates across all tests
+  // Toggle selection for all associates across all tests.
   const toggleAllAssociates = (isSelected) => {
-    // Rebuild all selections based on the current conflictData
     const newSelections = {};
     conflictData?.tests?.forEach((test) => {
       if (test.conflictAssociates) {
         test.conflictAssociates.forEach((associate, index) => {
           const associateId = getAssociateKey(test, associate, index);
-          newSelections[associateId] = isSelected;
+          if (isSelected) {
+            newSelections[associateId] = {
+              testId: test?.testId?._id || test?.testId?.name,
+              testName: test?.testId?.name || "Unnamed Test",
+              associate,
+              index,
+            };
+          }
         });
       }
     });
@@ -107,7 +123,7 @@ export default function AlertDialogbox({
     // Optionally expand all tests when selecting all
     if (isSelected) {
       const newOpenTests = {};
-      conflictData?.tests?.forEach((test) => {
+      conflictData?.tests?.forEach((test, index) => {
         const testId = `${test.testId?.id || test.testId?.name}-${index}`;
         newOpenTests[testId] = true;
       });
@@ -115,7 +131,7 @@ export default function AlertDialogbox({
     }
   };
 
-  // Check if all associates of a specific test are selected
+  // Check if all associates of a specific test are selected.
   const areAllTestAssociatesSelected = (test) => {
     if (!test?.conflictAssociates || test.conflictAssociates.length === 0)
       return false;
@@ -141,36 +157,30 @@ export default function AlertDialogbox({
   const allSelected =
     totalAssociatesCount > 0 && selectedCount === totalAssociatesCount;
 
-  // Handle conflict resolution
+  // Handle conflict resolution. Now we get the metadata for each selected associate.
   const handleConflictResolution = () => {
-    // Create a list of selected associate IDs to update
-    const associatesToUpdate = Object.keys(selectedAssociates).filter(
-      (key) => selectedAssociates[key]
-    );
+    const associatesToUpdate = Object.entries(selectedAssociates)
+      .filter(([key, metadata]) => metadata)
+      .map(([key, metadata]) => metadata);
 
-    // Here you would add your API call to update the selected associates
-    // Example:
-    // axios.post(url, { associateIds: associatesToUpdate })
+    // Here you would add your API call to update the selected associates using the metadata.
+    // For example:
+    // axios.post(url, { associates: associatesToUpdate })
     //   .then(() => {
     //     queryClient.invalidateQueries(["yourQueryKey"]);
     //     onClose();
     //   });
 
-    console.log("Updating associates:", associatesToUpdate);
+    console.log("Updating associates with metadata:", associatesToUpdate);
     onClose();
   };
+
   const getAssociateKey = (test, associate, index) => {
     const testId = test?.testId?._id || test?.testId?.name;
     return `${testId}-${associate.id || associate.firstName}-${
       associate.lastName || ""
     }-${index}`;
   };
-  // const getAssociateKey = (test, associate, index) => {
-  //   const testId = test?.testId?.id || test?.testId?.name; // Changed _id to id
-  //   return `${testId}-${associate.id || associate.firstName}-${
-  //     associate.lastName || ""
-  //   }-${index}`;
-  // };
 
   return (
     <div className="relative z-[200]">
@@ -222,13 +232,6 @@ export default function AlertDialogbox({
                           }-${index}`;
                           const isTestOpen = openTests[testId];
 
-                          // Check if all associates in this specific test are selected
-                          const allTestAssociatesSelected =
-                            areAllTestAssociatesSelected(
-                              testId,
-                              test.conflictAssociates
-                            );
-
                           return (
                             <React.Fragment key={`${testId}-${index}`}>
                               {/* Main test row */}
@@ -248,7 +251,6 @@ export default function AlertDialogbox({
                                         }
                                         id={`test-${testId}-${index}`}
                                       />
-
                                       <label
                                         htmlFor={`test-${testId}-${index}`}
                                         className="cursor-pointer"
@@ -261,7 +263,6 @@ export default function AlertDialogbox({
                                 <td className="py-3 px-4 font-medium">
                                   {test.testId?.name || "Unnamed Test"}
                                 </td>
-
                                 <td className="py-3 px-4 text-right">
                                   {test.unifiedValue?.price &&
                                     `$${test.unifiedValue.price}`}
@@ -270,9 +271,7 @@ export default function AlertDialogbox({
                                   {test.conflictAssociates?.length > 0 ? (
                                     <Button
                                       variant="light"
-                                      onClick={() =>
-                                        toggleTestRow(testId, index)
-                                      }
+                                      onClick={() => toggleTestRow(testId)}
                                       size="sm"
                                       className="flex items-center gap-1 align-right"
                                     >
@@ -301,32 +300,32 @@ export default function AlertDialogbox({
 
                               {isTestOpen &&
                                 test.conflictAssociates?.map(
-                                  (associate, index) => {
-                                    //  const associateId =
-                                    //   associate.id ||
-                                    //   `${testId}-${associate.firstName}`;
+                                  (associate, idx) => {
                                     const associateId = getAssociateKey(
                                       test,
                                       associate,
-                                      index
+                                      idx
                                     );
 
                                     return (
                                       <tr
-                                        key={`${testId}-associate-${index}`}
+                                        key={`${testId}-associate-${idx}`}
                                         className="border-b bg-blue-50 hover:bg-blue-100"
                                       >
                                         <td className="py-2 px-4 pl-8">
                                           <div className="flex items-center space-x-2">
                                             <Checkbox
                                               checked={
-                                                selectedAssociates[
+                                                !!selectedAssociates[
                                                   associateId
-                                                ] || false
+                                                ]
                                               }
                                               onCheckedChange={() =>
                                                 toggleAssociateSelection(
-                                                  associateId
+                                                  associateId,
+                                                  test,
+                                                  associate,
+                                                  idx
                                                 )
                                               }
                                               id={`associate-${associateId}`}
@@ -388,7 +387,10 @@ export default function AlertDialogbox({
                                             size="sm"
                                             onClick={() =>
                                               toggleAssociateSelection(
-                                                associateId
+                                                associateId,
+                                                test,
+                                                associate,
+                                                idx
                                               )
                                             }
                                             className="text-gray-500 hover:text-gray-700"
