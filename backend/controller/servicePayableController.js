@@ -90,11 +90,20 @@ const ServicePayableController = {
   },
   getAssociates: async (req, res, next) => {
     try {
-      const associates = req.body.associate;
+      const associates = req.body.associate; // array of associate IDs
       const userId = req.params.userId;
       const departmentId = req.query.departmentId;
 
-      // Fetch all relevant tests first
+      // Fetch associate details (assumes Associate model is imported)
+      const associatesDetails = await Associate.find({
+        _id: { $in: associates.map((id) => new mongoose.Types.ObjectId(id)) },
+      });
+      // Create a lookup map: associate id => associate details
+      const associateDetailsMap = new Map(
+        associatesDetails.map((detail) => [detail._id.toString(), detail])
+      );
+
+      // Fetch all relevant tests
       const tests = await Test.find({
         userId: new mongoose.Types.ObjectId(userId),
         ...(departmentId && {
@@ -102,7 +111,7 @@ const ServicePayableController = {
         }),
       });
 
-      // Create test map with all associates pre-populated
+      // Create test map with all associates pre-populated with default values
       const testMap = new Map(
         tests.map((test) => [
           test._id.toString(),
@@ -110,21 +119,18 @@ const ServicePayableController = {
             testId: test,
             defaultPrice: test.price,
             defaultPercentage: test.percentage,
+            // prices: Map of associateId => {price, percentage}
             prices: new Map(
               associates.map((associateId) => [
                 associateId,
-                {
-                  price: test.price, // Default price
-                  percentage: test.percentage, // Default percentage
-                },
+                { price: test.price, percentage: test.percentage },
               ])
             ),
-            hasConflict: false,
           },
         ])
       );
 
-      // Process services for all associates
+      // Process ServicePayable for each associate to update prices
       const servicePromises = associates.map(async (associateId) => {
         return ServicePayable.find({
           associate: new mongoose.Types.ObjectId(associateId),
@@ -134,22 +140,19 @@ const ServicePayableController = {
           populate: { path: "testId" },
         });
       });
-
       const allServices = await Promise.all(servicePromises);
 
-      // Update prices from services
+      // Update prices based on services for each associate
       allServices.forEach((services, index) => {
         const associateId = associates[index];
         services.forEach((service) => {
           service.test.forEach((serviceTest) => {
             const testId = serviceTest.testId?._id?.toString();
             if (!testId || !testMap.has(testId)) return;
-
             const testEntry = testMap.get(testId);
             const currentPrice = serviceTest.price ?? testEntry.defaultPrice;
             const currentPercentage =
               serviceTest.percentage ?? testEntry.defaultPercentage;
-
             testEntry.prices.set(associateId, {
               price: currentPrice,
               percentage: currentPercentage,
@@ -158,45 +161,74 @@ const ServicePayableController = {
         });
       });
 
-      // Detect conflicts
+      // Process each test to split associates into non-conflict and conflict arrays
       const results = Array.from(testMap.values()).map((testEntry) => {
-        let basePrice = null;
-        let basePercentage = null;
-        const conflictAssociates = new Set();
-
+        // Group values by "price-percentage" key
+        const groupMap = {};
         testEntry.prices.forEach(({ price, percentage }, associateId) => {
-          if (basePrice === null) {
-            basePrice = price;
-            basePercentage = percentage;
-            // console.log(price, percentage);
-          } else if (price !== basePrice || percentage !== basePercentage) {
-            // conflictAssociates.add(associateId);
-            // Add previous associates to conflicts too
-            console.log(associateId);
-            testEntry.prices.forEach((_, key) => {
-              if (key !== associateId) conflictAssociates.add(key);
-            });
+          const key = `${price}-${percentage}`;
+          if (!groupMap[key]) {
+            groupMap[key] = { value: { price, percentage }, associates: [] };
+          }
+          groupMap[key].associates.push(associateId);
+        });
+
+        // Determine the unified value (most frequent group)
+        let unifiedGroup = null;
+        Object.keys(groupMap).forEach((key) => {
+          const group = groupMap[key];
+          if (
+            !unifiedGroup ||
+            group.associates.length > unifiedGroup.associates.length
+          ) {
+            unifiedGroup = group;
           }
         });
-        console.log();
+
+        // Split associates into non-conflict and conflict based on unified value
+        const nonConflictAssociates = [];
+        const conflictAssociates = [];
+        // console.log(testEntry);
+        testEntry.prices.forEach(({ price, percentage }, associateId) => {
+          const meta = associateDetailsMap.get(associateId) || {
+            _id: associateId,
+          };
+          const associateData = {
+            ...meta._doc, // if using Mongoose, _doc contains the raw data; otherwise, adjust accordingly
+            value: { price, percentage },
+          };
+
+          console.log(price === testEntry.defaultPrice);
+          if (
+            price === unifiedGroup.value.price &&
+            percentage === unifiedGroup.value.percentage
+          ) {
+            nonConflictAssociates.push(associateData);
+          } else {
+            conflictAssociates.push(associateData);
+          }
+        });
+
         return {
-          ...testEntry,
+          testId: testEntry.testId,
+          defaultPrice: testEntry.defaultPrice,
+          defaultPercentage: testEntry.defaultPercentage,
+          unifiedValue: unifiedGroup.value,
+          // Arrays to easily display on the frontend
+          nonConflictAssociates,
+          conflictAssociates,
+          // For reference, keep the raw prices mapping too
           prices: Object.fromEntries(testEntry.prices),
-          hasConflict: conflictAssociates.size > 0,
-          conflicts:
-            conflictAssociates.size > 0
-              ? {
-                  message: "Price/percentage discrepancy",
-                  associates: Array.from(conflictAssociates),
-                  basePrice,
-                  basePercentage,
-                }
-              : null,
+          hasConflict: conflictAssociates.length > 0,
         };
       });
 
       res.status(200).json({
         associates,
+        // Also send a full mapping of associate metadata if needed on the frontend
+        associatesMeta: Object.fromEntries(
+          associatesDetails.map((detail) => [detail._id.toString(), detail])
+        ),
         department: departmentId,
         tests: results,
         hasConflicts: results.some((test) => test.hasConflict),
@@ -205,6 +237,7 @@ const ServicePayableController = {
       res.status(500).json({ error: error.message });
     }
   },
+
   updateThreads: async (req, res, next) => {
     try {
       const patientId = req.params.associateId;

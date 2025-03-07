@@ -89,7 +89,8 @@ function ProfileForm() {
   const [searchfilter, setsearchfilter] = useState("");
   const [FilteredTestData, setFilteredTestData] = useState<any[]>([]);
   const [conflictData, setConflictData] = useState();
-  const [conflictopen, setconflictopen] = useState(true);
+  const [conflictopen, setconflictopen] = useState(false);
+  const [Selectopen, setSelectopen] = useState(false);
 
   const { watch } = form;
   const watchedAssociate = watch("associate");
@@ -117,7 +118,11 @@ function ProfileForm() {
         console.log("Fetched on associate change:", response.data);
 
         setConflictData(response.data);
-        setconflictopen(true);
+        // setconflictopen(true);
+        if (response.data?.hasConflicts) {
+          setSelectopen(false);
+          setconflictopen(true);
+        }
 
         const updatedtestadded = response.data?.tests.map((item) => {
           let updatedtest = item.testId;
@@ -136,7 +141,7 @@ function ProfileForm() {
           };
           return newitem;
         });
-        setConflictData(updatedtestadded);
+        // setConflictData(updatedtestadded);
         console.log("UPDATED", updatedtestadded);
 
         const testspecialarrray = updatedtestadded.map((item) => {
@@ -307,8 +312,12 @@ function ProfileForm() {
                   placeholder="Select an animal"
                   selectedKeys={field.value}
                   variant="bordered"
+                  isOpen={Selectopen} // control the open state externally
                   selectionMode="multiple"
                   onSelectionChange={field.onChange}
+                  onOpenChange={(open) => {
+                    setSelectopen(open);
+                  }}
                 >
                   {associates.map((animal) => (
                     <SelectItem key={animal._id}>{animal.firstName}</SelectItem>
