@@ -92,6 +92,7 @@ function ProfileForm() {
   const [conflictopen, setconflictopen] = useState(false);
   const [Selectopen, setSelectopen] = useState(false);
   const [SelectedAssociate, setSelectedAssociate] = useState(null);
+  const [conflictedselected, setconflictedselected] = useState(false);
 
   const { watch } = form;
   const watchedAssociate = watch("associate");
@@ -124,6 +125,7 @@ function ProfileForm() {
           setSelectopen(false);
           setconflictopen(true);
         }
+        console.log("Watch associates", watchedAssociate);
 
         const updatedtestadded = response.data?.tests.map((item) => {
           let updatedtest = item.testId;
@@ -203,32 +205,214 @@ function ProfileForm() {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // const arrangeselecteddatawithconflict =
+    //   conflictedselected &&
+    //   conflictedselected?.map((item) => {
+    //     return {
+    //       associate: item.associate._id,
+    //       test: {
+    //         testId: item.testId,
+    //         price: item.unifiedPrice,
+    //         percentage: item.unifiedPercentage,
+    //       },
+    //       userId: item.userId,
+    //     };
+    //   });
+
+    const nonconflictingdata = conflictData?.tests?.map((item) => {
+      return item.nonConflictAssociates.map((items) => {
+        return {
+          associate: items._id,
+          test: {
+            testId: item.testId?._id,
+            price: item.unifiedValue?.price,
+            percentage: item?.unifiedValue?.percentage,
+            userId: User?._id,
+          },
+        };
+      });
+    });
+    console.log("Non conflicting data", conflictedselected);
+  }, [conflictedselected, watchedAssociate]);
+
+  // async function onSubmit(data: ProfileFormValues) {
+  //   const arrayValues2 = Array.from(watchedAssociate || []);
+  //   // console.log("Watch associates", watchedAssociate);
+
+  //   const arrangeselecteddatawithconflict =
+  //     conflictedselected &&
+  //     conflictedselected?.map((item) => {
+  //       return {
+  //         associate: item.associate._id,
+  //         test: {
+  //           testId: item.testId,
+  //           price: item.unifiedPrice,
+  //           percentage: item.unifiedPercentage,
+  //           userId: User?._id,
+  //         },
+  //       };
+  //     });
+
+  //   const formattedData = {
+  //     associate: [
+  //       ...new Set(
+  //         arrayValues2?.map((item) => item)?.filter((item) => item !== "")
+  //       ),
+  //     ],
+  //     department: data.department,
+  //     test: updatedtests?.map((item) => ({
+  //       testId: item._id,
+  //       price: item.price,
+  //       percentage: percentagevalue,
+  //     })),
+  //     userId: User?._id,
+  //   };
+
+  //   try {
+  //     const response = await axios.post(`/api/service`, formattedData);
+  //     console.log("Service saved:", response.data);
+  //     toast.success("Service Payable Created Successfully");
+  //     navigate("/service");
+  //   } catch (error) {
+  //     console.error("Error saving service:", error);
+  //     toast.error("Failed to create Service Payable");
+  //   }
+  // }
+
+  // Modified onSubmit function
   async function onSubmit(data: ProfileFormValues) {
-    const arrayValues2 = Array.from(watchedAssociate || []);
-
-    const formattedData = {
-      associate: [
-        ...new Set(
-          arrayValues2?.map((item) => item)?.filter((item) => item !== "")
-        ),
-      ],
-      department: data.department,
-      test: updatedtests?.map((item) => ({
-        testId: item._id,
-        price: item.price,
-        percentage: percentagevalue,
-      })),
-      userId: User?._id,
-    };
-
     try {
-      const response = await axios.post(`/api/service`, formattedData);
-      console.log("Service saved:", response.data);
-      toast.success("Service Payable Created Successfully");
-      navigate("/service");
+      // Process non-conflicting and conflicting associates in parallel
+      console.log("updatedtests", updatedtests);
+      // const nonconflictingdata = conflictData?.tests?.map((item) => {
+      //   return item.nonConflictAssociates.map((items) => {
+      //     return {
+      //       associate: [items._id],
+      //       test: {
+      //         testId: item.testId?._id,
+      //         price:
+      //           updatedtests?.find((test) => test._id === item.testId?._id)
+      //             ?.price || items.unifiedValue?.price,
+
+      //         percentage: item?.unifiedValue?.percentage,
+      //       },
+      //       value:
+      //         updatedtests?.find((test) => test._id === item.testId?._id)
+      //           ?.price || items.unifiedValue?.price,
+      //       userId: User?._id,
+      //     };
+      //   });
+      // });
+      // Assuming data is your object with the tests array
+      const nonconflictingdata = conflictData.tests.flatMap((test) => {
+        // Find the updated test using testId. Adjust the matching logic depending on your testId structure.
+        const updatedTest = updatedtests?.find(
+          (uTest) => uTest._id === (test.testId?._id || test.testId)
+        );
+
+        // Use the updated price if found; otherwise, fallback to the original price.
+        const price = updatedTest
+          ? updatedTest.price
+          : test.unifiedValue?.price;
+
+        // Return one record per non-conflict associate.
+        return test.nonConflictAssociates.map((associate) => ({
+          associate: [associate._id],
+          test: {
+            testId: test.testId?._id,
+            price, // updated price if available
+            percentage: test.unifiedPercentage?.percentage,
+          },
+          userId: User?._id,
+        }));
+      });
+
+      console.log("Resulta", nonconflictingdata);
+
+      // const arrangeselecteddatawithconflict =
+      //   conflictedselected &&
+      //   conflictedselected?.map((item) => {
+      // return {
+      //   associate: [item.associate._id],
+      //   test: {
+      //     testId: item.testId,
+      //     price:
+      //       updatedtests?.find((test) => test._id === item.testId?._id)
+      //         ?.price || item.unifiedValue?.price,
+      //     percentage: item.unifiedPercentage?.percentage,
+      //   },
+      //   userId: User?._id,
+      // };
+      //   });
+
+      console.log("Non conflicting data", nonconflictingdata);
+
+      // const aggregatedData = nonconflictingdata?.flatMap((group) => group);
+
+      async function sendRequests() {
+        try {
+          const nonConflictRequests = nonconflictingdata.map((item) =>
+            axios.post("/api/service", {
+              associate: item.associate,
+              test: [item.test],
+              value: item.test?.price,
+              userId: User?._id,
+            })
+          );
+
+          // Execute all the requests in parallel
+          const responses = await Promise.all(nonConflictRequests);
+
+          console.log("All responses:", responses);
+        } catch (error) {
+          console.error("Error executing requests:", error);
+        }
+      }
+
+      sendRequests();
+
+      console.log("aggregatedData", nonconflictingdata.length);
+      // const arrangeselecteddatawithconflict =
+      //     conflictedselected &&
+      //     conflictedselected?.map((item) => {
+      //       return {
+      //         associate: item.associate._id,
+      //         test: {
+      //           testId: item.testId,
+      //           price: item.unifiedPrice,
+      //           percentage: item.unifiedPercentage,
+      //           userId: User?._id,
+      //         },
+      //       };
+      //     });
+
+      // const conflictRequests =
+      //   arrangeselecteddatawithconflict &&
+      //   arrangeselecteddatawithconflict?.map((item) =>
+      //     axios.post("/api/servicea", {
+      //       associate: item.associate,
+      //       test: item.test,
+      //       value: item.test?.price,
+      //       userId: User?._id,
+      //     })
+      //   );
+
+      // Execute all requests in parallel
+      // const allRequests = [
+      //   ...nonConflictRequests,
+      //   // ...(arrangeselecteddatawithconflict || []),
+      // ];
+      // const responses = await Promise.all(allRequests);
+
+      // Handle responses
+      // if (responses.every((res) => res.status === 200)) {
+      //   toast.success("All associates processed successfully");
+      //   // navigate("/service");
+      // }
     } catch (error) {
-      console.error("Error saving service:", error);
-      toast.error("Failed to create Service Payable");
+      console.error("Error processing associates:", error);
+      toast.error("Failed to process some associates");
     }
   }
 
@@ -356,6 +540,8 @@ function ProfileForm() {
           isOpen={conflictopen}
           onOpen={setconflictopen}
           conflictData={conflictData}
+          setconflictedselected={setconflictedselected}
+          conflictedselected={conflictedselected}
         />
         <div className="flex justify-end w-full">
           <Button className="self-center mr-8" type="submit">

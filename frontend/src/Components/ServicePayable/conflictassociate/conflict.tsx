@@ -16,6 +16,7 @@ export default function AlertDialogbox({
   backdrop = "blur",
   isOpen,
   conflictData,
+  setconflictedselected,
   onOpen,
   onClose: propOnClose,
 }) {
@@ -23,7 +24,6 @@ export default function AlertDialogbox({
   const [openTests, setOpenTests] = useState({});
 
   // Instead of storing a boolean value, we now store metadata objects for selected associates.
-  // When an associate is not selected, its key is absent.
   const [selectedAssociates, setSelectedAssociates] = useState({});
 
   const queryClient = useQueryClient();
@@ -65,7 +65,7 @@ export default function AlertDialogbox({
         delete newSelections[associateId];
         return newSelections;
       } else {
-        // Otherwise, add a metadata object.
+        // Otherwise, add a metadata object including unified value data.
         return {
           ...prev,
           [associateId]: {
@@ -73,6 +73,8 @@ export default function AlertDialogbox({
             testName: test?.testId?.name || "Unnamed Test",
             associate,
             index,
+            unifiedPrice: test?.unifiedValue?.price,
+            unifiedPercentage: test?.unifiedValue?.percentage,
           },
         };
       }
@@ -91,6 +93,8 @@ export default function AlertDialogbox({
             testName: test?.testId?.name || "Unnamed Test",
             associate,
             index,
+            unifiedPrice: test?.unifiedValue?.price,
+            unifiedPercentage: test?.unifiedValue?.percentage,
           };
         } else {
           delete updatedSelections[associateId];
@@ -113,6 +117,8 @@ export default function AlertDialogbox({
               testName: test?.testId?.name || "Unnamed Test",
               associate,
               index,
+              unifiedPrice: test?.unifiedValue?.price,
+              unifiedPercentage: test?.unifiedValue?.percentage,
             };
           }
         });
@@ -157,14 +163,14 @@ export default function AlertDialogbox({
   const allSelected =
     totalAssociatesCount > 0 && selectedCount === totalAssociatesCount;
 
-  // Handle conflict resolution. Now we get the metadata for each selected associate.
+  // Handle conflict resolution. The metadata now includes unified value information.
   const handleConflictResolution = () => {
     const associatesToUpdate = Object.entries(selectedAssociates)
       .filter(([key, metadata]) => metadata)
       .map(([key, metadata]) => metadata);
+    setconflictedselected(associatesToUpdate);
 
-    // Here you would add your API call to update the selected associates using the metadata.
-    // For example:
+    // Example API call:
     // axios.post(url, { associates: associatesToUpdate })
     //   .then(() => {
     //     queryClient.invalidateQueries(["yourQueryKey"]);

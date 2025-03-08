@@ -11,6 +11,7 @@ const ServicePayableController = {
     try {
       const { associate, department, test, value, userId } = req.body;
       const Usertobefound = new mongoose.Types.ObjectId(userId);
+      console.log("Usertobefound", test);
       const results = [];
 
       for (const item of associate) {
@@ -90,7 +91,7 @@ const ServicePayableController = {
   },
   getAssociates: async (req, res, next) => {
     try {
-      const associates = req.body.associate; // array of associate IDs
+      const associates = req.body.associate;
       const userId = req.params.userId;
       const departmentId = req.query.departmentId;
 
@@ -198,10 +199,12 @@ const ServicePayableController = {
             value: { price, percentage },
           };
 
-          console.log(price === testEntry.defaultPrice);
+          // console.log(price === testEntry.defaultPrice);
+          console.log("Price", price);
+          console.log("unifiedGroup.value.price", unifiedGroup.value.price);
           if (
-            price === unifiedGroup.value.price &&
-            percentage === unifiedGroup.value.percentage
+            price === unifiedGroup.value.price
+            // percentage === unifiedGroup.value.percentage
           ) {
             nonConflictAssociates.push(associateData);
           } else {
