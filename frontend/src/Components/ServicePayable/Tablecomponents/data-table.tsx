@@ -315,11 +315,19 @@ function DataTable<
                   </TableCell>
                   {columns.map((column) => (
                     <TableCell key={column.key as string}>
-                      {column.render
+                      {column.key === "price"
+                        ? column.render
+                          ? column.render(
+                              Math.ceil(Number(item[column.key])),
+                              item
+                            )
+                          : Math.ceil(Number(item[column.key]))
+                        : column.render
                         ? column.render(item[column.key], item)
                         : (item[column.key] as React.ReactNode)}
                     </TableCell>
                   ))}
+
                   <TableCell className="action-cell">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -533,13 +541,15 @@ function DataTable<
                             {conflict.item?.name ?? "Unnamed Item"}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            {conflict.oldValue.toFixed(2)}
+                            {Math.ceil(conflict.oldValue.toFixed(2))}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            {conflict.newValue.toFixed(2)}
+                            {Math.ceil(conflict.newValue.toFixed(2))}
                           </td>
                           <td className="py-3 px-4 text-right text-destructive">
-                            {(conflict.newValue - conflict.oldValue).toFixed(2)}
+                            {Math.ceil(
+                              (conflict.newValue - conflict.oldValue).toFixed(2)
+                            )}
                           </td>
                           <td className="py-3 px-4 text-center">
                             {conflict.discountSource ? (

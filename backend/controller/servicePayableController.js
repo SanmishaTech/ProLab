@@ -11,16 +11,18 @@ const ServicePayableController = {
     try {
       const { associate, department, test, value, userId } = req.body;
       const Usertobefound = new mongoose.Types.ObjectId(userId);
-      console.log("Usertobefound", test);
       const results = [];
 
       for (const item of associate) {
         const associatetobefound = new mongoose.Types.ObjectId(item);
         console.log("Associate", associatetobefound);
+        const testtobefound = new mongoose.Types.ObjectId(test?.testId);
         const findexistingservice = await ServicePayable.find({
           associate: associatetobefound,
+          "test.testId": testtobefound, // Matches any object in the array with this testId
           userId: Usertobefound,
         });
+
         console.log("Find existing", findexistingservice);
 
         if (findexistingservice && findexistingservice.length > 0) {
@@ -51,7 +53,6 @@ const ServicePayableController = {
       return res.status(500).json({ error: error.message });
     }
   },
-
   getServices: async (req, res, next) => {
     try {
       const userId = req.params.userId;
@@ -144,10 +145,10 @@ const ServicePayableController = {
       const allServices = await Promise.all(servicePromises);
 
       // Update prices based on services for each associate
-      allServices.forEach((services, index) => {
+      allServices?.forEach((services, index) => {
         const associateId = associates[index];
-        services.forEach((service) => {
-          service.test.forEach((serviceTest) => {
+        services?.forEach((service) => {
+          service?.test?.forEach((serviceTest) => {
             const testId = serviceTest.testId?._id?.toString();
             if (!testId || !testMap.has(testId)) return;
             const testEntry = testMap.get(testId);
@@ -194,14 +195,16 @@ const ServicePayableController = {
           const meta = associateDetailsMap.get(associateId) || {
             _id: associateId,
           };
+          console.log("PPPPPPPP", testEntry.testId);
           const associateData = {
             ...meta._doc, // if using Mongoose, _doc contains the raw data; otherwise, adjust accordingly
             value: { price, percentage },
+            testId: testEntry.testId,
           };
 
           // console.log(price === testEntry.defaultPrice);
-          console.log("Price", price);
-          console.log("unifiedGroup.value.price", unifiedGroup.value.price);
+          // console.log("Price", price);
+          // console.log("unifiedGroup.value.price", unifiedGroup.value.price);
           if (
             price === unifiedGroup.value.price
             // percentage === unifiedGroup.value.percentage

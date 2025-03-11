@@ -92,17 +92,27 @@ export default function Tablecomponent({
   const handleBulkEdit = (discountPercentage: number) => {
     setPercentagevalue(discountPercentage);
     const updatedUsers = users.map((user) => {
-      if (selectedItems.some((selected) => selected._id === user._id)) {
+      if (selectedItems.some((selected) => selected?._id === user?._id)) {
         const originalPrice = user.originalPrice || user.price;
         const discount = originalPrice * (discountPercentage / 100);
+        const newPrice = Math.ceil(originalPrice - discount);
         return {
           ...user,
-          price: originalPrice - discount,
+          price: newPrice,
           originalPrice: originalPrice, // Preserve original price
         };
       }
       return user;
     });
+
+    const testtosave = updatedUsers
+      .filter((user) => user?.defaultPrice === user?.price)
+      .map((user) => ({
+        ...user,
+        price: user.price,
+        originalPrice: user.originalPrice,
+      }));
+
     setUsers(updatedUsers);
   };
 

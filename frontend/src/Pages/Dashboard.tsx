@@ -76,11 +76,29 @@ const Dashboard = () => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
 
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     if (!User?._id) {
+  //       navigate("/");
+  //     }
+  //   }, 1000);
+  // }, [location, User]);
+
   useEffect(() => {
-    if (!User?._id) {
+    const userString = localStorage.getItem("user");
+    if (!userString) {
+      navigate("/");
+      return;
+    }
+    try {
+      const user = JSON.parse(userString);
+      if (!user?._id) {
+        navigate("/");
+      }
+    } catch (error) {
       navigate("/");
     }
-  }, [location, User]);
+  }, [navigate]);
 
   return (
     <div className="flex bg-background w-[100vw] h-full relative min-h-screen">

@@ -270,8 +270,8 @@ export default function AlertDialogbox({
                                   {test.testId?.name || "Unnamed Test"}
                                 </td>
                                 <td className="py-3 px-4 text-right">
-                                  {test.unifiedValue?.price &&
-                                    `$${test.unifiedValue.price}`}
+                                  {Math.ceil(test.unifiedValue?.price) &&
+                                    `$${Math.ceil(test.unifiedValue.price)}`}
                                 </td>
                                 <td className="py-3 px-4 text-center flex items-end justify-center">
                                   {test.conflictAssociates?.length > 0 ? (
@@ -361,7 +361,7 @@ export default function AlertDialogbox({
                                             <div className="flex justify-end items-center gap-2">
                                               <span className="font-medium text-red-600">
                                                 $
-                                                {parseFloat(
+                                                {Math.ceil(
                                                   associate.value?.price || 0
                                                 ).toFixed(2)}
                                               </span>
@@ -370,16 +370,16 @@ export default function AlertDialogbox({
                                               </span>
                                               <span className="font-medium text-green-600">
                                                 $
-                                                {parseFloat(
+                                                {Math.ceil(
                                                   test.unifiedValue?.price || 0
                                                 ).toFixed(2)}
                                               </span>
                                             </div>
                                             <span className="text-xs text-gray-500 text-right">
-                                              {parseFloat(
+                                              {Math.ceil(
                                                 associate.value?.price || 0
                                               ) <
-                                              parseFloat(
+                                              Math.ceil(
                                                 test.unifiedValue?.price || 0
                                               )
                                                 ? "Price will increase"

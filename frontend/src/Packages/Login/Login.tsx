@@ -11,11 +11,11 @@ import { useNavigate } from "react-router-dom";
 const Login = () => {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
-  useEffect(() => {
-    if (user && User?.email) {
-      navigate("/dashboard");
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user && User?.email) {
+  //     navigate("/dashboard");
+  //   }
+  // }, [user]);
 
   const navigate = useNavigate();
   const defaultValues = {

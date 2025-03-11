@@ -92,11 +92,50 @@ function ProfileForm() {
   const [conflictopen, setconflictopen] = useState(false);
   const [Selectopen, setSelectopen] = useState(false);
   const [SelectedAssociate, setSelectedAssociate] = useState(null);
-  const [conflictedselected, setconflictedselected] = useState(false);
+  const [conflictedselected, setconflictedselected] = useState();
 
   const { watch } = form;
   const watchedAssociate = watch("associate");
   const watchDepartment = watch("department");
+  useEffect(() => {
+    console.log("");
+  }, [updatedtests]);
+
+  useEffect(() => {
+    console.log("Watched associate ppa", conflictedselected);
+    testmaster.map((item) => {
+      console.log("Item", item);
+      // const findtest = item.test.find((test) => {
+      //   console.log("Test", test);
+      //   return test.testId === conflictedselected.testId;
+      // });
+
+      const findtestfromconflict = conflictedselected?.find((test) => {
+        // console.log("Test", test);
+        return test.testId === item._id;
+      });
+      console.log("Findtest", findtestfromconflict);
+
+      if (findtestfromconflict) {
+        console.log("Findtest", findtestfromconflict);
+        item.price = findtestfromconflict.unifiedPrice;
+        item.originalPrice = findtestfromconflict.unifiedPrice;
+        // setUpdatedtests([...updatedtests, item]);
+        settestmaster((prevTestMaster) =>
+          prevTestMaster.map((test) =>
+            // Replace `test.id` with your unique identifier property
+            test._id === item._id
+              ? {
+                  ...test,
+                  price: findtestfromconflict.unifiedPrice,
+                  originalPrice: findtestfromconflict.unifiedPrice,
+                }
+              : test
+          )
+        );
+      }
+    });
+  }, [conflictedselected]);
 
   // Whenever "associate" changes, trigger this useEffect
   useEffect(() => {
@@ -134,12 +173,12 @@ function ProfileForm() {
               defaultPrice: item?.defaultPrice,
               conflicts: item?.prices,
               ...updatedtest,
-              price: item?.testId?.price,
+              price: item.unifiedValue?.price,
               hasConflict: item?.hasConflict,
               originalPrice: item?.defaultPrice ?? item.testId?.price,
             },
 
-            price: item.price,
+            price: item.unifiedValue?.price,
             percentagevalue: item.percentage,
           };
           return newitem;
@@ -206,20 +245,6 @@ function ProfileForm() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // const arrangeselecteddatawithconflict =
-    //   conflictedselected &&
-    //   conflictedselected?.map((item) => {
-    //     return {
-    //       associate: item.associate._id,
-    //       test: {
-    //         testId: item.testId,
-    //         price: item.unifiedPrice,
-    //         percentage: item.unifiedPercentage,
-    //       },
-    //       userId: item.userId,
-    //     };
-    //   });
-
     const nonconflictingdata = conflictData?.tests?.map((item) => {
       return item.nonConflictAssociates.map((items) => {
         return {
@@ -236,180 +261,103 @@ function ProfileForm() {
     console.log("Non conflicting data", conflictedselected);
   }, [conflictedselected, watchedAssociate]);
 
-  // async function onSubmit(data: ProfileFormValues) {
-  //   const arrayValues2 = Array.from(watchedAssociate || []);
-  //   // console.log("Watch associates", watchedAssociate);
-
-  //   const arrangeselecteddatawithconflict =
-  //     conflictedselected &&
-  //     conflictedselected?.map((item) => {
-  //       return {
-  //         associate: item.associate._id,
-  //         test: {
-  //           testId: item.testId,
-  //           price: item.unifiedPrice,
-  //           percentage: item.unifiedPercentage,
-  //           userId: User?._id,
-  //         },
-  //       };
-  //     });
-
-  //   const formattedData = {
-  //     associate: [
-  //       ...new Set(
-  //         arrayValues2?.map((item) => item)?.filter((item) => item !== "")
-  //       ),
-  //     ],
-  //     department: data.department,
-  //     test: updatedtests?.map((item) => ({
-  //       testId: item._id,
-  //       price: item.price,
-  //       percentage: percentagevalue,
-  //     })),
-  //     userId: User?._id,
-  //   };
-
-  //   try {
-  //     const response = await axios.post(`/api/service`, formattedData);
-  //     console.log("Service saved:", response.data);
-  //     toast.success("Service Payable Created Successfully");
-  //     navigate("/service");
-  //   } catch (error) {
-  //     console.error("Error saving service:", error);
-  //     toast.error("Failed to create Service Payable");
-  //   }
-  // }
-
   // Modified onSubmit function
   async function onSubmit(data: ProfileFormValues) {
     try {
       // Process non-conflicting and conflicting associates in parallel
-      console.log("updatedtests", updatedtests);
-      // const nonconflictingdata = conflictData?.tests?.map((item) => {
-      //   return item.nonConflictAssociates.map((items) => {
-      //     return {
-      //       associate: [items._id],
-      //       test: {
-      //         testId: item.testId?._id,
-      //         price:
-      //           updatedtests?.find((test) => test._id === item.testId?._id)
-      //             ?.price || items.unifiedValue?.price,
 
-      //         percentage: item?.unifiedValue?.percentage,
-      //       },
-      //       value:
-      //         updatedtests?.find((test) => test._id === item.testId?._id)
-      //           ?.price || items.unifiedValue?.price,
-      //       userId: User?._id,
-      //     };
-      //   });
-      // });
-      // Assuming data is your object with the tests array
-      const nonconflictingdata = conflictData.tests.flatMap((test) => {
-        // Find the updated test using testId. Adjust the matching logic depending on your testId structure.
-        const updatedTest = updatedtests?.find(
-          (uTest) => uTest._id === (test.testId?._id || test.testId)
-        );
+      const nonconflictingdata =
+        conflictData &&
+        conflictData?.tests?.flatMap((test) => {
+          // Find the updated test using testId. Adjust the matching logic depending on your testId structure.
+          const updatedTest = updatedtests?.find(
+            (uTest) => uTest._id === (test.testId?._id || test.testId)
+          );
 
-        // Use the updated price if found; otherwise, fallback to the original price.
-        const price = updatedTest
-          ? updatedTest.price
-          : test.unifiedValue?.price;
-
-        // Return one record per non-conflict associate.
-        return test.nonConflictAssociates.map((associate) => ({
-          associate: [associate._id],
-          test: {
-            testId: test.testId?._id,
-            price, // updated price if available
-            percentage: test.unifiedPercentage?.percentage,
-          },
-          userId: User?._id,
-        }));
-      });
+          console.log("nonConflictAssociates", test);
+          // const filterupdatedtest = test?.nonConflictAssociates.filter(
+          //   (testa) => {
+          //     const filterbyupdatetest = updatedtests?.filter((tests) => {
+          //       console.log("filterupdatedtest", tests.price, testa);
+          //       return (
+          //         tests._id === testa.testId?._id &&
+          //         tests.price !== test.unifiedValue?.price
+          //       );
+          //     });
+          //     return filterbyupdatetest;
+          //   }
+          // );
+          const filterupdatedtest = test?.nonConflictAssociates.filter(
+            (testa) => {
+              console.log(
+                "testa",
+                testa?.value?.price,
+                updatedTest?.price,
+                testa.testId?._id === updatedTest?._id &&
+                  testa?.value?.price !== updatedTest?.price
+              );
+              return (
+                testa.testId?._id === updatedTest?._id &&
+                testa?.value?.price !== updatedTest?.price
+              );
+            }
+          );
+          console.log("filterupdatedtest", filterupdatedtest, updatedTest);
+          filterupdatedtest.map(async (associate) => {
+            console.log("Asscoaiii", test.unifiedValue?.price, associate);
+            if (updatedTest?.price !== test.unifiedValue?.price) {
+              await axios.post("/api/service", {
+                associate: [associate._id],
+                test: {
+                  testId: associate.testId?._id,
+                  price: updatedTest?.price,
+                  percentage: test.unifiedValue?.percentage || 0, // Default if missing
+                },
+                value: updatedTest?.price,
+                userId: User?._id,
+              });
+            } else {
+              return;
+            }
+          });
+        });
 
       console.log("Resulta", nonconflictingdata);
 
-      // const arrangeselecteddatawithconflict =
-      //   conflictedselected &&
-      //   conflictedselected?.map((item) => {
-      // return {
-      //   associate: [item.associate._id],
-      //   test: {
-      //     testId: item.testId,
-      //     price:
-      //       updatedtests?.find((test) => test._id === item.testId?._id)
-      //         ?.price || item.unifiedValue?.price,
-      //     percentage: item.unifiedPercentage?.percentage,
-      //   },
-      //   userId: User?._id,
-      // };
-      //   });
-
-      console.log("Non conflicting data", nonconflictingdata);
-
-      // const aggregatedData = nonconflictingdata?.flatMap((group) => group);
-
-      async function sendRequests() {
-        try {
-          const nonConflictRequests = nonconflictingdata.map((item) =>
-            axios.post("/api/service", {
-              associate: item.associate,
-              test: [item.test],
-              value: item.test?.price,
-              userId: User?._id,
-            })
+      const arrangeselecteddatawithconflict =
+        conflictedselected &&
+        conflictedselected?.map(async (item) => {
+          const updatedTest = updatedtests?.find(
+            (uTest) => uTest._id === item.testId
           );
+          const unifiedvalue = conflictData?.tests?.map((tesa) => {
+            console.log("tesa", tesa);
+            return {
+              price: tesa.unifiedValue?.price,
+              testId: tesa.testId?._id,
+            };
+          });
+          console.log("iteme", unifiedvalue, updatedTest?.price);
+          if (unifiedvalue !== updatedTest?.price) {
+            await axios.post("/api/service", {
+              associate: [item.associate._id],
+              test: {
+                testId: item.testId,
+                price: updatedTest?.price,
 
-          // Execute all the requests in parallel
-          const responses = await Promise.all(nonConflictRequests);
+                percentage: updatedTest?.percentage,
+              },
+              value: updatedTest?.price,
+              userId: User?._id,
+            });
+          } else {
+            return;
+          }
+        });
 
-          console.log("All responses:", responses);
-        } catch (error) {
-          console.error("Error executing requests:", error);
-        }
-      }
-
-      sendRequests();
+      console.log("conflicting data", arrangeselecteddatawithconflict);
 
       console.log("aggregatedData", nonconflictingdata.length);
-      // const arrangeselecteddatawithconflict =
-      //     conflictedselected &&
-      //     conflictedselected?.map((item) => {
-      //       return {
-      //         associate: item.associate._id,
-      //         test: {
-      //           testId: item.testId,
-      //           price: item.unifiedPrice,
-      //           percentage: item.unifiedPercentage,
-      //           userId: User?._id,
-      //         },
-      //       };
-      //     });
-
-      // const conflictRequests =
-      //   arrangeselecteddatawithconflict &&
-      //   arrangeselecteddatawithconflict?.map((item) =>
-      //     axios.post("/api/servicea", {
-      //       associate: item.associate,
-      //       test: item.test,
-      //       value: item.test?.price,
-      //       userId: User?._id,
-      //     })
-      //   );
-
-      // Execute all requests in parallel
-      // const allRequests = [
-      //   ...nonConflictRequests,
-      //   // ...(arrangeselecteddatawithconflict || []),
-      // ];
-      // const responses = await Promise.all(allRequests);
-
-      // Handle responses
-      // if (responses.every((res) => res.status === 200)) {
-      //   toast.success("All associates processed successfully");
-      //   // navigate("/service");
-      // }
     } catch (error) {
       console.error("Error processing associates:", error);
       toast.error("Failed to process some associates");
@@ -466,12 +414,12 @@ function ProfileForm() {
   // Filter the test data based on the search query.
   // Adjust "name" to whichever property you wish to filter on.
   useEffect(() => {
-    const filteredData = testmaster.filter((item) => {
+    const filteredData = testmaster?.filter((item) => {
       return item?.name?.toLowerCase()?.includes(searchfilter?.toLowerCase());
     });
     console.log("Filter data", filteredData);
     setFilteredTestData(filteredData);
-  }, [searchfilter]);
+  }, [searchfilter, testmaster]);
 
   // Use form.watch to get the current value of the associate field
   const selectedAssociates = form.watch("associate") || [];

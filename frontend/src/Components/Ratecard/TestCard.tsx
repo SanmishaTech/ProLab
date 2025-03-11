@@ -206,7 +206,7 @@ function ProfileForm() {
     };
 
     try {
-      const response = await axios.post(`/api/service`, formattedData);
+      const response = await axios.post(`/api/servicea`, formattedData);
       console.log("Service saved:", response.data);
       toast.success("Service Payable Created Successfully");
       navigate("/service");
