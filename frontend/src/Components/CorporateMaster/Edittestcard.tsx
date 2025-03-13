@@ -43,7 +43,7 @@ const profileFormSchema = z.object({
   corporateCode: z.string().optional(),
   corporateName: z.string().optional(),
   discount: z.string().optional(),
-  value: z.number().optional(),
+  value: z.any().optional(),
   country: z
     .string()
     .min(2, {

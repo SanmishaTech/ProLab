@@ -8,6 +8,7 @@ const testSchema = new mongoose.Schema({
   },
   price: { type: Number },
   percentage: { type: Number },
+  date: { type: Date },
 });
 
 const servicePayable = new mongoose.Schema({

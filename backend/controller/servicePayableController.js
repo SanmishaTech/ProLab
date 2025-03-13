@@ -27,6 +27,7 @@ const ServicePayableController = {
 
         if (findexistingservice && findexistingservice.length > 0) {
           console.log("Existing");
+          test.date = new Date();
           const updatedService = await ServicePayable.findOneAndUpdate(
             { _id: findexistingservice[0]._id },
             { associate: item, department, test, value, userId },
@@ -35,6 +36,8 @@ const ServicePayableController = {
           results.push(updatedService);
         } else {
           console.log("Non existing ");
+          test.date = new Date();
+
           const newService = new ServicePayable({
             associate: item,
             department,
@@ -155,6 +158,8 @@ const ServicePayableController = {
             const currentPrice = serviceTest.price ?? testEntry.defaultPrice;
             const currentPercentage =
               serviceTest.percentage ?? testEntry.defaultPercentage;
+            console.log("currentprice", serviceTest);
+            testEntry.date = serviceTest?.date;
             testEntry.prices.set(associateId, {
               price: currentPrice,
               percentage: currentPercentage,
@@ -190,25 +195,18 @@ const ServicePayableController = {
         // Split associates into non-conflict and conflict based on unified value
         const nonConflictAssociates = [];
         const conflictAssociates = [];
-        // console.log(testEntry);
         testEntry.prices.forEach(({ price, percentage }, associateId) => {
           const meta = associateDetailsMap.get(associateId) || {
             _id: associateId,
           };
           console.log("PPPPPPPP", testEntry.testId);
           const associateData = {
-            ...meta._doc, // if using Mongoose, _doc contains the raw data; otherwise, adjust accordingly
+            ...meta._doc,
             value: { price, percentage },
             testId: testEntry.testId,
           };
 
-          // console.log(price === testEntry.defaultPrice);
-          // console.log("Price", price);
-          // console.log("unifiedGroup.value.price", unifiedGroup.value.price);
-          if (
-            price === unifiedGroup.value.price
-            // percentage === unifiedGroup.value.percentage
-          ) {
+          if (price === unifiedGroup.value.price) {
             nonConflictAssociates.push(associateData);
           } else {
             conflictAssociates.push(associateData);
@@ -220,10 +218,9 @@ const ServicePayableController = {
           defaultPrice: testEntry.defaultPrice,
           defaultPercentage: testEntry.defaultPercentage,
           unifiedValue: unifiedGroup.value,
-          // Arrays to easily display on the frontend
+          date: testEntry.date,
           nonConflictAssociates,
           conflictAssociates,
-          // For reference, keep the raw prices mapping too
           prices: Object.fromEntries(testEntry.prices),
           hasConflict: conflictAssociates.length > 0,
         };

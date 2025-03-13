@@ -176,13 +176,16 @@ function DataTable<
               (check.type === "associate" && item.associate) ||
               (check.type === "department" && item.department)
           );
+          // const discount = originalPrice * (discountPercentage / 100);
+          // const newPrice = Math.ceil(originalPrice - discount);
 
           console.log("Item ppa", item);
 
           return {
             item,
             oldValue: item?.price ?? 0,
-            newValue: (item?.price ?? 0) * (1 - bulkEditPercentage / 100),
+            newValue:
+              (item?.defaultPrice ?? 0) * (1 - bulkEditPercentage / 100),
             selected: false,
             discountSource,
           };
@@ -313,6 +316,7 @@ function DataTable<
                       }
                     />
                   </TableCell>
+                  {console.log("item1111", item, columns)}
                   {columns.map((column) => (
                     <TableCell key={column.key as string}>
                       {column.key === "price"
@@ -365,7 +369,7 @@ function DataTable<
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
             <div className="bg-white p-6 rounded-lg max-w-md w-full">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold">Apply Discount</h3>
+                <h3 className="text-lg font-bold">Apply Compensation</h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -392,7 +396,7 @@ function DataTable<
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Discount Percentage
+                    Compensation Percentage
                   </label>
                   <div className="relative">
                     <input

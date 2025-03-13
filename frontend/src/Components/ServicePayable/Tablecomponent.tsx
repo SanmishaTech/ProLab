@@ -31,13 +31,13 @@ interface Props {
 
 const columns: Array<{ key: keyof Test; header: string }> = [
   { key: "name", header: "Name" },
-  { key: "email", header: "Date" },
+  { key: "date", header: "Date" },
   { key: "price", header: "Price" },
 ];
 
 const fields: Array<{ key: keyof Test; label: string; type: string }> = [
   { key: "name", label: "Name", type: "text" },
-  { key: "email", label: "Date", type: "email" },
+  { key: "date", label: "Date", type: "date" },
   { key: "price", label: "Price", type: "number" },
 ];
 
@@ -47,6 +47,7 @@ export default function Tablecomponent({
   setPercentagevalue,
   conflictchecks,
   setSelectedAssociate,
+  conflictData,
   onUpdateTests,
 }: Props) {
   const [users, setUsers] = useState<Test[]>([]);
@@ -60,9 +61,22 @@ export default function Tablecomponent({
   useEffect(() => {
     // Initialize with original prices
     console.log("countingid ", data);
+
     const usersWithOriginal = data?.map((user) => ({
       ...user,
       id: user._id, // Ensure id is set
+      date:
+        conflictData?.tests?.find((test) => test.testId?._id === user._id)
+          ?.date &&
+        new Date(
+          conflictData?.tests?.find(
+            (test) => test.testId?._id === user._id
+          )?.date
+        )?.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        }),
       originalPrice: user.originalPrice || user.price, // Use existing originalPrice or current price
     }));
     setUsers(usersWithOriginal);
@@ -96,22 +110,32 @@ export default function Tablecomponent({
         const originalPrice = user.originalPrice || user.price;
         const discount = originalPrice * (discountPercentage / 100);
         const newPrice = Math.ceil(originalPrice - discount);
+
         return {
           ...user,
           price: newPrice,
+          date: conflictData?.tests?.find(
+            (test) => test.testId?._id === user._id
+          )?.date
+            ? new Date(
+                conflictData?.tests?.find(
+                  (test) => test.testId?._id === user._id
+                )?.date
+              )?.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "2-digit",
+              })
+            : new Date().toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "2-digit",
+              }),
           originalPrice: originalPrice, // Preserve original price
         };
       }
       return user;
     });
-
-    const testtosave = updatedUsers
-      .filter((user) => user?.defaultPrice === user?.price)
-      .map((user) => ({
-        ...user,
-        price: user.price,
-        originalPrice: user.originalPrice,
-      }));
 
     setUsers(updatedUsers);
   };

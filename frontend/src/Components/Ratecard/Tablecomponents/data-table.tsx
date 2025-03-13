@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -10,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@heroui/input";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,7 +17,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, ChevronUp, MoreHorizontal, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
 import AddEditModal from "./Add-editModal";
 import Pagination from "./pagination";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,7 +37,6 @@ interface Field<T> {
   type: string;
 }
 
-//cancel
 interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
@@ -46,7 +44,12 @@ interface DataTableProps<T> {
   onAdd: (item: T) => void;
   onEdit: (item: T) => void;
   onDelete: (items: T[]) => void;
-  onBulkEdit?: (discountPercentage: number, items: T[]) => void;
+  // Updated onBulkEdit accepts a mode and corresponding value
+  onBulkEdit?: (
+    mode: "percentage" | "flat",
+    value: number | { flatPurchasePrice: number; flatSaleRate: number },
+    items: T[]
+  ) => void;
   selectedItems: T[];
   onSelectedItemsChange: (items: T[]) => void;
   itemsPerPage?: number;
@@ -55,13 +58,19 @@ interface DataTableProps<T> {
     value: number;
     isPercentage: boolean;
   }[];
+  // If you need to pass a callback to select a specific associate, include it as needed.
+  setSelectedAssociate?: (associate: any) => void;
 }
 
 function DataTable<
   T extends {
     id: string | number;
     _id: string | number;
-    price?: number;
+    // Updated to include dual pricing fields:
+    purchasePrice?: number;
+    saleRate?: number;
+    defaultPurchasePrice?: number;
+    defaultSaleRate?: number;
     name?: string;
     department?: string;
     associate?: string;
@@ -78,20 +87,27 @@ function DataTable<
   selectedItems,
   onSelectedItemsChange,
   conflictchecks,
+  setSelectedAssociate,
 }: DataTableProps<T>) {
   const [sortColumn, setSortColumn] = useState<keyof T | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<T | undefined>(undefined);
+  // Bulk edit state
+  const [bulkEditMode, setBulkEditMode] = useState<"percentage" | "flat">(
+    "percentage"
+  );
   const [bulkEditPercentage, setBulkEditPercentage] = useState(0);
+  const [flatPurchasePrice, setFlatPurchasePrice] = useState(0);
+  const [flatSaleRate, setFlatSaleRate] = useState(0);
   const [showBulkEditModal, setShowBulkEditModal] = useState(false);
   const [showConflictModal, setShowConflictModal] = useState(false);
   const [conflictItems, setConflictItems] = useState<
     Array<{
       item: T;
-      oldValue: number;
-      newValue: number;
+      oldValue: { purchasePrice: number; saleRate: number };
+      newValue: { purchasePrice: number; saleRate: number };
       selected: boolean;
       discountSource?: {
         type: "associate" | "department";
@@ -162,39 +178,65 @@ function DataTable<
     }
   };
 
+  // Updated bulk-edit confirm handler that applies either percentage discount or flat rates
   const handleBulkEditConfirm = (e: any) => {
     e.preventDefault();
     if (onBulkEdit) {
-      // Check for conflicts and get discount sources
       const conflicts = selectedItems
-        .filter((item) => {
-          const existingDiscount = item?.price ?? 0;
-          return existingDiscount !== 0;
-        })
         .map((item) => {
+          let newPurchasePrice: number, newSaleRate: number;
+          if (bulkEditMode === "percentage") {
+            newPurchasePrice =
+              (item?.defaultPurchasePrice ?? 0) *
+              (1 - bulkEditPercentage / 100);
+            newSaleRate =
+              (item?.defaultSaleRate ?? 0) * (1 - bulkEditPercentage / 100);
+          } else {
+            newPurchasePrice = flatPurchasePrice;
+            newSaleRate = flatSaleRate;
+          }
           const discountSource = conflictchecks?.find(
             (check) =>
               (check.type === "associate" && item.associate) ||
               (check.type === "department" && item.department)
           );
-
           return {
             item,
-            oldValue: item?.price ?? 0,
-            newValue: (item?.price ?? 0) * (1 - bulkEditPercentage / 100),
+            oldValue: {
+              purchasePrice: item?.purchasePrice ? item?.purchasePrice : 0,
+              saleRate: item?.saleRate ? item?.saleRate : 0,
+            },
+            newValue: {
+              purchasePrice: newPurchasePrice,
+              saleRate: newSaleRate,
+            },
             selected: false,
             discountSource,
           };
-        });
+        })
+        .filter(
+          (conflict) =>
+            conflict.item?.purchasePrice !==
+              conflict.item?.defaultPurchasePrice ||
+            conflict.item?.saleRate !== conflict.item?.defaultSaleRate
+        );
 
       if (conflicts.length > 0) {
         setConflictItems(conflicts);
         setShowConflictModal(true);
         setShowBulkEditModal(false);
       } else {
-        onBulkEdit(bulkEditPercentage, selectedItems);
+        onBulkEdit(
+          bulkEditMode,
+          bulkEditMode === "percentage"
+            ? bulkEditPercentage
+            : { flatPurchasePrice, flatSaleRate },
+          selectedItems
+        );
         onSelectedItemsChange([]);
         setBulkEditPercentage(0);
+        setFlatPurchasePrice(0);
+        setFlatSaleRate(0);
         setShowBulkEditModal(false);
       }
     }
@@ -202,27 +244,34 @@ function DataTable<
 
   const handleConflictResolution = () => {
     if (onBulkEdit) {
-      // Get selected items from conflicts
+      // Get the items that were approved in the conflict modal…
       const selectedConflictItems = conflictItems
         .filter((conflict) => conflict.selected)
         .map((conflict) => conflict.item);
 
-      // Get items without conflicts
+      // And also include the items that had no conflicts.
       const nonConflictItems = selectedItems.filter(
         (item) =>
           !conflictItems.some((conflict) => conflict.item._id === item._id)
       );
 
-      // Combine selected conflict items with non-conflict items
       const itemsToUpdate = [...selectedConflictItems, ...nonConflictItems];
 
       if (itemsToUpdate.length > 0) {
-        onBulkEdit(bulkEditPercentage, itemsToUpdate);
+        onBulkEdit(
+          bulkEditMode,
+          bulkEditMode === "percentage"
+            ? bulkEditPercentage
+            : { flatPurchasePrice, flatSaleRate },
+          itemsToUpdate
+        );
       }
-
+      // Reset conflict modal and inputs.
       setShowConflictModal(false);
       onSelectedItemsChange([]);
       setBulkEditPercentage(0);
+      setFlatPurchasePrice(0);
+      setFlatSaleRate(0);
     }
   };
 
@@ -294,7 +343,6 @@ function DataTable<
                       : ""
                   }`}
                   onClick={(e) => {
-                    // Don't trigger row click when clicking on checkbox or action buttons
                     if (
                       (e.target as HTMLElement).closest(".checkbox-cell") ||
                       (e.target as HTMLElement).closest(".action-cell")
@@ -314,7 +362,16 @@ function DataTable<
                   </TableCell>
                   {columns.map((column) => (
                     <TableCell key={column.key as string}>
-                      {column.render
+                      {["purchasePrice", "saleRate"].includes(
+                        column.key as string
+                      )
+                        ? column.render
+                          ? column.render(
+                              Math.ceil(Number(item[column.key])),
+                              item
+                            )
+                          : Math.ceil(Number(item[column.key]))
+                        : column.render
                         ? column.render(item[column.key], item)
                         : (item[column.key] as React.ReactNode)}
                     </TableCell>
@@ -356,7 +413,7 @@ function DataTable<
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
             <div className="bg-white p-6 rounded-lg max-w-md w-full">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold">Apply Discount</h3>
+                <h3 className="text-lg font-bold">Apply Compensation</h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -379,30 +436,92 @@ function DataTable<
                   </svg>
                 </Button>
               </div>
-
+              {/* Toggle between Percentage and Flat Rate */}
+              <div className="flex space-x-4 mb-4">
+                <Button
+                  variant={
+                    bulkEditMode === "percentage" ? "default" : "outline"
+                  }
+                  onClick={() => setBulkEditMode("percentage")}
+                >
+                  Percentage
+                </Button>
+                <Button
+                  variant={bulkEditMode === "flat" ? "default" : "outline"}
+                  onClick={() => setBulkEditMode("flat")}
+                >
+                  Flat Rate
+                </Button>
+              </div>
               <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Discount Percentage
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={bulkEditPercentage}
-                      onChange={(e) =>
-                        setBulkEditPercentage(Number(e.target.value))
-                      }
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 pr-12"
-                      placeholder="Enter percentage"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-                      %
-                    </span>
-                  </div>
-                </div>
-
+                {bulkEditMode === "percentage" ? (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">
+                        Compensation Percentage
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={bulkEditPercentage}
+                          onChange={(e) =>
+                            setBulkEditPercentage(Number(e.target.value))
+                          }
+                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 pr-12"
+                          placeholder="Enter percentage"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                          %
+                        </span>
+                      </div>
+                    </div>
+                    {bulkEditPercentage > 0 && (
+                      <div className="text-xs text-muted-foreground">
+                        This will apply a {bulkEditPercentage}% discount to all
+                        selected items (both purchase price and sale rate)
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">
+                        New Purchase Price
+                      </label>
+                      <input
+                        type="number"
+                        value={flatPurchasePrice}
+                        onChange={(e) =>
+                          setFlatPurchasePrice(Number(e.target.value))
+                        }
+                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        placeholder="Enter flat purchase price"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">
+                        New Sale Rate
+                      </label>
+                      <input
+                        type="number"
+                        value={flatSaleRate}
+                        onChange={(e) =>
+                          setFlatSaleRate(Number(e.target.value))
+                        }
+                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        placeholder="Enter flat sale rate"
+                      />
+                    </div>
+                    {(flatPurchasePrice > 0 || flatSaleRate > 0) && (
+                      <div className="text-xs text-muted-foreground">
+                        This will update purchase price to {flatPurchasePrice}{" "}
+                        and sale rate to {flatSaleRate} for all selected items.
+                      </div>
+                    )}
+                  </>
+                )}
                 <div className="bg-muted/30 p-3 rounded-md">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                     <svg
@@ -423,20 +542,15 @@ function DataTable<
                     </svg>
                     <span>Selected Items: {selectedItems.length}</span>
                   </div>
-                  {bulkEditPercentage > 0 && (
-                    <div className="text-xs text-muted-foreground">
-                      This will apply a {bulkEditPercentage}% discount to all
-                      selected items
-                    </div>
-                  )}
                 </div>
-
                 <div className="flex justify-end gap-2 mt-6">
                   <Button
                     variant="outline"
                     onClick={() => {
                       setShowBulkEditModal(false);
                       setBulkEditPercentage(0);
+                      setFlatPurchasePrice(0);
+                      setFlatSaleRate(0);
                     }}
                   >
                     Cancel
@@ -447,10 +561,13 @@ function DataTable<
                       handleBulkEditConfirm(e);
                     }}
                     disabled={
-                      bulkEditPercentage <= 0 || bulkEditPercentage > 100
+                      bulkEditMode === "percentage"
+                        ? bulkEditPercentage <= 0 || bulkEditPercentage > 100
+                        : flatPurchasePrice <= 0 || flatSaleRate <= 0
                     }
                   >
-                    Apply Discount
+                    Apply{" "}
+                    {bulkEditMode === "percentage" ? "Discount" : "Update"}
                   </Button>
                 </div>
               </div>
@@ -490,7 +607,7 @@ function DataTable<
               <div className="mb-4">
                 <p className="text-sm text-gray-600 mb-4">
                   The following items already have discounts applied. Select
-                  which items should receive the new discount.
+                  which items should receive the new update.
                 </p>
                 <div className="max-h-[60vh] overflow-y-auto rounded-lg border">
                   <table className="w-full text-sm">
@@ -510,9 +627,20 @@ function DataTable<
                           </div>
                         </th>
                         <th className="py-3 px-4 text-left">Item</th>
-                        <th className="py-3 px-4 text-right">Current Price</th>
-                        <th className="py-3 px-4 text-right">New Price</th>
-                        <th className="py-3 px-4 text-right">Difference</th>
+                        <th className="py-3 px-4 text-right">
+                          Current Purchase Price
+                        </th>
+                        <th className="py-3 px-4 text-right">
+                          New Purchase Price
+                        </th>
+                        <th className="py-3 px-4 text-right">
+                          Diff (Purchase)
+                        </th>
+                        <th className="py-3 px-4 text-right">
+                          Current Sale Rate
+                        </th>
+                        <th className="py-3 px-4 text-right">New Sale Rate</th>
+                        <th className="py-3 px-4 text-right">Diff (Sale)</th>
                         <th className="py-3 px-4 text-center">
                           Current Discount
                         </th>
@@ -531,20 +659,38 @@ function DataTable<
                             {conflict.item?.name ?? "Unnamed Item"}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            {conflict.oldValue.toFixed(2)}
+                            {Math.ceil(conflict.oldValue.purchasePrice || 0)}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            {conflict.newValue.toFixed(2)}
+                            {Math.ceil(conflict.newValue.purchasePrice || 0)}
                           </td>
                           <td className="py-3 px-4 text-right text-destructive">
-                            {(conflict.newValue - conflict.oldValue).toFixed(2)}
+                            {Math.ceil(
+                              conflict.newValue.purchasePrice -
+                                conflict.oldValue.purchasePrice
+                            ) || 0}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            {Math.ceil(conflict.oldValue.saleRate || 0)}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            {Math.ceil(conflict.newValue.saleRate || 0) || 0}
+                          </td>
+                          <td className="py-3 px-4 text-right text-destructive">
+                            {Math.ceil(
+                              conflict.newValue.saleRate -
+                                conflict.oldValue.saleRate
+                            ) || 0}
                           </td>
                           <td className="py-3 px-4 text-center">
                             {conflict.discountSource ? (
                               <div className="flex flex-col items-center gap-1">
                                 <span
-                                  className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
-                                  {conflict.discountSource.type === 'associate' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}"
+                                  className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                                    conflict.discountSource.type === "associate"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-green-100 text-green-700"
+                                  }`}
                                 >
                                   {conflict.discountSource.type === "associate"
                                     ? "Associate"
@@ -572,7 +718,6 @@ function DataTable<
                   {conflictItems.filter((item) => item.selected).length} of{" "}
                   {conflictItems.length} items selected
                 </div>
-
                 <div className="flex gap-2">
                   <Button
                     variant="outline"

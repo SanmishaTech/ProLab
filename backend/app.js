@@ -54,6 +54,7 @@ var clinicHistoryRoutes = require("./routes/clientHistoryRoutes");
 var templateRoutes = require("./routes/templateRoutes");
 var paymentmodeRoutes = require("./routes/paymentmode");
 var unitmasterRoutes = require("./routes/unitmaster");
+var ratecardRoutes = require("./routes/ratecardRoutes");
 
 var app = express();
 const corsOptions = {
@@ -118,6 +119,7 @@ app.use("/api/clinic", clinicHistoryRoutes);
 app.use("/api/template", templateRoutes);
 app.use("/api/paymentmode", paymentmodeRoutes);
 app.use("/api/unitmaster", unitmasterRoutes);
+app.use("/api/ratecard", ratecardRoutes);
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 

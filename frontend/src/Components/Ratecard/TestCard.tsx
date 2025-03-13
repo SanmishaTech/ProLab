@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -25,36 +25,39 @@ import {
 } from "@/components/ui/form";
 import { Editor } from "@/Components/Editor/Editor";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectItem } from "@heroui/react";
 import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import MultiSelectorComponent from "./profile";
 import Tablecomponent from "./Tablecomponent";
+import AlertDialogbox from "./conflictassociate/conflict";
 
+// -----------------------------
+// Updated Schema to include purchasePrice & saleRate
+// -----------------------------
 const profileFormSchema = z.object({
-  associate: z.string().optional(),
+  associate: z.any().optional(),
   department: z.string().optional(),
   test: z
     .array(
       z.object({
         testId: z.string(),
-        price: z.number(),
+        purchasePrice: z.number(),
+        saleRate: z.number(),
         percentage: z.number(),
       })
     )
     .optional(),
-  value: z.any().optional(),
+  value: z
+    .object({
+      purchasePrice: z.number(),
+      saleRate: z.number(),
+    })
+    .optional(),
   userId: z.string().optional(),
 });
 
@@ -83,65 +86,96 @@ function ProfileForm() {
   const [updatedtests, setUpdatedtests] = useState<any[]>([]);
   const [percentagevalue, setPercentagevalue] = useState<any[]>([]);
   const [conflictchecks, setconflictchecks] = useState<any[]>([]);
-  let alltests;
+  const [searchfilter, setsearchfilter] = useState("");
+  const [FilteredTestData, setFilteredTestData] = useState<any[]>([]);
+  const [conflictData, setConflictData] = useState();
+  const [conflictopen, setconflictopen] = useState(false);
+  const [Selectopen, setSelectopen] = useState(false);
+  const [SelectedAssociate, setSelectedAssociate] = useState(null);
+  const [conflictedselected, setconflictedselected] = useState();
 
   const { watch } = form;
   const watchedAssociate = watch("associate");
   const watchDepartment = watch("department");
-  // const watchedAssociate = form.watch("associate");
+
+  // When conflict data changes, update testmaster items with purchasePrice & saleRate
+  useEffect(() => {
+    testmaster.forEach((item) => {
+      const findtestfromconflict = conflictedselected?.find((test) => {
+        return test.testId === item._id;
+      });
+      if (findtestfromconflict) {
+        // Update dual price values on the test master item
+        settestmaster((prevTestMaster) =>
+          prevTestMaster.map((test) =>
+            test._id === item._id
+              ? {
+                  ...test,
+                  purchasePrice: findtestfromconflict.unifiedPurchasePrice,
+                  saleRate: findtestfromconflict.unifiedSaleRate,
+                  originalPurchasePrice:
+                    findtestfromconflict.unifiedPurchasePrice,
+                  originalSaleRate: findtestfromconflict.unifiedSaleRate,
+                }
+              : test
+          )
+        );
+      }
+    });
+  }, [conflictedselected]);
 
   // Whenever "associate" changes, trigger this useEffect
   useEffect(() => {
-    console.log("Associate value changed:", watchedAssociate);
+    const arrayValues2 = Array.from(watchedAssociate || []);
     if (!watchedAssociate) return;
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(
-          `/api/service/getassociate/${watchedAssociate}/${
-            User?._id
-          }?departmentId=${watchDepartment ? watchDepartment : ""}`
+        const response = await axios.post(
+          `/api/ratecard/getassociate/${User?._id}?departmentId=${
+            watchDepartment ? watchDepartment : ""
+          }`,
+          {
+            associate: [
+              ...new Set(
+                arrayValues2.map((item) => item).filter((item) => item !== "")
+              ),
+            ],
+          }
         );
-        console.log("Fetched on associate change:", response.data[0].test);
-        const updatedtestadded = response.data[0]?.test.map((item) => {
+        setConflictData(response.data);
+        if (response.data?.hasConflicts) {
+          setSelectopen(false);
+          setconflictopen(true);
+        }
+
+        const updatedtestadded = response.data?.tests.map((item) => {
           let updatedtest = item.testId;
           let newitem = {
             testId: {
+              defaultPurchasePrice: item?.defaultPurchasePrice,
+              defaultSaleRate: item?.defaultSaleRate,
+              conflicts: item?.prices,
               ...updatedtest,
-              price: item.price ?? item?.testId?.price,
-              originalPrice: item?.testId?.price ?? item.price,
+              // Note: Adjust the property names from unifiedValue accordingly
+              purchasePrice: item.unifiedValue?.purchasePrice,
+              saleRate: item.unifiedValue?.saleRate,
+              hasConflict: item?.hasConflict,
+              originalPurchasePrice:
+                item?.defaultPurchasePrice ?? item.testId?.purchasePrice,
+              originalSaleRate: item?.defaultSaleRate ?? item.testId?.saleRate,
             },
-            price: item.price,
+            purchasePrice: item.unifiedValue?.purchasePrice,
+            saleRate: item.unifiedValue?.saleRate,
             percentagevalue: item.percentage,
           };
           return newitem;
         });
-
         const testspecialarrray = updatedtestadded.map((item) => {
           return item.testId;
         });
-        console.log("Updatedtestadded", updatedtestadded);
-        setconflictchecks(updatedtestadded);
+        setconflictchecks(testspecialarrray);
         setUpdatedtests(testspecialarrray);
         settestmaster(testspecialarrray);
-
-        // Update the test values if they exist
-        // if (response.data && response.data.length > 0) {
-        //   const associateTests = response.data[0]?.test || [];
-        //   const updatedTestMaster = testmaster.map((test) => {
-        //     const savedTest = associateTests.find(
-        //       (at) => at.testId === test._id
-        //     );
-        //     if (savedTest) {
-        //       return {
-        //         ...test,
-        //         price: savedTest.price,
-        //         originalPrice: test.price, // Keep original price for reference
-        //       };
-        //     }
-        //     return test;
-        //   });
-        //   settestmaster(updatedTestMaster);
-        // }
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -155,7 +189,6 @@ function ProfileForm() {
         const response = await axios.get(
           `/api/associatemaster/allassociates/${User?._id}`
         );
-        console.log(response.data);
         setAssociates(response.data);
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -170,9 +203,6 @@ function ProfileForm() {
         const response = await axios.get(
           `/api/testmaster/alltestmaster/${User?._id}`
         );
-        console.log("This is tetdata", response.data);
-        settestmaster(response.data);
-        alltests = response.data;
       } catch (error) {
         console.error("Error fetching specimen:", error);
       }
@@ -182,7 +212,6 @@ function ProfileForm() {
         const response = await axios.get(
           `/api/department/alldepartment/${User?._id}`
         );
-        console.log(response.data);
         setDepartment(response.data);
       } catch (error) {
         console.error("Error fetching department:", error);
@@ -191,35 +220,101 @@ function ProfileForm() {
     fetchDepartment();
     fetchSpecimen();
   }, []);
+
   const navigate = useNavigate();
 
-  async function onSubmit(data: ProfileFormValues) {
-    const formattedData = {
-      associate: data.associate,
-      department: data.department,
-      test: updatedtests?.map((item) => ({
-        testId: item._id,
-        price: item.price,
-        percentage: percentagevalue,
-      })),
-      userId: User?._id,
-    };
+  useEffect(() => {
+    // Here you can process non-conflict associates data if needed.
+    const nonconflictingdata = conflictData?.tests?.map((item) => {
+      return item.nonConflictAssociates.map((assoc) => {
+        return {
+          associate: assoc._id,
+          test: {
+            testId: item.testId?._id,
+            purchasePrice: item.unifiedValue?.purchasePrice,
+            saleRate: item.unifiedValue?.saleRate,
+            userId: User?._id,
+            percentage: item.unifiedValue?.percentage || 0,
+          },
+        };
+      });
+    });
+  }, [conflictedselected, watchedAssociate]);
 
+  // -----------------------------
+  // Updated onSubmit to include dual pricing in payloads
+  // -----------------------------
+  async function onSubmit(data: ProfileFormValues) {
     try {
-      const response = await axios.post(`/api/servicea`, formattedData);
-      console.log("Service saved:", response.data);
-      toast.success("Service Payable Created Successfully");
-      navigate("/service");
+      // Process non-conflicting associates
+      const nonconflictingdata =
+        conflictData &&
+        conflictData?.tests?.flatMap((test) => {
+          const updatedTest = updatedtests?.find(
+            (uTest) => uTest._id === (test.testId?._id || test.testId)
+          );
+          // Check if either purchasePrice or saleRate has changed
+          if (
+            updatedTest &&
+            (updatedTest?.purchasePrice !== test.unifiedValue?.purchasePrice ||
+              updatedTest?.saleRate !== test.unifiedValue?.saleRate)
+          ) {
+            test.nonConflictAssociates.forEach(async (associate) => {
+              await axios.post("/api/ratecard", {
+                associate: [associate._id],
+                test: {
+                  testId: associate.testId?._id,
+                  purchasePrice: updatedTest?.purchasePrice,
+                  saleRate: updatedTest?.saleRate,
+                  percentage: test.unifiedValue?.percentage || 0,
+                },
+                value: {
+                  purchasePrice: updatedTest?.purchasePrice,
+                  saleRate: updatedTest?.saleRate,
+                },
+                userId: User?._id,
+              });
+            });
+          }
+        });
+
+      // Process conflicting associates
+      const arrangeselecteddatawithconflict =
+        conflictedselected &&
+        conflictedselected?.map(async (item) => {
+          const updatedTest = updatedtests?.find(
+            (uTest) => uTest._id === item.testId
+          );
+          if (
+            updatedTest &&
+            (updatedTest?.purchasePrice !== item.unifiedValue?.purchasePrice ||
+              updatedTest?.saleRate !== item.unifiedValue?.saleRate)
+          ) {
+            await axios.post("/api/ratecard", {
+              associate: [item.associate._id],
+              test: {
+                testId: item.testId,
+                purchasePrice: updatedTest?.purchasePrice,
+                saleRate: updatedTest?.saleRate,
+                percentage: updatedTest?.percentage,
+              },
+              value: {
+                purchasePrice: updatedTest?.purchasePrice,
+                saleRate: updatedTest?.saleRate,
+              },
+              userId: User?._id,
+            });
+          }
+        });
     } catch (error) {
-      console.error("Error saving service:", error);
-      toast.error("Failed to create Service Payable");
+      console.error("Error processing associates:", error);
+      toast.error("Failed to process some associates");
     }
   }
 
-  const getformdatafromnextcomponent = (data) => {
-    setFormData(data);
-  };
-
+  // -----------------------------
+  // Updated handleUpdateTests to include purchasePrice and saleRate
+  // -----------------------------
   const handleUpdateTests = async (
     testsToUpdate: any[],
     discountPercentage: number
@@ -230,32 +325,35 @@ function ProfileForm() {
         department: form.getValues("department"),
         test: testsToUpdate.map((item) => ({
           testId: item._id,
-          price: item.price,
+          purchasePrice: item.purchasePrice,
+          saleRate: item.saleRate,
           percentage: discountPercentage,
         })),
         userId: User?._id,
       };
 
       const response = await axios.put(
-        `/api/service/updatetests/${watchedAssociate}/${User?._id}`,
+        `/api/ratecard/updatetests/${watchedAssociate}/${User?._id}`,
         formattedData
       );
 
       if (response.data) {
         toast.success("Test values updated successfully");
-        // Refresh the test values
         const updatedTestMaster = testmaster.map((test) => {
           const updatedTest = testsToUpdate.find((ut) => ut._id === test._id);
           if (updatedTest) {
             return {
               ...test,
-              price: updatedTest.price,
-              originalPrice: test.price,
+              purchasePrice: updatedTest.purchasePrice,
+              saleRate: updatedTest.saleRate,
+              originalPurchasePrice: test.purchasePrice,
+              originalSaleRate: test.saleRate,
             };
           }
           return test;
         });
-        settestmaster(updatedTestMaster);
+        // Optionally update testmaster state here if needed
+        // settestmaster(updatedTestMaster);
       }
     } catch (error) {
       console.error("Error updating test values:", error);
@@ -263,13 +361,22 @@ function ProfileForm() {
     }
   };
 
+  // Filter the test data based on the search query.
+  useEffect(() => {
+    const filteredData = testmaster?.filter((item) => {
+      return item?.name?.toLowerCase()?.includes(searchfilter?.toLowerCase());
+    });
+    setFilteredTestData(filteredData);
+  }, [searchfilter, testmaster]);
+
+  // Use form.watch to get the current value of the associate field
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8 pb-[2rem]"
       >
-        {" "}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-full p-4">
           <FormField
             className="flex-1"
@@ -277,81 +384,59 @@ function ProfileForm() {
             name="associate"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Associate</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="w-full"
+                  className="max-w-xs"
+                  label="Associates"
+                  placeholder="Select Associates"
+                  selectedKeys={field.value}
+                  variant="bordered"
+                  isOpen={Selectopen}
+                  selectionMode="multiple"
+                  onSelectionChange={field.onChange}
+                  onOpenChange={(open) => setSelectopen(open)}
                 >
-                  <FormControl className="w-full">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Associate" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {associates?.map((associate) => {
-                      return (
-                        <SelectItem value={associate?._id}>
-                          {associate.firstName}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
+                  {associates.map((animal) => (
+                    <SelectItem key={animal._id}>{animal.firstName}</SelectItem>
+                  ))}
                 </Select>
                 <FormDescription>
-                  Select Associate you want to use.
+                  Select Associates you want to Update.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            className="flex-1"
-            control={form.control}
-            name="department"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Department</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="w-full"
-                >
-                  <FormControl className="w-full">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Department type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {department?.map((department) => {
-                      return (
-                        <SelectItem value={department?._id}>
-                          {department.name}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  Select Department you want to use.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+        </div>
+        <div className="flex items-center justify-end">
+          <Input
+            type="search"
+            placeholder="Search..."
+            className="w-full rounded-full bg-slate-100 pl-10 border-muted focus-visible:ring-primary border-muted"
+            value={searchfilter}
+            onChange={(e) => setsearchfilter(e.target.value)}
           />
         </div>
         <div className="flex w-full">
           <Tablecomponent
-            data={testmaster}
+            data={FilteredTestData}
             setUpdatedtests={setUpdatedtests}
             setPercentagevalue={setPercentagevalue}
             conflictchecks={conflictchecks}
+            conflictData={conflictData}
+            setSelectedAssociate={setSelectedAssociate}
             onUpdateTests={handleUpdateTests}
           />
         </div>
-        <div className="flex justify-end w-full ">
+        <AlertDialogbox
+          isOpen={conflictopen}
+          onOpen={setconflictopen}
+          conflictData={conflictData}
+          setconflictedselected={setconflictedselected}
+          conflictedselected={conflictedselected}
+        />
+        <div className="flex justify-end w-full">
           <Button className="self-center mr-8" type="submit">
-            Add Profile
+            Add Rate Card
           </Button>
         </div>
       </form>
@@ -362,21 +447,20 @@ function ProfileForm() {
 export default function SettingsProfilePage() {
   const navigate = useNavigate();
   return (
-    <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
+    <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4">
       <Button
-        onClick={() => navigate("/service")}
+        onClick={() => navigate("/ratecard")}
         className="ml-4 flex gap-2 m-8 mb-4"
       >
         <MoveLeft className="w-5 text-white" />
         Back
       </Button>
-
       <CardHeader>
-        <CardTitle>Service Payable</CardTitle>
-        <CardDescription>Service Payable</CardDescription>
+        <CardTitle>Rate Card</CardTitle>
+        <CardDescription>Rate Card</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6 ">
+        <div className="space-y-6">
           <Separator />
           <ProfileForm />
         </div>

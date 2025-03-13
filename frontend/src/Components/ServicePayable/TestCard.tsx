@@ -441,8 +441,8 @@ function ProfileForm() {
               <FormItem className="w-full">
                 <Select
                   className="max-w-xs"
-                  label="Favorite Animal"
-                  placeholder="Select an animal"
+                  label="Associates"
+                  placeholder="Select Associates"
                   selectedKeys={field.value}
                   variant="bordered"
                   isOpen={Selectopen} // control the open state externally
@@ -458,7 +458,7 @@ function ProfileForm() {
                 </Select>
 
                 <FormDescription>
-                  Select Associate you want to use.
+                  Select Associates you want to Update.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -480,6 +480,7 @@ function ProfileForm() {
             setUpdatedtests={setUpdatedtests}
             setPercentagevalue={setPercentagevalue}
             conflictchecks={conflictchecks}
+            conflictData={conflictData}
             setSelectedAssociate={setSelectedAssociate}
             onUpdateTests={handleUpdateTests}
           />

@@ -97,13 +97,13 @@ export default function Dashboardholiday() {
     setConfig({
       breadcrumbs: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Rate Card Master" },
+        { label: "Service Payable Master" },
       ],
-      searchPlaceholder: "Search Rate Card Master...",
+      searchPlaceholder: "Search Service Payable   Master...",
       userAvatar: userAvatar, // Use the imported avatar
       tableColumns: {
-        title: "Rate Card Master",
-        description: "Manage Rate Card Master and view their details.",
+        title: "Service PayableMaster",
+        description: "Manage Service Payable  Master and view their details.",
         headers: [
           { label: "Associates", key: "associate" },
           { label: "Tests", key: "test" },
