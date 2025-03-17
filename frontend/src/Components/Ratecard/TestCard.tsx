@@ -768,8 +768,8 @@ export default function SettingsProfilePage() {
       </Button>
 
       <CardHeader>
-        <CardTitle>Service Payable</CardTitle>
-        <CardDescription>Service Payable</CardDescription>
+        <CardTitle>Rate Card</CardTitle>
+        <CardDescription>Rate Card</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
