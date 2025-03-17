@@ -56,6 +56,8 @@ const RatecardController = {
                   percentage: testRecord.currentPercentage,
                   fromDate: testRecord.currentFromDate,
                   toDate: now,
+                  reason: "Rate Update",
+                  associate: item,
                 });
               }
             }
@@ -264,7 +266,68 @@ const RatecardController = {
             const currentPercentage =
               serviceTest.currentPercentage ?? testEntry.defaultPercentage;
 
-            testEntry.history = serviceTest.history || [];
+            // Process history entries to include percentage change calculations
+            const processedHistory = (serviceTest.history || []).map(
+              (entry, index, arr) => {
+                // Find previous entry to calculate changes
+                const prevEntry =
+                  index < arr.length - 1 ? arr[index + 1] : null;
+                const previousPurchaseRate = prevEntry
+                  ? prevEntry.purchasePrice
+                  : testEntry.defaultPurchasePrice;
+                const previousSaleRate = prevEntry
+                  ? prevEntry.saleRate
+                  : testEntry.defaultSaleRate;
+
+                // Calculate absolute changes
+                const purchaseRateChange =
+                  entry.purchasePrice - previousPurchaseRate;
+                const saleRateChange = entry.saleRate - previousSaleRate;
+
+                // Calculate percentage changes (avoid division by zero)
+                const purchasePercentageChange =
+                  previousPurchaseRate !== 0
+                    ? (purchaseRateChange / previousPurchaseRate) * 100
+                    : entry.purchasePrice > 0
+                    ? 100
+                    : 0;
+
+                const salePercentageChange =
+                  previousSaleRate !== 0
+                    ? (saleRateChange / previousSaleRate) * 100
+                    : entry.saleRate > 0
+                    ? 100
+                    : 0;
+
+                return {
+                  date: entry.fromDate
+                    ? new Date(entry.fromDate).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "2-digit",
+                      })
+                    : "",
+                  purchaseRate: entry.purchasePrice,
+                  saleRate: entry.saleRate,
+                  previousPurchaseRate,
+                  previousSaleRate,
+                  purchaseRateChange,
+                  saleRateChange,
+                  purchasePercentageChange,
+                  salePercentageChange,
+                  reason: entry.reason || "Historical Rate",
+                  fromDate: entry.fromDate,
+                  toDate: entry.toDate,
+                  _id:
+                    entry._id ||
+                    `history_${Date.now()}_${Math.random()
+                      .toString(36)
+                      .substring(2, 9)}`,
+                };
+              }
+            );
+
+            testEntry.history = processedHistory;
             testEntry.date = serviceTest.currentFromDate;
 
             testEntry.prices.set(associateId, {
@@ -421,6 +484,8 @@ const RatecardController = {
               percentage: testRecord.currentPercentage,
               fromDate: testRecord.currentFromDate,
               toDate: now,
+              reason: "Rate Update",
+              associate: testItem.associate,
             });
 
             // Update with new values
