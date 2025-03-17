@@ -17,27 +17,16 @@ interface Test {
   date?: string;
 }
 
-interface ConflictCheck {
-  type: "associate" | "department";
-  value: number;
-  isPercentage: boolean;
-}
-
-interface ConflictData {
-  tests: {
-    testId: {
-      _id: string | number;
-    };
-    date: string;
-  }[];
-}
-
 interface Props {
   data: Test[];
   setUpdatedtests: (tests: Test[]) => void;
   setPercentagevalue: (value: number) => void;
-  conflictchecks?: ConflictCheck[];
-  conflictData?: ConflictData;
+  conflictchecks?: Array<{
+    type: "associate" | "department";
+    value: number;
+    isPercentage: boolean;
+  }>;
+  conflictData?: any;
   setSelectedAssociate?: (associate: any) => void;
   onUpdateTests?: (
     testsToUpdate: Test[],
@@ -64,8 +53,8 @@ export default function Tablecomponent({
   setUpdatedtests,
   setPercentagevalue,
   conflictchecks,
-  conflictData,
   setSelectedAssociate,
+  conflictData,
   onUpdateTests,
 }: Props) {
   const [users, setUsers] = useState<Test[]>([]);
@@ -77,33 +66,26 @@ export default function Tablecomponent({
   >([]);
 
   useEffect(() => {
-    // Initialize with original purchase and sale rates and format date if available.
-    console.log("data", data);
-    const usersWithOriginal = data?.map((user) => ({
-      ...user,
-      id: user._id, // Ensure id is set
-      date:
-        conflictData?.tests?.find((test) => test.testId?._id === user._id)
-          ?.date &&
-        new Date(
-          conflictData?.tests?.find(
-            (test) => test.testId?._id === user._id
-          )?.date
-        )?.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "2-digit",
-        }),
-      originalPurchaseRate:
-        user.originalPurchaseRate !== undefined
-          ? user.originalPurchaseRate
-          : user.purchaseRate,
-      originalSaleRate:
-        user.originalSaleRate !== undefined
-          ? user.originalSaleRate
-          : user.saleRate,
-    }));
-    setUsers(usersWithOriginal);
+    // Initialize with original prices
+    console.log("countingid ", data);
+
+    const usersWithOriginal = data?.map((user) => {
+      const testData = conflictData?.tests?.find((test: any) => test.testId?._id === user._id);
+      return {
+        ...user,
+        id: user._id, // Ensure id is set
+        date: testData?.date 
+          ? new Date(testData.date).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+            }) 
+          : undefined,
+        originalPurchaseRate: user.originalPurchaseRate || user.purchaseRate, // Use existing originalPurchaseRate or current purchaseRate
+        originalSaleRate: user.originalSaleRate || user.saleRate, // Use existing originalSaleRate or current saleRate
+      };
+    });
+    setUsers(usersWithOriginal || []);
   }, [data, conflictData]);
 
   useEffect(() => {
@@ -112,16 +94,7 @@ export default function Tablecomponent({
 
   const handleAdd = (newUser: Test) => {
     const newId = Math.max(...users.map((u) => Number(u._id))) + 1;
-    setUsers((prev) => [
-      ...prev,
-      {
-        ...newUser,
-        _id: newId,
-        id: newId,
-        originalPurchaseRate: newUser.purchaseRate,
-        originalSaleRate: newUser.saleRate,
-      },
-    ]);
+    setUsers((prev) => [...prev, { ...newUser, _id: newId, id: newId }]);
   };
 
   const handleDelete = (usersToDelete: Test[]) => {
@@ -136,36 +109,22 @@ export default function Tablecomponent({
     );
   };
 
-  // Update both purchase and sale rates using the discount percentage.
-  // If the newly calculated rates are identical to the current ones, no update is performed.
   const handleBulkEdit = (discountPercentage: number) => {
     setPercentagevalue(discountPercentage);
-    console.log("users", users);
     const updatedUsers = users.map((user) => {
-      if (selectedItems.some((selected) => selected._id === user._id)) {
-        const originalSale = user.originalSaleRate ?? user.saleRate;
-        const originalPurchase = user.originalPurchaseRate ?? user.price;
-        const newSaleRate = Math.ceil(
-          originalSale - originalSale * (discountPercentage / 100)
-        );
-        const newPurchaseRate = Math.ceil(
-          originalPurchase - originalPurchase * (discountPercentage / 100)
-        );
-        console.log("newPurchaseRate", originalPurchase);
+      if (selectedItems.some((selected) => selected?._id === user?._id)) {
+        const originalPurchaseRate = user.originalPurchaseRate || user.purchaseRate;
+        const originalSaleRate = user.originalSaleRate || user.saleRate;
+        
+        const purchaseDiscount = originalPurchaseRate * (discountPercentage / 100);
+        const saleDiscount = originalSaleRate * (discountPercentage / 100);
+        
+        const newPurchaseRate = Math.ceil(originalPurchaseRate - purchaseDiscount);
+        const newSaleRate = Math.ceil(originalSaleRate - saleDiscount);
 
-        // Skip update if both new rates are same as the current ones.
-        if (
-          newSaleRate === user.saleRate &&
-          newPurchaseRate === user.purchaseRate
-        ) {
-          return user;
-        }
-
-        const conflictTest = conflictData?.tests?.find(
-          (test) => test.testId?._id === user._id
-        );
-        const formattedDate = conflictTest?.date
-          ? new Date(conflictTest.date).toLocaleDateString("en-GB", {
+        const testData = conflictData?.tests?.find((test: any) => test.testId?._id === user._id);
+        const formattedDate = testData?.date
+          ? new Date(testData.date).toLocaleDateString("en-GB", {
               day: "2-digit",
               month: "2-digit",
               year: "2-digit",
@@ -178,11 +137,11 @@ export default function Tablecomponent({
 
         return {
           ...user,
-          saleRate: newSaleRate,
           purchaseRate: newPurchaseRate,
+          saleRate: newSaleRate,
           date: formattedDate,
-          originalSaleRate: originalSale,
-          originalPurchaseRate: originalPurchase,
+          originalPurchaseRate: originalPurchaseRate, // Preserve original purchase rate
+          originalSaleRate: originalSaleRate, // Preserve original sale rate
         };
       }
       return user;

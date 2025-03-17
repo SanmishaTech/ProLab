@@ -11,20 +11,77 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
+// Define types for the component props
+interface ConflictAssociate {
+  _id: string;
+  firstName?: string;
+  lastName?: string;
+  id?: string;
+  fullName?: string;
+  value?: {
+    purchaseRate?: number;
+    purchasePrice?: number;
+    saleRate?: number;
+    percentage?: number;
+  };
+}
+
+interface TestWithConflicts {
+  testId: {
+    _id: string;
+    name: string;
+    id?: string;
+  };
+  conflictAssociates: ConflictAssociate[];
+  unifiedValue: {
+    purchaseRate?: number;
+    purchasePrice?: number;
+    saleRate?: number;
+    percentage?: number;
+  };
+}
+
+interface ConflictData {
+  tests: TestWithConflicts[];
+  hasConflicts: boolean;
+}
+
+interface SelectedAssociate {
+  testId: string;
+  testName: string;
+  associate: ConflictAssociate;
+  index: number;
+  unifiedPurchaseRate: number;
+  unifiedSaleRate: number;
+  unifiedPercentage?: number;
+}
+
+interface AlertDialogboxProps {
+  url: string;
+  backdrop?: string;
+  isOpen: boolean;
+  conflictData: ConflictData;
+  setconflictedselected: (selected: SelectedAssociate[]) => void;
+  conflictedselected?: SelectedAssociate[];
+  onOpen: (open: boolean) => void;
+  onClose?: () => void;
+}
+
 export default function AlertDialogbox({
   url,
   backdrop = "blur",
   isOpen,
   conflictData,
   setconflictedselected,
+  conflictedselected,
   onOpen,
   onClose: propOnClose,
-}) {
+}: AlertDialogboxProps) {
   // Track which test rows are expanded
-  const [openTests, setOpenTests] = useState({});
+  const [openTests, setOpenTests] = useState<Record<string, boolean>>({});
 
   // Instead of storing a boolean value, we now store metadata objects for selected associates.
-  const [selectedAssociates, setSelectedAssociates] = useState({});
+  const [selectedAssociates, setSelectedAssociates] = useState<Record<string, SelectedAssociate>>({});
 
   const queryClient = useQueryClient();
 
@@ -48,7 +105,7 @@ export default function AlertDialogbox({
   }, [conflictData]);
 
   // Toggle expansion of a test row
-  const toggleTestRow = (uniqueTestKey) => {
+  const toggleTestRow = (uniqueTestKey: string) => {
     setOpenTests((prev) => ({
       ...prev,
       [uniqueTestKey]: !prev[uniqueTestKey],
@@ -57,7 +114,12 @@ export default function AlertDialogbox({
 
   // Toggle selection of a specific associate.
   // Now we also pass in the test, associate, and index so we can save extra metadata.
-  const toggleAssociateSelection = (associateId, test, associate, index) => {
+  const toggleAssociateSelection = (
+    associateId: string, 
+    test: TestWithConflicts, 
+    associate: ConflictAssociate, 
+    index: number
+  ) => {
     setSelectedAssociates((prev) => {
       if (prev[associateId]) {
         // If already selected, remove it.
@@ -73,7 +135,8 @@ export default function AlertDialogbox({
             testName: test?.testId?.name || "Unnamed Test",
             associate,
             index,
-            unifiedPrice: test?.unifiedValue?.price,
+            unifiedPurchaseRate: test?.unifiedValue?.purchaseRate || test?.unifiedValue?.purchasePrice || 0,
+            unifiedSaleRate: test?.unifiedValue?.saleRate || 0,
             unifiedPercentage: test?.unifiedValue?.percentage,
           },
         };
@@ -82,7 +145,7 @@ export default function AlertDialogbox({
   };
 
   // Toggle selection for all associates in a specific test.
-  const toggleAllTestAssociates = (test, isSelected) => {
+  const toggleAllTestAssociates = (test: TestWithConflicts, isSelected: boolean) => {
     if (test?.conflictAssociates) {
       const updatedSelections = { ...selectedAssociates };
       test.conflictAssociates.forEach((associate, index) => {
@@ -93,7 +156,8 @@ export default function AlertDialogbox({
             testName: test?.testId?.name || "Unnamed Test",
             associate,
             index,
-            unifiedPrice: test?.unifiedValue?.price,
+            unifiedPurchaseRate: test?.unifiedValue?.purchaseRate || test?.unifiedValue?.purchasePrice || 0,
+            unifiedSaleRate: test?.unifiedValue?.saleRate || 0,
             unifiedPercentage: test?.unifiedValue?.percentage,
           };
         } else {
@@ -105,8 +169,8 @@ export default function AlertDialogbox({
   };
 
   // Toggle selection for all associates across all tests.
-  const toggleAllAssociates = (isSelected) => {
-    const newSelections = {};
+  const toggleAllAssociates = (isSelected: boolean) => {
+    const newSelections: Record<string, SelectedAssociate> = {};
     conflictData?.tests?.forEach((test) => {
       if (test.conflictAssociates) {
         test.conflictAssociates.forEach((associate, index) => {
@@ -117,7 +181,8 @@ export default function AlertDialogbox({
               testName: test?.testId?.name || "Unnamed Test",
               associate,
               index,
-              unifiedPrice: test?.unifiedValue?.price,
+              unifiedPurchaseRate: test?.unifiedValue?.purchaseRate || test?.unifiedValue?.purchasePrice || 0,
+              unifiedSaleRate: test?.unifiedValue?.saleRate || 0,
               unifiedPercentage: test?.unifiedValue?.percentage,
             };
           }
@@ -128,7 +193,7 @@ export default function AlertDialogbox({
 
     // Optionally expand all tests when selecting all
     if (isSelected) {
-      const newOpenTests = {};
+      const newOpenTests: Record<string, boolean> = {};
       conflictData?.tests?.forEach((test, index) => {
         const testId = `${test.testId?.id || test.testId?.name}-${index}`;
         newOpenTests[testId] = true;
@@ -138,7 +203,7 @@ export default function AlertDialogbox({
   };
 
   // Check if all associates of a specific test are selected.
-  const areAllTestAssociatesSelected = (test) => {
+  const areAllTestAssociatesSelected = (test: TestWithConflicts) => {
     if (!test?.conflictAssociates || test.conflictAssociates.length === 0)
       return false;
 
@@ -149,12 +214,11 @@ export default function AlertDialogbox({
   };
 
   // Count selected associates
-  const selectedCount =
-    Object.values(selectedAssociates).filter(Boolean).length;
+  const selectedCount = Object.values(selectedAssociates).filter(Boolean).length;
 
   // Count total associates
   const totalAssociatesCount =
-    conflictData?.tests.reduce(
+    conflictData?.tests?.reduce(
       (total, test) => total + (test.conflictAssociates?.length || 0),
       0
     ) || 0;
@@ -165,23 +229,58 @@ export default function AlertDialogbox({
 
   // Handle conflict resolution. The metadata now includes unified value information.
   const handleConflictResolution = () => {
+    // Get the selected associates with their metadata
     const associatesToUpdate = Object.entries(selectedAssociates)
-      .filter(([key, metadata]) => metadata)
-      .map(([key, metadata]) => metadata);
+      .filter(([, metadata]) => metadata)
+      .map(([, metadata]) => {
+        // Ensure we have valid numeric values
+        const unifiedPurchaseRate = 
+          typeof metadata.unifiedPurchaseRate === 'number' && !isNaN(metadata.unifiedPurchaseRate)
+            ? metadata.unifiedPurchaseRate
+            : 0;
+        
+        const unifiedSaleRate = 
+          typeof metadata.unifiedSaleRate === 'number' && !isNaN(metadata.unifiedSaleRate)
+            ? metadata.unifiedSaleRate
+            : 0;
+            
+        // Create a clean copy with explicit numeric values
+        return {
+          ...metadata,
+          unifiedPurchaseRate,
+          unifiedSaleRate,
+          // Add clear purchaseRate and saleRate values to avoid ambiguity
+          purchaseRate: unifiedPurchaseRate,
+          saleRate: unifiedSaleRate
+        };
+      });
+    
+    // If no associates selected, show a warning and prevent action
+    if (associatesToUpdate.length === 0) {
+      console.warn("No associates selected for conflict resolution");
+      return;
+    }
+    
+    console.log("Submitting conflict resolution with values:", 
+      associatesToUpdate.map(a => ({
+        test: a.testName, 
+        purchaseRate: a.unifiedPurchaseRate, 
+        saleRate: a.unifiedSaleRate
+      }))
+    );
+    
+    // Pass the selected items to the parent component
     setconflictedselected(associatesToUpdate);
-
-    // Example API call:
-    // axios.post(url, { associates: associatesToUpdate })
-    //   .then(() => {
-    //     queryClient.invalidateQueries(["yourQueryKey"]);
-    //     onClose();
-    //   });
-
-    console.log("Updating associates with metadata:", associatesToUpdate);
+    
+    // Close the dialog
     onClose();
   };
 
-  const getAssociateKey = (test, associate, index) => {
+  const getAssociateKey = (
+    test: TestWithConflicts, 
+    associate: ConflictAssociate, 
+    index: number
+  ): string => {
     const testId = test?.testId?._id || test?.testId?.name;
     return `${testId}-${associate.id || associate.firstName}-${
       associate.lastName || ""
@@ -190,7 +289,16 @@ export default function AlertDialogbox({
 
   return (
     <div className="relative z-[200]">
-      <Modal backdrop={backdrop} isOpen={isOpen} onClose={onClose} size="6xl">
+      <Modal 
+        isOpen={isOpen} 
+        onClose={onClose} 
+        size="5xl"
+        classNames={{
+          backdrop: "z-[200]",
+          wrapper: "z-[200]",
+          base: "z-[200]"
+        }}
+      >
         <ModalContent>
           {() => (
             <>
@@ -226,7 +334,10 @@ export default function AlertDialogbox({
                           </th>
                           <th className="py-3 px-4 text-left">Test</th>
                           <th className="py-3 px-4 text-right">
-                            Unified Value
+                            Unified Purchase Rate
+                          </th>
+                          <th className="py-3 px-4 text-right">
+                            Unified Sale Rate
                           </th>
                           <th className="py-3 px-4 text-center">Actions</th>
                         </tr>
@@ -270,142 +381,86 @@ export default function AlertDialogbox({
                                   {test.testId?.name || "Unnamed Test"}
                                 </td>
                                 <td className="py-3 px-4 text-right">
-                                  {Math.ceil(test.unifiedValue?.price) &&
-                                    `$${Math.ceil(test.unifiedValue.price)}`}
+                                  {(test.unifiedValue?.purchaseRate || test.unifiedValue?.purchasePrice) && 
+                                    `₹${Math.ceil(test.unifiedValue?.purchaseRate || test.unifiedValue?.purchasePrice || 0)}`}
                                 </td>
-                                <td className="py-3 px-4 text-center flex items-end justify-center">
-                                  {test.conflictAssociates?.length > 0 ? (
-                                    <Button
-                                      variant="light"
-                                      onClick={() => toggleTestRow(testId)}
-                                      size="sm"
-                                      className="flex items-center gap-1 align-right"
-                                    >
-                                      {isTestOpen ? (
-                                        <>
-                                          <span>Hide Associates</span>
-                                          <ChevronUp className="h-4 w-4" />
-                                        </>
-                                      ) : (
-                                        <>
-                                          <span>
-                                            View Associates (
-                                            {test.conflictAssociates.length})
-                                          </span>
-                                          <ChevronDown className="h-4 w-4" />
-                                        </>
-                                      )}
-                                    </Button>
-                                  ) : (
-                                    <span className="text-gray-500 text-sm">
-                                      No conflicts
-                                    </span>
-                                  )}
+                                <td className="py-3 px-4 text-right">
+                                  {test.unifiedValue?.saleRate && 
+                                    `₹${Math.ceil(test.unifiedValue?.saleRate || 0)}`}
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <Button
+                                    color="primary"
+                                    variant="light"
+                                    isIconOnly
+                                    size="sm"
+                                    className="rounded-full"
+                                    onClick={() => toggleTestRow(testId)}
+                                  >
+                                    {isTestOpen ? (
+                                      <ChevronUp className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronDown className="h-4 w-4" />
+                                    )}
+                                  </Button>
                                 </td>
                               </tr>
 
+                              {/* Associate rows (expanded) */}
                               {isTestOpen &&
                                 test.conflictAssociates?.map(
-                                  (associate, idx) => {
-                                    const associateId = getAssociateKey(
+                                  (associate, associateIndex) => {
+                                    const associateKey = getAssociateKey(
                                       test,
                                       associate,
-                                      idx
+                                      associateIndex
                                     );
-
                                     return (
                                       <tr
-                                        key={`${testId}-associate-${idx}`}
-                                        className="border-b bg-blue-50 hover:bg-blue-100"
+                                        key={associateKey}
+                                        className="border-b bg-muted/20 hover:bg-muted/40"
                                       >
                                         <td className="py-2 px-4 pl-8">
                                           <div className="flex items-center space-x-2">
                                             <Checkbox
                                               checked={
                                                 !!selectedAssociates[
-                                                  associateId
+                                                  associateKey
                                                 ]
                                               }
-                                              onCheckedChange={() =>
+                                              onCheckedChange={(checked) =>
                                                 toggleAssociateSelection(
-                                                  associateId,
+                                                  associateKey,
                                                   test,
                                                   associate,
-                                                  idx
+                                                  associateIndex
                                                 )
                                               }
-                                              id={`associate-${associateId}`}
+                                              id={`associate-${associateKey}`}
                                             />
                                             <label
-                                              htmlFor={`associate-${associateId}`}
+                                              htmlFor={`associate-${associateKey}`}
                                               className="cursor-pointer"
                                             >
-                                              Select
+                                              {associate.fullName ||
+                                                `${associate.firstName || ""} ${
+                                                  associate.lastName || ""
+                                                }`.trim() ||
+                                                associate._id ||
+                                                "Unnamed Associate"}
                                             </label>
                                           </div>
                                         </td>
-                                        <td className="py-2 px-4">
-                                          <div className="flex flex-col">
-                                            <span>
-                                              {associate.firstName}{" "}
-                                              {associate.lastName}
-                                            </span>
-                                            <span className="text-xs text-gray-500">
-                                              ID:{" "}
-                                              {associate.id || "Not available"}
-                                            </span>
-                                          </div>
+                                        <td className="py-2 px-4"></td>
+                                        <td className="py-2 px-4 text-right">
+                                          {(associate.value?.purchaseRate || associate.value?.purchasePrice) && 
+                                            `₹${Math.ceil(associate.value?.purchaseRate || associate.value?.purchasePrice || 0)}`}
                                         </td>
                                         <td className="py-2 px-4 text-right">
-                                          <div className="flex flex-col">
-                                            <div className="flex justify-end items-center gap-2">
-                                              <span className="font-medium text-red-600">
-                                                $
-                                                {Math.ceil(
-                                                  associate.value?.price || 0
-                                                ).toFixed(2)}
-                                              </span>
-                                              <span className="text-gray-400">
-                                                →
-                                              </span>
-                                              <span className="font-medium text-green-600">
-                                                $
-                                                {Math.ceil(
-                                                  test.unifiedValue?.price || 0
-                                                ).toFixed(2)}
-                                              </span>
-                                            </div>
-                                            <span className="text-xs text-gray-500 text-right">
-                                              {Math.ceil(
-                                                associate.value?.price || 0
-                                              ) <
-                                              Math.ceil(
-                                                test.unifiedValue?.price || 0
-                                              )
-                                                ? "Price will increase"
-                                                : "Price will decrease"}
-                                            </span>
-                                          </div>
+                                          {associate.value?.saleRate && 
+                                            `₹${Math.ceil(associate.value?.saleRate || 0)}`}
                                         </td>
-                                        <td className="py-2 px-4 text-center">
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() =>
-                                              toggleAssociateSelection(
-                                                associateId,
-                                                test,
-                                                associate,
-                                                idx
-                                              )
-                                            }
-                                            className="text-gray-500 hover:text-gray-700"
-                                          >
-                                            {selectedAssociates[associateId]
-                                              ? "Deselect"
-                                              : "Select"}
-                                          </Button>
-                                        </td>
+                                        <td></td>
                                       </tr>
                                     );
                                   }
@@ -417,15 +472,9 @@ export default function AlertDialogbox({
                     </table>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-muted-foreground">
-                    {selectedCount} of {totalAssociatesCount} associates
-                    selected
-                  </div>
-                </div>
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+                <Button variant="flat" color="danger" onPress={onClose}>
                   Cancel
                 </Button>
                 <Button
@@ -433,7 +482,7 @@ export default function AlertDialogbox({
                   onPress={handleConflictResolution}
                   disabled={selectedCount === 0}
                 >
-                  Apply Changes to Selected
+                  Apply Selected ({selectedCount}/{totalAssociatesCount})
                 </Button>
               </ModalFooter>
             </>

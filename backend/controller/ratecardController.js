@@ -124,34 +124,65 @@ const RatecardController = {
       const userId = req.params.userId;
       const usertobefound = new mongoose.Types.ObjectId(userId);
 
-      //   const patient = await ServicePayable.find({
-      //     userId: usertobefound,
-      //   });
-      const servicePayable = await ServicePayable.find({
+      const rateCards = await ServicePayable.find({
         userId: usertobefound,
       })
         .populate({
           path: "associate",
         })
         .populate({
-          path: "test",
+          path: "test.testId",
         });
-      res.status(200).json(servicePayable);
+
+      // Transform data to include history
+      const formattedRateCards = rateCards.map((card) => {
+        return {
+          ...card.toObject(),
+          test: card.test.map((test) => ({
+            ...test.toObject(),
+            purchaseRate: test.currentPurchasePrice,
+            saleRate: test.currentSaleRate,
+            percentage: test.currentPercentage,
+            date: test.currentFromDate,
+            history: test.history,
+          })),
+        };
+      });
+
+      res.status(200).json(formattedRateCards);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
   getServicesbyId: async (req, res, next) => {
     try {
-      const patientId = req.params.referenceId;
-      const services = await ServicePayable.findById(patientId)
+      const rateCardId = req.params.referenceId;
+      const rateCard = await ServicePayable.findById(rateCardId)
         .populate({
           path: "associate",
         })
         .populate({
-          path: "test",
+          path: "test.testId",
         });
-      res.status(200).json(services);
+
+      if (!rateCard) {
+        return res.status(404).json({ message: "Rate card not found." });
+      }
+
+      // Transform data to include history
+      const formattedRateCard = {
+        ...rateCard.toObject(),
+        test: rateCard.test.map((test) => ({
+          ...test.toObject(),
+          purchaseRate: test.currentPurchasePrice,
+          saleRate: test.currentSaleRate,
+          percentage: test.currentPercentage,
+          date: test.currentFromDate,
+          history: test.history,
+        })),
+      };
+
+      res.status(200).json(formattedRateCard);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -162,16 +193,17 @@ const RatecardController = {
       const userId = req.params.userId;
       const departmentId = req.query.departmentId;
 
-      // Fetch associate details (assumes Associate model is imported)
+      // Fetch associate details
       const associatesDetails = await Associate.find({
         _id: { $in: associates.map((id) => new mongoose.Types.ObjectId(id)) },
       });
+
       // Create a lookup map: associate id => associate details
       const associateDetailsMap = new Map(
         associatesDetails.map((detail) => [detail._id.toString(), detail])
       );
 
-      // Fetch all relevant tests (assuming Test model now includes purchasePrice and saleRate)
+      // Fetch all relevant tests
       const tests = await Test.find({
         userId: new mongoose.Types.ObjectId(userId),
         ...(departmentId && {
@@ -215,7 +247,7 @@ const RatecardController = {
       });
       const allServices = await Promise.all(servicePromises);
 
-      // Update prices based on ServicePayable for each associate
+      // Update prices based on services for each associate
       allServices?.forEach((services, index) => {
         const associateId = associates[index];
         services?.forEach((service) => {
@@ -231,6 +263,10 @@ const RatecardController = {
               serviceTest.currentSaleRate ?? testEntry.defaultSaleRate;
             const currentPercentage =
               serviceTest.currentPercentage ?? testEntry.defaultPercentage;
+
+            testEntry.history = serviceTest.history || [];
+            testEntry.date = serviceTest.currentFromDate;
+
             testEntry.prices.set(associateId, {
               purchasePrice: currentPurchasePrice,
               saleRate: currentSaleRate,
@@ -240,60 +276,82 @@ const RatecardController = {
         });
       });
 
-      // Process each test to split associates into non-conflict and conflict arrays
       const results = Array.from(testMap.values()).map((testEntry) => {
-        // Group values by a combined key: "purchasePrice-saleRate-percentage"
-        const groupMap = {};
-        testEntry.prices.forEach(
-          ({ purchasePrice, saleRate, percentage }, associateId) => {
-            const key = `${purchasePrice}-${saleRate}-${percentage}`;
-            if (!groupMap[key]) {
-              groupMap[key] = {
-                value: { purchasePrice, saleRate, percentage },
+        // Group values by combined purchasePrice-saleRate key
+        const priceGroups = new Map();
+        let priceGroupCounts = new Map();
+
+        // Iterate through all price entries for this test
+        Array.from(testEntry.prices.entries()).forEach(
+          ([associateId, priceData]) => {
+            const priceKey = `${priceData.purchasePrice}-${priceData.saleRate}`;
+            if (!priceGroups.has(priceKey)) {
+              priceGroups.set(priceKey, {
+                value: priceData,
                 associates: [],
-              };
+              });
+              priceGroupCounts.set(priceKey, 0);
             }
-            groupMap[key].associates.push(associateId);
+            priceGroups.get(priceKey).associates.push(associateId);
+            priceGroupCounts.set(priceKey, priceGroupCounts.get(priceKey) + 1);
           }
         );
 
-        // Determine the unified value (the most frequent group)
-        let unifiedGroup = null;
-        Object.keys(groupMap).forEach((key) => {
-          const group = groupMap[key];
-          if (
-            !unifiedGroup ||
-            group.associates.length > unifiedGroup.associates.length
-          ) {
-            unifiedGroup = group;
+        // Find the most common price group (or first if tied)
+        let mostCommonPriceKey = "";
+        let maxCount = 0;
+        for (const [priceKey, count] of priceGroupCounts.entries()) {
+          if (count > maxCount) {
+            maxCount = count;
+            mostCommonPriceKey = priceKey;
           }
-        });
+        }
 
-        // Split associates into non-conflict and conflict based on the unified value
-        const nonConflictAssociates = [];
-        const conflictAssociates = [];
-        testEntry.prices.forEach(
-          ({ purchasePrice, saleRate, percentage }, associateId) => {
-            const meta = associateDetailsMap.get(associateId) || {
+        // Get the unified group and separate conflicting/non-conflicting associates
+        const unifiedGroup = priceGroups.get(mostCommonPriceKey) || {
+          value: {
+            purchasePrice: testEntry.defaultPurchasePrice,
+            saleRate: testEntry.defaultSaleRate,
+            percentage: testEntry.defaultPercentage,
+          },
+          associates: [],
+        };
+
+        // Separate associates into conflicting and non-conflicting
+        const nonConflictAssociates = unifiedGroup.associates.map(
+          (associateId) => {
+            const associate = associateDetailsMap.get(associateId);
+            return {
               _id: associateId,
-            };
-            const associateData = {
-              ...meta._doc, // Use _doc if using Mongoose; adjust otherwise
-              value: { purchasePrice, saleRate, percentage },
+              firstName: associate?.firstName,
+              lastName: associate?.lastName,
+              fullName: `${associate?.firstName || ""} ${
+                associate?.lastName || ""
+              }`.trim(),
+              value: testEntry.prices.get(associateId),
               testId: testEntry.testId,
             };
-
-            if (
-              purchasePrice === unifiedGroup.value.purchasePrice &&
-              saleRate === unifiedGroup.value.saleRate &&
-              percentage === unifiedGroup.value.percentage
-            ) {
-              nonConflictAssociates.push(associateData);
-            } else {
-              conflictAssociates.push(associateData);
-            }
           }
         );
+
+        const conflictAssociates = Array.from(testEntry.prices.entries())
+          .filter(
+            ([associateId, priceData]) =>
+              !unifiedGroup.associates.includes(associateId)
+          )
+          .map(([associateId, priceData]) => {
+            const associate = associateDetailsMap.get(associateId);
+            return {
+              _id: associateId,
+              firstName: associate?.firstName,
+              lastName: associate?.lastName,
+              fullName: `${associate?.firstName || ""} ${
+                associate?.lastName || ""
+              }`.trim(),
+              value: priceData,
+              testId: testEntry.testId,
+            };
+          });
 
         return {
           testId: testEntry.testId,
@@ -301,9 +359,10 @@ const RatecardController = {
           defaultSaleRate: testEntry.defaultSaleRate,
           defaultPercentage: testEntry.defaultPercentage,
           unifiedValue: unifiedGroup.value,
+          date: testEntry.date,
+          history: testEntry.history,
           nonConflictAssociates,
           conflictAssociates,
-          // For reference, include the raw prices mapping
           prices: Object.fromEntries(testEntry.prices),
           hasConflict: conflictAssociates.length > 0,
         };
@@ -326,38 +385,91 @@ const RatecardController = {
 
   updateThreads: async (req, res, next) => {
     try {
-      const patientId = req.params.associateId;
+      const associateId = req.params.associateId;
       const { associate, department, test, value, userId } = req.body;
+      const now = new Date();
 
-      const newService = await ServicePayable.findByIdAndUpdate(
-        patientId,
-        {
-          associate,
-          department,
-          test,
-          value,
-          userId,
-        },
-        { new: true }
-      );
-      if (!newService) {
-        return res.status(404).json({ message: "Service not found." });
+      // Find existing rate card for this associate
+      const existingRateCard = await ServicePayable.findOne({
+        associate: new mongoose.Types.ObjectId(associateId),
+        userId: new mongoose.Types.ObjectId(userId),
+      });
+
+      if (!existingRateCard) {
+        return res.status(404).json({ message: "Rate card not found." });
       }
 
-      res.json({ message: "Service updated successfully.", newService });
+      // Process each test to update
+      for (const testItem of test) {
+        const testId = new mongoose.Types.ObjectId(testItem.testId);
+
+        // Find the test in the rate card
+        const testRecord = existingRateCard.test.find((t) =>
+          t.testId.equals(testId)
+        );
+
+        if (testRecord) {
+          // Only update if values have changed
+          if (
+            testRecord.currentPurchasePrice !== testItem.purchasePrice ||
+            testRecord.currentSaleRate !== testItem.saleRate
+          ) {
+            // Archive current values to history
+            testRecord.history.push({
+              purchasePrice: testRecord.currentPurchasePrice,
+              saleRate: testRecord.currentSaleRate,
+              percentage: testRecord.currentPercentage,
+              fromDate: testRecord.currentFromDate,
+              toDate: now,
+            });
+
+            // Update with new values
+            testRecord.currentPurchasePrice = testItem.purchasePrice;
+            testRecord.currentSaleRate = testItem.saleRate;
+            testRecord.currentPercentage = testItem.percentage;
+            testRecord.currentFromDate = now;
+            testRecord.currentToDate = null;
+          }
+        } else {
+          // Add new test to rate card
+          existingRateCard.test.push({
+            testId,
+            currentPurchasePrice: testItem.purchasePrice,
+            currentSaleRate: testItem.saleRate,
+            currentPercentage: testItem.percentage,
+            currentFromDate: now,
+            currentToDate: null,
+            history: [],
+          });
+        }
+      }
+
+      // Save updated rate card
+      const updatedRateCard = await existingRateCard.save();
+
+      res.json({
+        message: "Rate card updated successfully.",
+        rateCard: updatedRateCard,
+      });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   },
   deleteThread: async (req, res, next) => {
     try {
-      const patientId = req.params.specimenId;
-      const newService = await ServicePayable.findByIdAndDelete(patientId);
-      if (!newService) {
-        return res.status(404).json({ message: "Service not found." });
+      const rateCardId = req.params.specimenId;
+      const deletedRateCard = await ServicePayable.findByIdAndDelete(
+        rateCardId
+      );
+
+      if (!deletedRateCard) {
+        return res.status(404).json({ message: "Rate card not found." });
       }
 
-      res.json({ message: "Service deleted successfully.", newService });
+      res.json({
+        message: "Rate card deleted successfully.",
+        deletedRateCard,
+      });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

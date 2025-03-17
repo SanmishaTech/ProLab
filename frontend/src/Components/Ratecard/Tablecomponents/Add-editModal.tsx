@@ -40,7 +40,11 @@ function AddEditModal<T extends object>({
   }, [item]);
 
   const handleChange = (key: keyof T, value: any) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    const processedValue = ["number", "tel"].includes(fields.find(f => f.key === key)?.type || "") 
+      ? Number(value) 
+      : value;
+      
+    setFormData((prev) => ({ ...prev, [key]: processedValue }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
