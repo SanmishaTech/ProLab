@@ -59,7 +59,7 @@ const profileFormSchema = z.object({
     .array(
       z.object({
         testId: z.string(),
-        purchaseRate: z.number(),
+        purchasePrice: z.number(),
         saleRate: z.number(),
         percentage: z.number(),
       })
@@ -88,7 +88,7 @@ type ConflictedSelected = Array<{
   unifiedPurchaseRate?: number;
   unifiedSaleRate?: number;
   unifiedPercentage?: number;
-  purchaseRate?: number;
+  purchasePrice?: number;
   saleRate?: number;
   index?: number;
 }>;
@@ -117,7 +117,8 @@ function ProfileForm() {
   const [conflictopen, setconflictopen] = useState(false);
   const [Selectopen, setSelectopen] = useState(false);
   const [SelectedAssociate, setSelectedAssociate] = useState(null);
-  const [conflictedselected, setconflictedselected] = useState<ConflictedSelected>([]);
+  const [conflictedselected, setconflictedselected] =
+    useState<ConflictedSelected>([]);
   const [ratecardHistory, setRatecardHistory] = useState<any[]>([]);
 
   const { watch } = form;
@@ -130,10 +131,10 @@ function ProfileForm() {
   useEffect(() => {
     console.log("Conflict selection updated:", conflictedselected);
     if (!conflictedselected || conflictedselected.length === 0) return;
-    
+
     try {
       const updatedTestMaster = [...testmaster];
-      
+
       // Update each test that has a conflict resolved
       conflictedselected.forEach((selectedConflict) => {
         if (!selectedConflict || !selectedConflict.testId) {
@@ -141,45 +142,68 @@ function ProfileForm() {
           return;
         }
 
-        console.log("Processing conflict for test ID:", selectedConflict.testId);
-        const testIndex = updatedTestMaster.findIndex(test => test._id === selectedConflict.testId);
-        
+        console.log(
+          "Processing conflict for test ID:",
+          selectedConflict.testId
+        );
+        const testIndex = updatedTestMaster.findIndex(
+          (test) => test._id === selectedConflict.testId
+        );
+
         if (testIndex >= 0) {
           const test = updatedTestMaster[testIndex];
           // Use the unified rates or fallback to the conflict's rates with proper null/undefined checks
-          const newPurchaseRate = (selectedConflict.unifiedPurchaseRate !== undefined && selectedConflict.unifiedPurchaseRate !== null) 
-            ? selectedConflict.unifiedPurchaseRate 
-            : (selectedConflict.purchaseRate !== undefined && selectedConflict.purchaseRate !== null)
-              ? selectedConflict.purchaseRate 
-              : test.purchaseRate || 0;
-              
-          const newSaleRate = (selectedConflict.unifiedSaleRate !== undefined && selectedConflict.unifiedSaleRate !== null)
-            ? selectedConflict.unifiedSaleRate
-            : (selectedConflict.saleRate !== undefined && selectedConflict.saleRate !== null)
+          const newPurchaseRate =
+            selectedConflict.unifiedPurchaseRate !== undefined &&
+            selectedConflict.unifiedPurchaseRate !== null
+              ? selectedConflict.unifiedPurchaseRate
+              : selectedConflict.purchasePrice !== undefined &&
+                selectedConflict.purchasePrice !== null
+              ? selectedConflict.purchasePrice
+              : test.purchasePrice || 0;
+
+          const newSaleRate =
+            selectedConflict.unifiedSaleRate !== undefined &&
+            selectedConflict.unifiedSaleRate !== null
+              ? selectedConflict.unifiedSaleRate
+              : selectedConflict.saleRate !== undefined &&
+                selectedConflict.saleRate !== null
               ? selectedConflict.saleRate
               : test.saleRate || 0;
-          
+
           // Ensure we never pass NaN
-          const finalPurchaseRate = isNaN(newPurchaseRate) ? test.purchaseRate || 0 : newPurchaseRate;
-          const finalSaleRate = isNaN(newSaleRate) ? test.saleRate || 0 : newSaleRate;
-          
-          console.log(`Updating test ${test.name || test._id}: Purchase rate: ${test.purchaseRate} → ${finalPurchaseRate}, Sale rate: ${test.saleRate} → ${finalSaleRate}`);
-          
+          const finalPurchaseRate = isNaN(newPurchaseRate)
+            ? test.purchasePrice || 0
+            : newPurchaseRate;
+          const finalSaleRate = isNaN(newSaleRate)
+            ? test.saleRate || 0
+            : newSaleRate;
+
+          console.log(
+            `Updating test ${test.name || test._id}: Purchase rate: ${
+              test.purchasePrice
+            } → ${finalPurchaseRate}, Sale rate: ${
+              test.saleRate
+            } → ${finalSaleRate}`
+          );
+
           // Update the test with the new rates
           updatedTestMaster[testIndex] = {
             ...test,
-            purchaseRate: finalPurchaseRate,
+            purchasePrice: finalPurchaseRate,
             saleRate: finalSaleRate,
             originalPurchaseRate: finalPurchaseRate,
-            originalSaleRate: finalSaleRate
+            originalSaleRate: finalSaleRate,
           };
         } else {
-          console.warn(`Test with ID ${selectedConflict.testId} not found in the test master.`);
+          console.warn(
+            `Test with ID ${selectedConflict.testId} not found in the test master.`
+          );
         }
       });
-      
+
       console.log("Setting updated test master:", updatedTestMaster);
-      
+
       // Set the updated test master
       settestmaster(updatedTestMaster);
       // Also update the updated tests array for form submission
@@ -222,18 +246,22 @@ function ProfileForm() {
           let updatedtest = item.testId;
           let newitem = {
             testId: {
-              defaultPurchaseRate: item?.defaultPurchaseRate || item?.testId?.purchaseRate,
+              purchasePrice:
+                item?.defaultPurchaseRate || item?.testId?.purchasePrice,
               defaultSaleRate: item?.defaultSaleRate || item?.testId?.saleRate,
               conflicts: item?.prices,
               ...updatedtest,
-              purchaseRate: item.unifiedValue?.purchaseRate || item.testId?.purchaseRate,
+              purchasePrice:
+                item.unifiedValue?.purchasePrice || item.testId?.purchasePrice,
               saleRate: item.unifiedValue?.saleRate || item.testId?.saleRate,
               hasConflict: item?.hasConflict,
-              originalPurchaseRate: item?.defaultPurchaseRate || item.testId?.purchaseRate,
+              originalPurchaseRate:
+                item?.purchasePrice || item.testId?.purchasePrice,
               originalSaleRate: item?.defaultSaleRate || item.testId?.saleRate,
-              rateHistory: item?.history || []
+              rateHistory: item?.history || [],
             },
-            purchaseRate: item.unifiedValue?.purchaseRate || item.testId?.purchaseRate,
+            purchasePrice:
+              item.unifiedValue?.purchasePrice || item.testId?.purchasePrice,
             saleRate: item.unifiedValue?.saleRate || item.testId?.saleRate,
             percentagevalue: item.percentage,
           };
@@ -249,15 +277,15 @@ function ProfileForm() {
         setconflictchecks(testspecialarrray);
         setUpdatedtests(testspecialarrray);
         settestmaster(testspecialarrray);
-        
+
         // Extract and set rate history if available
         if (response.data?.tests) {
           const allHistory = response.data.tests
-            .filter(test => test.history && test.history.length > 0)
-            .map(test => ({
+            .filter((test) => test.history && test.history.length > 0)
+            .map((test) => ({
               testId: test.testId._id,
               testName: test.testId.name,
-              history: test.history
+              history: test.history,
             }));
           setRatecardHistory(allHistory);
         }
@@ -319,7 +347,7 @@ function ProfileForm() {
           associate: items._id,
           test: {
             testId: item.testId?._id,
-            purchaseRate: item.unifiedValue?.purchaseRate,
+            purchasePrice: item.unifiedValue?.purchasePrice,
             saleRate: item.unifiedValue?.saleRate,
             percentage: item?.unifiedValue?.percentage,
             userId: User?._id,
@@ -336,9 +364,9 @@ function ProfileForm() {
       // Keep track of successful and failed updates
       let successCount = 0;
       let errorCount = 0;
-      
+
       console.log("Submitting rate card updates...");
-      
+
       // Process non-conflicting and conflicting associates in parallel
       const nonconflictingdata =
         conflictData &&
@@ -349,58 +377,80 @@ function ProfileForm() {
           );
 
           if (!updatedTest) return [];
-          
-          console.log(`Processing test: ${updatedTest.name || updatedTest._id}`);
-          
+
+          console.log(
+            `Processing test: ${updatedTest.name || updatedTest._id}`
+          );
+
           // Get non-conflict associates that need updates
-          const filterupdatedtest = test?.nonConflictAssociates?.filter(
-            (testa) => {
+          const filterupdatedtest =
+            test?.nonConflictAssociates?.filter((testa) => {
               // Only update if the rates have changed
               return (
                 testa.testId?._id === updatedTest?._id &&
-                (testa?.value?.purchaseRate !== updatedTest?.purchaseRate ||
-                 testa?.value?.saleRate !== updatedTest?.saleRate)
+                (testa?.value?.purchasePrice !== updatedTest?.purchasePrice ||
+                  testa?.value?.saleRate !== updatedTest?.saleRate)
               );
-            }
-          ) || [];
-          
-          console.log(`Found ${filterupdatedtest.length} non-conflicting associates to update for test ${updatedTest.name || updatedTest._id}`);
-          
+            }) || [];
+
+          console.log(
+            `Found ${
+              filterupdatedtest.length
+            } non-conflicting associates to update for test ${
+              updatedTest.name || updatedTest._id
+            }`
+          );
+
+          console.log("PPPPPAPAP", filterupdatedtest);
           return filterupdatedtest.map(async (associate) => {
             try {
-              if (updatedTest?.purchaseRate === undefined || updatedTest?.saleRate === undefined) {
+              if (
+                updatedTest?.purchasePrice === undefined ||
+                updatedTest?.saleRate === undefined
+              ) {
                 console.warn(`Missing rate data for test ${updatedTest?._id}`);
                 return null;
               }
-              
+
               // Ensure numeric values
-              const purchaseRate = typeof updatedTest.purchaseRate === 'number' ? updatedTest.purchaseRate : 0;
-              const saleRate = typeof updatedTest.saleRate === 'number' ? updatedTest.saleRate : 0;
-              
-              console.log(`Updating associate ${associate._id} for test ${updatedTest._id} with purchase rate: ${purchaseRate}, sale rate: ${saleRate}`);
-              
+              const purchasePrice =
+                typeof updatedTest.purchasePrice === "number"
+                  ? updatedTest.purchasePrice
+                  : 0;
+              const saleRate =
+                typeof updatedTest.saleRate === "number"
+                  ? updatedTest.saleRate
+                  : 0;
+
+              console.log(
+                `Updating associate ${associate._id} for test ${updatedTest._id} with purchase rate: ${purchasePrice}, sale rate: ${saleRate}`
+              );
+
               const response = await axios.post("/api/ratecard", {
                 associate: [associate._id],
                 test: {
                   testId: associate.testId?._id,
-                  purchasePrice: purchaseRate,
+                  purchasePrice: purchasePrice,
                   saleRate: saleRate,
                   percentage: test.unifiedValue?.percentage || 0,
                 },
                 value: {
-                  purchasePrice: purchaseRate,
-                  saleRate: saleRate
+                  purchasePrice: purchasePrice,
+                  saleRate: saleRate,
                 },
                 userId: User?._id,
               });
-              
+
               if (response.status === 200) {
                 successCount++;
               }
-              
+
               return response;
             } catch (error) {
-              console.error(`Error updating associate ${associate._id}:`, error);
+              console.error(
+                `Error updating associate ${associate._id}:`,
+                error
+              );
               errorCount++;
               return null;
             }
@@ -415,40 +465,51 @@ function ProfileForm() {
             const updatedTest = updatedtests?.find(
               (uTest) => uTest._id === item.testId
             );
-            
+
             if (!updatedTest) {
               console.warn(`Test ${item.testId} not found in updated tests`);
               return null;
             }
-            
+
             // Ensure numeric values
-            const purchaseRate = typeof updatedTest.purchaseRate === 'number' ? updatedTest.purchaseRate : 0;
-            const saleRate = typeof updatedTest.saleRate === 'number' ? updatedTest.saleRate : 0;
-            
-            console.log(`Updating conflict resolved associate ${item.associate._id} for test ${item.testId} with purchase rate: ${purchaseRate}, sale rate: ${saleRate}`);
-            
+            const purchasePrice =
+              typeof updatedTest.purchasePrice === "number"
+                ? updatedTest.purchasePrice
+                : 0;
+            const saleRate =
+              typeof updatedTest.saleRate === "number"
+                ? updatedTest.saleRate
+                : 0;
+
+            console.log(
+              `Updating conflict resolved associate ${item.associate._id} for test ${item.testId} with purchase rate: ${purchasePrice}, sale rate: ${saleRate}`
+            );
+
             const response = await axios.post("/api/ratecard", {
               associate: [item.associate._id],
               test: {
                 testId: item.testId,
-                purchasePrice: purchaseRate,
+                purchasePrice: purchasePrice,
                 saleRate: saleRate,
                 percentage: updatedTest?.percentage || 0,
               },
               value: {
-                purchasePrice: purchaseRate,
-                saleRate: saleRate
+                purchasePrice: purchasePrice,
+                saleRate: saleRate,
               },
               userId: User?._id,
             });
-            
+
             if (response.status === 200) {
               successCount++;
             }
-            
+
             return response;
           } catch (error) {
-            console.error(`Error updating conflict resolved associate ${item.associate._id}:`, error);
+            console.error(
+              `Error updating conflict resolved associate ${item.associate._id}:`,
+              error
+            );
             errorCount++;
             return null;
           }
@@ -458,45 +519,52 @@ function ProfileForm() {
       if (nonconflictingdata) {
         await Promise.all(nonconflictingdata.flat().filter(Boolean));
       }
-      
+
       if (conflictPromises) {
         await Promise.all(conflictPromises.filter(Boolean));
       }
 
       if (errorCount > 0) {
-        toast.warning(`Rate card updated with ${successCount} successes and ${errorCount} failures`);
+        toast.warning(
+          `Rate card updated with ${successCount} successes and ${errorCount} failures`
+        );
       } else {
         toast.success("Rate card updated successfully");
       }
-      
+
       // Refresh the data
       if (watchedAssociate) {
         // Re-fetch the data to show updated values
         const response = await axios.post(
-          `/api/ratecard/getassociate/${User?._id}?departmentId=${watchDepartment ? watchDepartment : ""}`,
+          `/api/ratecard/getassociate/${User?._id}?departmentId=${
+            watchDepartment ? watchDepartment : ""
+          }`,
           {
-            associate: Array.from(watchedAssociate).filter(item => item !== ""),
+            associate: Array.from(watchedAssociate).filter(
+              (item) => item !== ""
+            ),
           }
         );
-        
+
         setConflictData(response.data);
-        
+
         // Process the updated data
         const updatedTestsData = response.data?.tests.map((item) => {
           return {
             testId: {
               ...item.testId,
-              purchaseRate: item.unifiedValue?.purchaseRate || item.testId?.purchaseRate,
+              purchasePrice:
+                item.unifiedValue?.purchasePrice || item.testId?.purchasePrice,
               saleRate: item.unifiedValue?.saleRate || item.testId?.saleRate,
-              originalPurchaseRate: item.defaultPurchaseRate || item.testId?.purchaseRate,
+              originalPurchaseRate:
+                item.purchasePrice || item.testId?.purchasePrice,
               originalSaleRate: item.defaultSaleRate || item.testId?.saleRate,
-            }
+            },
           };
         });
-        
+
         setUpdatedtests(updatedTestsData);
       }
-      
     } catch (error) {
       console.error("Error processing associates:", error);
       toast.error("Failed to process rate card updates");
@@ -517,7 +585,7 @@ function ProfileForm() {
         department: form.getValues("department"),
         test: testsToUpdate.map((item) => ({
           testId: item._id,
-          purchasePrice: item.purchaseRate,
+          purchasePrice: item.purchasePrice,
           saleRate: item.saleRate,
           percentage: discountPercentage,
         })),
@@ -537,9 +605,9 @@ function ProfileForm() {
           if (updatedTest) {
             return {
               ...test,
-              purchaseRate: updatedTest.purchaseRate,
+              purchasePrice: updatedTest.purchasePrice,
               saleRate: updatedTest.saleRate,
-              originalPurchaseRate: test.purchaseRate,
+              originalPurchaseRate: test.purchasePrice,
               originalSaleRate: test.saleRate,
             };
           }
@@ -627,7 +695,7 @@ function ProfileForm() {
             onUpdateTests={handleUpdateTests}
           />
         </div>
-        
+
         {ratecardHistory.length > 0 && (
           <div className="w-full mt-4 relative z-10">
             <h3 className="text-lg font-medium mb-2">Rate Change History</h3>
@@ -653,10 +721,9 @@ function ProfileForm() {
                           {new Date(historyItem.fromDate).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          {historyItem.toDate 
+                          {historyItem.toDate
                             ? new Date(historyItem.toDate).toLocaleDateString()
-                            : "Current"
-                          }
+                            : "Current"}
                         </TableCell>
                       </TableRow>
                     ))
@@ -666,13 +733,13 @@ function ProfileForm() {
             </div>
           </div>
         )}
-        
+
         <AlertDialogbox
           isOpen={conflictopen}
           onOpen={setconflictopen}
           conflictData={conflictData as any}
           setconflictedselected={(selected) => {
-            console.log('Selected conflicts:', selected);
+            console.log("Selected conflicts:", selected);
             setconflictedselected(selected as any);
           }}
           conflictedselected={conflictedselected as any}

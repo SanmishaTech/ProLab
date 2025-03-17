@@ -9,109 +9,104 @@ const csv = require("csv-parser");
 const RatecardController = {
   createThread: async (req, res, next) => {
     try {
-      const { associate, department, test, value, userId } = req.body;
+      const { associate, department, test, userId } = req.body;
       const userObjectId = new mongoose.Types.ObjectId(userId);
       const now = new Date();
       const results = [];
 
-      // Loop through each associate in the request
+      // Process each associate
       for (const item of associate) {
         const associateObjectId = new mongoose.Types.ObjectId(item);
         const testObjectId = new mongoose.Types.ObjectId(test?.testId);
 
-        // Look for an existing ServicePayable document for this associate and user
+        // Retrieve existing document
         let ratecardDoc = await ServicePayable.findOne({
           associate: associateObjectId,
           userId: userObjectId,
         });
 
-        if (ratecardDoc) {
-          // Find the existing test record for this testId
-          let testRecord = ratecardDoc.test.find((t) =>
-            t.testId.equals(testObjectId)
-          );
-
-          if (testRecord) {
-            // If both purchasePrice and saleRate are unchanged, skip any update.
-            if (
-              testRecord.currentPurchasePrice === test.purchasePrice &&
-              testRecord.currentSaleRate === test.saleRate
-            ) {
-              console.log("Prices unchanged for associate:", associateObjectId);
-              results.push(ratecardDoc);
-              continue;
-            }
-            // Archive the current state if active, but only if the last archived values differ.
-            if (!testRecord.currentToDate) {
-              const lastHistory =
-                testRecord.history[testRecord.history.length - 1];
-              if (
-                !lastHistory ||
-                lastHistory.purchasePrice !== test.purchasePrice ||
-                lastHistory.saleRate !== test.saleRate
-              ) {
-                testRecord.history.push({
-                  purchasePrice: testRecord.currentPurchasePrice,
-                  saleRate: testRecord.currentSaleRate,
-                  percentage: testRecord.currentPercentage,
-                  fromDate: testRecord.currentFromDate,
-                  toDate: now,
-                  reason: "Rate Update",
-                  associate: item,
-                });
-              }
-            }
-            // Update the current test state with the new data.
-            testRecord.currentPurchasePrice = test.purchasePrice;
-            testRecord.currentSaleRate = test.saleRate;
-            testRecord.currentPercentage = test.percentage;
-            testRecord.currentFromDate = now;
-            testRecord.currentToDate = null;
-          } else {
-            // Test record not found; add a new one.
-            const newTestRecord = {
-              testId: testObjectId,
-              currentPurchasePrice: test.purchasePrice,
-              currentSaleRate: test.saleRate,
-              currentPercentage: test.percentage,
-              currentFromDate: now,
-              currentToDate: null,
-              history: [],
-            };
-            ratecardDoc.test.push(newTestRecord);
-          }
-          // Update other top-level fields as needed.
+        if (!ratecardDoc) {
+          // Create new document if it doesn't exist
+          ratecardDoc = new ServicePayable({
+            associate: associateObjectId,
+            userId: userObjectId,
+            department,
+            test: [
+              {
+                testId: testObjectId,
+                purchasePrice: test.purchasePrice,
+                saleRate: test.saleRate,
+                currentPercentage: test.percentage,
+                currentFromDate: now,
+                currentToDate: null,
+                history: [],
+              },
+            ],
+            value: {
+              purchasePrice: test.purchasePrice,
+              saleRate: test.saleRate,
+            },
+          });
+        } else {
+          // Update top-level fields
           ratecardDoc.department = department;
           ratecardDoc.value = {
             purchasePrice: test.purchasePrice,
             saleRate: test.saleRate,
           };
-          console.log("Ratecard", ratecardDoc);
-          await ratecardDoc.save({ validateBeforeSave: false });
-        } else {
-          // No ServicePayable document exists; create one with the new test record.
-          const newTestRecord = {
-            testId: testObjectId,
-            currentPurchasePrice: test.purchasePrice,
-            currentSaleRate: test.saleRate,
-            currentPercentage: test.percentage,
-            currentFromDate: now,
-            currentToDate: null,
-            history: [],
-          };
 
-          ratecardDoc = new ServicePayable({
-            associate: associateObjectId,
-            department,
-            test: [newTestRecord],
-            value: {
+          // Check if the test record exists in the document's test array
+          const existingTest = ratecardDoc.test.find((t) =>
+            t.testId.equals(testObjectId)
+          );
+
+          if (existingTest) {
+            // Optionally archive the current state if needed
+            if (
+              existingTest.purchasePrice !== test.purchasePrice ||
+              existingTest.saleRate !== test.saleRate
+            ) {
+              if (!existingTest.currentToDate) {
+                const lastHistory =
+                  existingTest.history[existingTest.history.length - 1];
+                if (
+                  !lastHistory ||
+                  lastHistory.purchasePrice !== test.purchasePrice ||
+                  lastHistory.saleRate !== test.saleRate
+                ) {
+                  existingTest.history.push({
+                    purchasePrice: existingTest.purchasePrice,
+                    saleRate: existingTest.saleRate,
+                    percentage: existingTest.currentPercentage,
+                    fromDate: existingTest.currentFromDate,
+                    toDate: now,
+                    reason: "Rate Update",
+                    associate: item,
+                  });
+                }
+              }
+            }
+            // Update the existing test record
+            existingTest.purchasePrice = test.purchasePrice;
+            existingTest.saleRate = test.saleRate;
+            existingTest.currentPercentage = test.percentage;
+            existingTest.currentFromDate = now;
+            existingTest.currentToDate = null;
+          } else {
+            // Push a new test record if one doesn't exist
+            ratecardDoc.test.push({
+              testId: testObjectId,
               purchasePrice: test.purchasePrice,
               saleRate: test.saleRate,
-            },
-            userId: userObjectId,
-          });
-          await ratecardDoc.save({ validateBeforeSave: false });
+              currentPercentage: test.percentage,
+              currentFromDate: now,
+              currentToDate: null,
+              history: [],
+            });
+          }
         }
+
+        await ratecardDoc.save({ validateBeforeSave: false });
         results.push(ratecardDoc);
       }
 
@@ -142,8 +137,8 @@ const RatecardController = {
           ...card.toObject(),
           test: card.test.map((test) => ({
             ...test.toObject(),
-            purchaseRate: test.currentPurchasePrice,
-            saleRate: test.currentSaleRate,
+            purchasePrice: test.purchasePrice,
+            saleRate: test.saleRate,
             percentage: test.currentPercentage,
             date: test.currentFromDate,
             history: test.history,
@@ -176,8 +171,8 @@ const RatecardController = {
         ...rateCard.toObject(),
         test: rateCard.test.map((test) => ({
           ...test.toObject(),
-          purchaseRate: test.currentPurchasePrice,
-          saleRate: test.currentSaleRate,
+          purchasePrice: test.purchasePrice,
+          saleRate: test.saleRate,
           percentage: test.currentPercentage,
           date: test.currentFromDate,
           history: test.history,
@@ -258,11 +253,9 @@ const RatecardController = {
             if (!testId || !testMap.has(testId)) return;
             const testEntry = testMap.get(testId);
 
-            const currentPurchasePrice =
-              serviceTest.currentPurchasePrice ??
-              testEntry.defaultPurchasePrice;
-            const currentSaleRate =
-              serviceTest.currentSaleRate ?? testEntry.defaultSaleRate;
+            const purchasePrice =
+              serviceTest.purchasePrice ?? testEntry.defaultPurchasePrice;
+            const saleRate = serviceTest.saleRate ?? testEntry.defaultSaleRate;
             const currentPercentage =
               serviceTest.currentPercentage ?? testEntry.defaultPercentage;
 
@@ -307,7 +300,7 @@ const RatecardController = {
                         year: "2-digit",
                       })
                     : "",
-                  purchaseRate: entry.purchasePrice,
+                  purchasePrice: entry.purchasePrice,
                   saleRate: entry.saleRate,
                   previousPurchaseRate,
                   previousSaleRate,
@@ -331,8 +324,8 @@ const RatecardController = {
             testEntry.date = serviceTest.currentFromDate;
 
             testEntry.prices.set(associateId, {
-              purchasePrice: currentPurchasePrice,
-              saleRate: currentSaleRate,
+              purchasePrice: purchasePrice,
+              saleRate: saleRate,
               percentage: currentPercentage,
             });
           });
@@ -474,13 +467,13 @@ const RatecardController = {
         if (testRecord) {
           // Only update if values have changed
           if (
-            testRecord.currentPurchasePrice !== testItem.purchasePrice ||
-            testRecord.currentSaleRate !== testItem.saleRate
+            testRecord.purchasePrice !== testItem.purchasePrice ||
+            testRecord.saleRate !== testItem.saleRate
           ) {
             // Archive current values to history
             testRecord.history.push({
-              purchasePrice: testRecord.currentPurchasePrice,
-              saleRate: testRecord.currentSaleRate,
+              purchasePrice: testRecord.purchasePrice,
+              saleRate: testRecord.saleRate,
               percentage: testRecord.currentPercentage,
               fromDate: testRecord.currentFromDate,
               toDate: now,
@@ -489,8 +482,8 @@ const RatecardController = {
             });
 
             // Update with new values
-            testRecord.currentPurchasePrice = testItem.purchasePrice;
-            testRecord.currentSaleRate = testItem.saleRate;
+            testRecord.purchasePrice = testItem.purchasePrice;
+            testRecord.saleRate = testItem.saleRate;
             testRecord.currentPercentage = testItem.percentage;
             testRecord.currentFromDate = now;
             testRecord.currentToDate = null;
@@ -499,8 +492,8 @@ const RatecardController = {
           // Add new test to rate card
           existingRateCard.test.push({
             testId,
-            currentPurchasePrice: testItem.purchasePrice,
-            currentSaleRate: testItem.saleRate,
+            purchasePrice: testItem.purchasePrice,
+            saleRate: testItem.saleRate,
             currentPercentage: testItem.percentage,
             currentFromDate: now,
             currentToDate: null,

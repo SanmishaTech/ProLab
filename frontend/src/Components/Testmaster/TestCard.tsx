@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -146,9 +146,9 @@ function ProfileForm() {
     });
   }
 
-  const getformdatafromnextcomponent = (data) => {
+  const getformdatafromnextcomponent = useCallback((data) => {
     setFormData(data);
-  };
+  }, []);
 
   return (
     <Form {...form}>
