@@ -531,9 +531,8 @@ function DataTable<
     console.log("History p1", historyItems);
     const testGroups = historyItems.map((item) => ({
       test: item,
-      history: item.history || generateMockHistory(item),
+      history: item.Historyassociates,
     }));
-
     // Sort history entries by date (newest first)
     testGroups.forEach((group) => {
       group.history.sort((a, b) => {
@@ -551,19 +550,27 @@ function DataTable<
         return dateB - dateA;
       });
     });
+    console.log("testGroups", testGroups);
 
-    // Get unique associates and departments for filtering
-    console.log("History items", testGroups);
+    // Get unique associates and departments for filtering by extracting only the names
     const associates = Array.from(
-      new Set(historyItems.filter((item) => item.associate).map((item) => item))
+      new Set(
+        historyItems
+          .filter((item) => item.associate)
+          .map((item) => item.associate)
+      )
     );
 
     const departments = Array.from(
       new Set(
-        historyItems.filter((item) => item.department).map((item) => item)
+        historyItems
+          .filter((item) => item.department)
+          .map((item) => item.department)
       )
     );
-    console.log("Departments", associates);
+
+    console.log("Associates", associates);
+    console.log("Departments", departments);
 
     return (
       <div className="w-full">
@@ -586,24 +593,25 @@ function DataTable<
                 )
               </TabsTrigger>
             ))}
+            {/* Uncomment below for department tabs if needed */}
             {/* {departments.map((department) => (
               <TabsTrigger
-                key={`dept-${department.name}`}
-                value={`dept-${department.name}`}
+                key={`dept-${department}`}
+                value={`dept-${department}`}
               >
-                {department.name} (
+                {department} (
                 {
-                  testGroups.filter((g) => g.test?._id === department?._id)
-                    .length
+                  testGroups.filter((g) => g.test.department === department).length
                 }
                 )
               </TabsTrigger>
             ))} */}
           </TabsList>
 
+          {/* "All" Tab Content */}
           <TabsContent value="all" className="space-y-6">
             <ScrollArea className="h-[500px] pr-4">
-              {testGroups.length === 0 || testGroups.length < 0 ? (
+              {testGroups.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <ClipboardList className="h-12 w-12 mb-4" />
                   <p>No history data available</p>
@@ -675,12 +683,8 @@ function DataTable<
                             // Calculate previous entry for comparison
                             const prevEntry = group.history[entryIndex + 1];
                             const purchaseRateDiff = prevEntry
-                              ? (entry.purchasePrice ||
-                                  entry.purchasePrice ||
-                                  0) -
-                                (prevEntry.purchasePrice ||
-                                  prevEntry.purchasePrice ||
-                                  0)
+                              ? (entry.purchasePrice || 0) -
+                                (prevEntry.purchasePrice || 0)
                               : 0;
                             const saleRateDiff = prevEntry
                               ? (entry.saleRate || 0) -
@@ -717,7 +721,7 @@ function DataTable<
                                 : "Unknown");
 
                             const displayPurchaseRate =
-                              entry.purchasePrice || entry.purchasePrice || 0;
+                              entry.purchasePrice || 0;
 
                             return (
                               <TableRow key={`entry-${entryIndex}`}>
@@ -743,7 +747,6 @@ function DataTable<
                                             {Math.abs(
                                               (purchaseRateDiff /
                                                 (prevEntry.purchasePrice ||
-                                                  prevEntry.purchasePrice ||
                                                   1)) *
                                                 100
                                             ).toFixed(1)}
@@ -796,7 +799,8 @@ function DataTable<
               )}
             </ScrollArea>
           </TabsContent>
-          {console.log("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP", associates)}
+
+          {/* Tabs Content for each Associate */}
           {associates.map((associate) => (
             <TabsContent
               key={associate}
@@ -864,22 +868,16 @@ function DataTable<
                           </TableHeader>
                           <TableBody>
                             {group.history.map((entry, entryIndex) => {
-                              // Calculate previous entry for comparison
                               const prevEntry = group.history[entryIndex + 1];
                               const purchaseRateDiff = prevEntry
-                                ? (entry.purchasePrice ||
-                                    entry.purchasePrice ||
-                                    0) -
-                                  (prevEntry.purchasePrice ||
-                                    prevEntry.purchasePrice ||
-                                    0)
+                                ? (entry.purchasePrice || 0) -
+                                  (prevEntry.purchasePrice || 0)
                                 : 0;
                               const saleRateDiff = prevEntry
                                 ? (entry.saleRate || 0) -
                                   (prevEntry.saleRate || 0)
                                 : 0;
 
-                              // Determine if this was an increase or decrease
                               const purchaseDirection =
                                 purchaseRateDiff > 0
                                   ? "text-green-500"
@@ -894,7 +892,6 @@ function DataTable<
                                   ? "text-red-500"
                                   : "text-muted-foreground";
 
-                              // Format the date for display
                               const displayDate =
                                 entry.date ||
                                 (entry.fromDate
@@ -909,7 +906,7 @@ function DataTable<
                                   : "Unknown");
 
                               const displayPurchaseRate =
-                                entry.purchasePrice || entry.purchasePrice || 0;
+                                entry.purchasePrice || 0;
 
                               return (
                                 <TableRow key={`entry-${entryIndex}`}>
@@ -935,7 +932,6 @@ function DataTable<
                                               {Math.abs(
                                                 (purchaseRateDiff /
                                                   (prevEntry.purchasePrice ||
-                                                    prevEntry.purchasePrice ||
                                                     1)) *
                                                   100
                                               ).toFixed(1)}
@@ -990,7 +986,7 @@ function DataTable<
             </TabsContent>
           ))}
 
-          {/* Department Tabs */}
+          {/* Department Tabs Content */}
           {departments.map((department) => (
             <TabsContent
               key={`dept-${department}`}
@@ -1058,22 +1054,16 @@ function DataTable<
                           </TableHeader>
                           <TableBody>
                             {group.history.map((entry, entryIndex) => {
-                              // Calculate previous entry for comparison
                               const prevEntry = group.history[entryIndex + 1];
                               const purchaseRateDiff = prevEntry
-                                ? (entry.purchasePrice ||
-                                    entry.purchasePrice ||
-                                    0) -
-                                  (prevEntry.purchasePrice ||
-                                    prevEntry.purchasePrice ||
-                                    0)
+                                ? (entry.purchasePrice || 0) -
+                                  (prevEntry.purchasePrice || 0)
                                 : 0;
                               const saleRateDiff = prevEntry
                                 ? (entry.saleRate || 0) -
                                   (prevEntry.saleRate || 0)
                                 : 0;
 
-                              // Determine if this was an increase or decrease
                               const purchaseDirection =
                                 purchaseRateDiff > 0
                                   ? "text-green-500"
@@ -1088,7 +1078,6 @@ function DataTable<
                                   ? "text-red-500"
                                   : "text-muted-foreground";
 
-                              // Format the date for display
                               const displayDate =
                                 entry.date ||
                                 (entry.fromDate
@@ -1103,7 +1092,7 @@ function DataTable<
                                   : "Unknown");
 
                               const displayPurchaseRate =
-                                entry.purchasePrice || entry.purchasePrice || 0;
+                                entry.purchasePrice || 0;
 
                               return (
                                 <TableRow key={`entry-${entryIndex}`}>
@@ -1129,7 +1118,6 @@ function DataTable<
                                               {Math.abs(
                                                 (purchaseRateDiff /
                                                   (prevEntry.purchasePrice ||
-                                                    prevEntry.purchasePrice ||
                                                     1)) *
                                                   100
                                               ).toFixed(1)}

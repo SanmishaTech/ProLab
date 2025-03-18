@@ -435,7 +435,7 @@ export default function Tablecomponent({
         });
       }
 
-      console.log("User", user);
+      console.log("LLLLLLLLLLLLLLLLLLLLLLLLLLLL", user);
       return {
         ...user,
         id: user._id, // Ensure id is set

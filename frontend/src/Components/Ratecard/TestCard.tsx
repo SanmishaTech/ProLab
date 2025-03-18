@@ -241,54 +241,84 @@ function ProfileForm() {
           setconflictopen(true);
         }
         console.log("Watch associates", watchedAssociate);
+        console.log("MMMMMMMMMMMMMMMMMMm", response.data?.tests);
 
-        const updatedtestadded = response.data?.tests.map((item) => {
-          let updatedtest = item.testId;
-          let newitem = {
-            testId: {
-              purchasePrice:
-                item?.defaultPurchaseRate || item?.testId?.purchasePrice,
-              defaultSaleRate: item?.defaultSaleRate || item?.testId?.saleRate,
-              conflicts: item?.prices,
-              ...updatedtest,
-              purchasePrice:
-                item.unifiedValue?.purchasePrice || item.testId?.purchasePrice,
-              saleRate: item.unifiedValue?.saleRate || item.testId?.saleRate,
-              hasConflict: item?.hasConflict,
-              originalPurchaseRate:
-                item?.purchasePrice || item.testId?.purchasePrice,
-              originalSaleRate: item?.defaultSaleRate || item.testId?.saleRate,
-              rateHistory: item?.history || [],
+        const updatedtestadded = response.data?.tests.map((test) => {
+          const {
+            testId,
+            unifiedValue,
+            prices,
+            historyByAssociate,
+            hasConflict,
+          } = test;
+
+          // Create an array for conflict and non-conflict associates separately.
+          // Assume you have arrays of associate objects from your response:
+          const conflictAssocs = (test.conflictAssociates || []).map(
+            (assoc) => ({
+              associateId: assoc._id,
+              firstName: assoc.firstName,
+              lastName: assoc.lastName,
+              pricing: prices[assoc._id] || {},
+              history: historyByAssociate[assoc._id] || [],
+            })
+          );
+
+          const nonConflictAssocs = (test.nonConflictAssociates || []).map(
+            (assoc) => ({
+              associateId: assoc._id,
+              firstName: assoc.firstName,
+              lastName: assoc.lastName,
+              pricing: prices[assoc._id] || {},
+              history: historyByAssociate[assoc._id] || [],
+            })
+          );
+          console.log(
+            "PPPPAAAAA",
+            Object.entries(test.historyByAssociate).map(
+              ([associateId, history]) => ({
+                associateId,
+                history,
+              })
+            )
+          );
+
+          return {
+            ...testId, // test details like _id, name, etc.
+            unifiedValue, // overall pricing if needed
+            Historyassociates: Object.entries(test.historyByAssociate).map(
+              ([associateId, history]) => ({
+                associateId,
+                history,
+              })
+            ),
+            purchasePrice: test.unifiedValue?.purchasePrice,
+            saleRate: test.unifiedValue?.saleRate,
+            associates: {
+              conflict: conflictAssocs,
+              nonConflict: nonConflictAssocs,
             },
-            purchasePrice:
-              item.unifiedValue?.purchasePrice || item.testId?.purchasePrice,
-            saleRate: item.unifiedValue?.saleRate || item.testId?.saleRate,
-            percentagevalue: item.percentage,
+            hasConflict,
+            date: test.date,
+            // add any additional keys or transformations as needed
           };
-          return newitem;
         });
+        // console.log(
+        //   "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa",
+        //   Object.entries(response.data.historyByAssociate).map(
+        //     ([associateId, history]) => ({
+        //       associateId,
+        //       history,
+        //     })
+        //   )
+        // );
         // setConflictData(updatedtestadded);
         console.log("UPDATED", updatedtestadded);
 
-        const testspecialarrray = updatedtestadded.map((item) => {
-          return item.testId;
-        });
-        console.log("Updatedtestadded", testspecialarrray);
-        setconflictchecks(testspecialarrray);
-        setUpdatedtests(testspecialarrray);
-        settestmaster(testspecialarrray);
-
-        // Extract and set rate history if available
-        if (response.data?.tests) {
-          const allHistory = response.data.tests
-            .filter((test) => test.history && test.history.length > 0)
-            .map((test) => ({
-              testId: test.testId._id,
-              testName: test.testId.name,
-              history: test.history,
-            }));
-          setRatecardHistory(allHistory);
-        }
+        console.log("Updatedtestadded", updatedtestadded);
+        setconflictchecks(updatedtestadded);
+        setUpdatedtests(updatedtestadded);
+        settestmaster(updatedtestadded);
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -339,24 +369,6 @@ function ProfileForm() {
   }, []);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const nonconflictingdata = conflictData?.tests?.map((item) => {
-      return item.nonConflictAssociates.map((items) => {
-        return {
-          associate: items._id,
-          test: {
-            testId: item.testId?._id,
-            purchasePrice: item.unifiedValue?.purchasePrice,
-            saleRate: item.unifiedValue?.saleRate,
-            percentage: item?.unifiedValue?.percentage,
-            userId: User?._id,
-          },
-        };
-      });
-    });
-    console.log("Non conflicting data", conflictedselected);
-  }, [conflictedselected, watchedAssociate]);
 
   // Modified onSubmit function
   async function onSubmit(data: ProfileFormValues) {

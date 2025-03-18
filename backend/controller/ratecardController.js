@@ -217,7 +217,7 @@ const RatecardController = {
             defaultPurchasePrice: test.purchasePrice,
             defaultSaleRate: test.saleRate,
             defaultPercentage: test.percentage,
-            // prices: Map of associateId => { purchasePrice, saleRate, percentage }
+            // prices: Map of associateId => { purchasePrice, saleRate, percentage }s
             prices: new Map(
               associates.map((associateId) => [
                 associateId,
@@ -228,11 +228,15 @@ const RatecardController = {
                 },
               ])
             ),
+            // new field to store history metadata per associate
+            historyByAssociate: {},
+            // Optionally, you may want to keep a combined history too (unchanged)
+            history: [],
           },
         ])
       );
 
-      // Process ServicePayable for each associate to update prices
+      // Process ServicePayable for each associate to update prices and accumulate history metadata
       const servicePromises = associates.map(async (associateId) => {
         return ServicePayable.find({
           associate: new mongoose.Types.ObjectId(associateId),
@@ -244,10 +248,15 @@ const RatecardController = {
       });
       const allServices = await Promise.all(servicePromises);
 
-      // Update prices based on services for each associate
+      // Update prices based on services for each associate and accumulate history by associate
       allServices?.forEach((services, index) => {
         const associateId = associates[index];
+        const associate = associatesDetails.find(
+          (associate) => associate._id.toString() === associateId.toString()
+        );
+
         services?.forEach((service) => {
+          console.log("MAOAOAOAOAOA", service);
           service?.test?.forEach((serviceTest) => {
             const testId = serviceTest.testId?._id?.toString();
             if (!testId || !testMap.has(testId)) return;
@@ -316,13 +325,28 @@ const RatecardController = {
                     `history_${Date.now()}_${Math.random()
                       .toString(36)
                       .substring(2, 9)}`,
+                  // Added metadata: associate id that produced this history entry
+                  associate,
                 };
               }
             );
 
-            testEntry.history = processedHistory;
+            // Save the processed history by associate (without altering the original history field)
+            if (!testEntry.historyByAssociate[associateId]) {
+              testEntry.historyByAssociate[associateId] = [];
+            }
+            testEntry.historyByAssociate[associateId] =
+              testEntry.historyByAssociate[associateId].concat(
+                processedHistory
+              );
+
+            // You can choose to merge into a combined history if needed:
+            // testEntry.history = testEntry.history.concat(processedHistory);
+
+            // Set the test date (this remains as before)
             testEntry.date = serviceTest.currentFromDate;
 
+            // Update the pricing for this associate
             testEntry.prices.set(associateId, {
               purchasePrice: purchasePrice,
               saleRate: saleRate,
@@ -417,6 +441,8 @@ const RatecardController = {
           unifiedValue: unifiedGroup.value,
           date: testEntry.date,
           history: testEntry.history,
+          // New metadata: history grouped by associate
+          historyByAssociate: testEntry.historyByAssociate,
           nonConflictAssociates,
           conflictAssociates,
           prices: Object.fromEntries(testEntry.prices),
