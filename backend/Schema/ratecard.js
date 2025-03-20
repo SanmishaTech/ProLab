@@ -29,7 +29,12 @@ const testSchema = new mongoose.Schema({
 // Define the ratecard schema that includes an array of test records
 const rateCardSchema = new mongoose.Schema(
   {
-    associate: { type: mongoose.Schema.Types.ObjectId, ref: "AssociateMaster" },
+    associate: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "AssociateMaster",
+      unique: true,
+      required: true,
+    },
     department: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "DepartmentMaster",

@@ -14,19 +14,22 @@ const RatecardController = {
       const now = new Date();
       const results = [];
 
-      // Process each associate
-      for (const item of associate) {
-        const associateObjectId = new mongoose.Types.ObjectId(item);
+      // Filter duplicate associates if any
+      const uniqueAssociates = [...new Set(associate)];
+
+      // Process each unique associate
+      for (const associateId of uniqueAssociates) {
+        const associateObjectId = new mongoose.Types.ObjectId(associateId);
         const testObjectId = new mongoose.Types.ObjectId(test?.testId);
 
-        // Retrieve existing document
+        // Retrieve existing document for the associate and user
         let ratecardDoc = await ServicePayable.findOne({
           associate: associateObjectId,
           userId: userObjectId,
         });
 
         if (!ratecardDoc) {
-          // Create new document if it doesn't exist
+          // Create a new document if it doesn't exist
           ratecardDoc = new ServicePayable({
             associate: associateObjectId,
             userId: userObjectId,
@@ -55,13 +58,14 @@ const RatecardController = {
             saleRate: test.saleRate,
           };
 
-          // Check if the test record exists in the document's test array
+          // Find the existing test record if it exists
           const existingTest = ratecardDoc.test.find((t) =>
             t.testId.equals(testObjectId)
           );
+          console.log("LLLLL", existingTest);
 
           if (existingTest) {
-            // Optionally archive the current state if needed
+            // Check if pricing has changed
             if (
               existingTest.purchasePrice !== test.purchasePrice ||
               existingTest.saleRate !== test.saleRate
@@ -74,26 +78,25 @@ const RatecardController = {
                   lastHistory.purchasePrice !== test.purchasePrice ||
                   lastHistory.saleRate !== test.saleRate
                 ) {
+                  // Add history record for rate update
                   existingTest.history.push({
                     purchasePrice: existingTest.purchasePrice,
                     saleRate: existingTest.saleRate,
                     percentage: existingTest.currentPercentage,
                     fromDate: existingTest.currentFromDate,
                     toDate: now,
-                    reason: "Rate Update",
-                    associate: item,
                   });
                 }
               }
             }
-            // Update the existing test record
+            // Update the existing test record with new values
             existingTest.purchasePrice = test.purchasePrice;
             existingTest.saleRate = test.saleRate;
             existingTest.currentPercentage = test.percentage;
             existingTest.currentFromDate = now;
             existingTest.currentToDate = null;
           } else {
-            // Push a new test record if one doesn't exist
+            // Add a new test record if one doesn't exist
             ratecardDoc.test.push({
               testId: testObjectId,
               purchasePrice: test.purchasePrice,

@@ -83,6 +83,7 @@ export default function Tablecomponent({
   setSelectedAssociate,
   conflictData,
   onUpdateTests,
+  watchedAssociate,
 }: Props) {
   const [users, setUsers] = useState<Test[]>([]);
   const [selectedItems, setSelectedItems] = useState<Test[]>([]);
@@ -742,6 +743,7 @@ export default function Tablecomponent({
         setSelectedAssociate={setSelectedAssociate}
         itemsPerPage={10}
         selectedItems={selectedItems}
+        watchedAssociate={watchedAssociate}
         onSelectedItemsChange={setSelectedItems}
         // @ts-ignore - conflictchecks is a valid prop that needs to be passed through for conflict checking functionality
         conflictchecks={conflictchecks}

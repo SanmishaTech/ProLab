@@ -81,7 +81,9 @@ export default function AlertDialogbox({
   const [openTests, setOpenTests] = useState<Record<string, boolean>>({});
 
   // Instead of storing a boolean value, we now store metadata objects for selected associates.
-  const [selectedAssociates, setSelectedAssociates] = useState<Record<string, SelectedAssociate>>({});
+  const [selectedAssociates, setSelectedAssociates] = useState<
+    Record<string, SelectedAssociate>
+  >({});
 
   const queryClient = useQueryClient();
 
@@ -115,9 +117,9 @@ export default function AlertDialogbox({
   // Toggle selection of a specific associate.
   // Now we also pass in the test, associate, and index so we can save extra metadata.
   const toggleAssociateSelection = (
-    associateId: string, 
-    test: TestWithConflicts, 
-    associate: ConflictAssociate, 
+    associateId: string,
+    test: TestWithConflicts,
+    associate: ConflictAssociate,
     index: number
   ) => {
     setSelectedAssociates((prev) => {
@@ -135,7 +137,10 @@ export default function AlertDialogbox({
             testName: test?.testId?.name || "Unnamed Test",
             associate,
             index,
-            unifiedPurchaseRate: test?.unifiedValue?.purchaseRate || test?.unifiedValue?.purchasePrice || 0,
+            unifiedPurchaseRate:
+              test?.unifiedValue?.purchaseRate ||
+              test?.unifiedValue?.purchasePrice ||
+              0,
             unifiedSaleRate: test?.unifiedValue?.saleRate || 0,
             unifiedPercentage: test?.unifiedValue?.percentage,
           },
@@ -145,7 +150,10 @@ export default function AlertDialogbox({
   };
 
   // Toggle selection for all associates in a specific test.
-  const toggleAllTestAssociates = (test: TestWithConflicts, isSelected: boolean) => {
+  const toggleAllTestAssociates = (
+    test: TestWithConflicts,
+    isSelected: boolean
+  ) => {
     if (test?.conflictAssociates) {
       const updatedSelections = { ...selectedAssociates };
       test.conflictAssociates.forEach((associate, index) => {
@@ -156,7 +164,10 @@ export default function AlertDialogbox({
             testName: test?.testId?.name || "Unnamed Test",
             associate,
             index,
-            unifiedPurchaseRate: test?.unifiedValue?.purchaseRate || test?.unifiedValue?.purchasePrice || 0,
+            unifiedPurchaseRate:
+              test?.unifiedValue?.purchaseRate ||
+              test?.unifiedValue?.purchasePrice ||
+              0,
             unifiedSaleRate: test?.unifiedValue?.saleRate || 0,
             unifiedPercentage: test?.unifiedValue?.percentage,
           };
@@ -181,7 +192,10 @@ export default function AlertDialogbox({
               testName: test?.testId?.name || "Unnamed Test",
               associate,
               index,
-              unifiedPurchaseRate: test?.unifiedValue?.purchaseRate || test?.unifiedValue?.purchasePrice || 0,
+              unifiedPurchaseRate:
+                test?.unifiedValue?.purchaseRate ||
+                test?.unifiedValue?.purchasePrice ||
+                0,
               unifiedSaleRate: test?.unifiedValue?.saleRate || 0,
               unifiedPercentage: test?.unifiedValue?.percentage,
             };
@@ -214,7 +228,8 @@ export default function AlertDialogbox({
   };
 
   // Count selected associates
-  const selectedCount = Object.values(selectedAssociates).filter(Boolean).length;
+  const selectedCount =
+    Object.values(selectedAssociates).filter(Boolean).length;
 
   // Count total associates
   const totalAssociatesCount =
@@ -234,16 +249,18 @@ export default function AlertDialogbox({
       .filter(([, metadata]) => metadata)
       .map(([, metadata]) => {
         // Ensure we have valid numeric values
-        const unifiedPurchaseRate = 
-          typeof metadata.unifiedPurchaseRate === 'number' && !isNaN(metadata.unifiedPurchaseRate)
+        const unifiedPurchaseRate =
+          typeof metadata.unifiedPurchaseRate === "number" &&
+          !isNaN(metadata.unifiedPurchaseRate)
             ? metadata.unifiedPurchaseRate
             : 0;
-        
-        const unifiedSaleRate = 
-          typeof metadata.unifiedSaleRate === 'number' && !isNaN(metadata.unifiedSaleRate)
+
+        const unifiedSaleRate =
+          typeof metadata.unifiedSaleRate === "number" &&
+          !isNaN(metadata.unifiedSaleRate)
             ? metadata.unifiedSaleRate
             : 0;
-            
+
         // Create a clean copy with explicit numeric values
         return {
           ...metadata,
@@ -251,34 +268,35 @@ export default function AlertDialogbox({
           unifiedSaleRate,
           // Add clear purchaseRate and saleRate values to avoid ambiguity
           purchaseRate: unifiedPurchaseRate,
-          saleRate: unifiedSaleRate
+          saleRate: unifiedSaleRate,
         };
       });
-    
+
     // If no associates selected, show a warning and prevent action
     if (associatesToUpdate.length === 0) {
       console.warn("No associates selected for conflict resolution");
       return;
     }
-    
-    console.log("Submitting conflict resolution with values:", 
-      associatesToUpdate.map(a => ({
-        test: a.testName, 
-        purchaseRate: a.unifiedPurchaseRate, 
-        saleRate: a.unifiedSaleRate
+
+    console.log(
+      "Submitting conflict resolution with values:",
+      associatesToUpdate.map((a) => ({
+        test: a.testName,
+        purchaseRate: a.unifiedPurchaseRate,
+        saleRate: a.unifiedSaleRate,
       }))
     );
-    
+
     // Pass the selected items to the parent component
     setconflictedselected(associatesToUpdate);
-    
+
     // Close the dialog
     onClose();
   };
 
   const getAssociateKey = (
-    test: TestWithConflicts, 
-    associate: ConflictAssociate, 
+    test: TestWithConflicts,
+    associate: ConflictAssociate,
     index: number
   ): string => {
     const testId = test?.testId?._id || test?.testId?.name;
@@ -289,14 +307,14 @@ export default function AlertDialogbox({
 
   return (
     <div className="relative z-[200]">
-      <Modal 
-        isOpen={isOpen} 
-        onClose={onClose} 
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
         size="5xl"
         classNames={{
           backdrop: "z-[200]",
           wrapper: "z-[200]",
-          base: "z-[200]"
+          base: "z-[200]",
         }}
       >
         <ModalContent>
@@ -381,12 +399,19 @@ export default function AlertDialogbox({
                                   {test.testId?.name || "Unnamed Test"}
                                 </td>
                                 <td className="py-3 px-4 text-right">
-                                  {(test.unifiedValue?.purchaseRate || test.unifiedValue?.purchasePrice) && 
-                                    `₹${Math.ceil(test.unifiedValue?.purchaseRate || test.unifiedValue?.purchasePrice || 0)}`}
+                                  {(test.unifiedValue?.purchaseRate ||
+                                    test.unifiedValue?.purchasePrice) &&
+                                    `₹${Math.ceil(
+                                      test.unifiedValue?.purchaseRate ||
+                                        test.unifiedValue?.purchasePrice ||
+                                        0
+                                    )}`}
                                 </td>
                                 <td className="py-3 px-4 text-right">
-                                  {test.unifiedValue?.saleRate && 
-                                    `₹${Math.ceil(test.unifiedValue?.saleRate || 0)}`}
+                                  {test.unifiedValue?.saleRate &&
+                                    `₹${Math.ceil(
+                                      test.unifiedValue?.saleRate || 0
+                                    )}`}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <Button
@@ -453,12 +478,20 @@ export default function AlertDialogbox({
                                         </td>
                                         <td className="py-2 px-4"></td>
                                         <td className="py-2 px-4 text-right">
-                                          {(associate.value?.purchaseRate || associate.value?.purchasePrice) && 
-                                            `₹${Math.ceil(associate.value?.purchaseRate || associate.value?.purchasePrice || 0)}`}
+                                          {(associate.value?.purchaseRate ||
+                                            associate.value?.purchasePrice) &&
+                                            `₹${Math.ceil(
+                                              associate.value?.purchaseRate ||
+                                                associate.value
+                                                  ?.purchasePrice ||
+                                                0
+                                            )}`}
                                         </td>
                                         <td className="py-2 px-4 text-right">
-                                          {associate.value?.saleRate && 
-                                            `₹${Math.ceil(associate.value?.saleRate || 0)}`}
+                                          {associate.value?.saleRate &&
+                                            `₹${Math.ceil(
+                                              associate.value?.saleRate || 0
+                                            )}`}
                                         </td>
                                         <td></td>
                                       </tr>

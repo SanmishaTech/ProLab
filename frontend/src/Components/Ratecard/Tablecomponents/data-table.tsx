@@ -42,7 +42,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
+import { User, Download } from "lucide-react"; // Add this import
 // Define a history entry interface
 interface PriceHistoryEntry {
   date: string;
@@ -217,6 +217,7 @@ function DataTable<
   onEdit,
   onDelete,
   itemsPerPage = 10,
+  watchedAssociate,
   onBulkEdit,
   selectedItems,
   onSelectedItemsChange,
@@ -529,37 +530,64 @@ function DataTable<
   const renderHistoryContent = () => {
     // Group history by test
     console.log("History p1", historyItems);
-    const testGroups = historyItems.map((item) => ({
-      test: item,
-      history: item.Historyassociates,
-    }));
-    // Sort history entries by date (newest first)
-    testGroups.forEach((group) => {
+    // Flatten the tests into test-associate pairs
+    const flattenedTestGroups = historyItems.flatMap((testItem) => {
+      return (testItem.Historyassociates || []).map((assocEntry) => {
+        // Find the full associate details from watchedAssociate
+        const associate = watchedAssociate?.find(
+          (a) => a._id === assocEntry.associateId
+        );
+
+        return {
+          test: testItem,
+          associate: associate || { _id: assocEntry.associateId },
+          history: assocEntry.history || [],
+        };
+      });
+    });
+
+    flattenedTestGroups.forEach((group) => {
       group.history.sort((a, b) => {
-        // Convert date strings to Date objects for comparison
         const dateA = a.fromDate
           ? new Date(a.fromDate).getTime()
           : a.date
           ? new Date(a.date.split("/").reverse().join("-")).getTime()
           : 0;
+
         const dateB = b.fromDate
           ? new Date(b.fromDate).getTime()
           : b.date
           ? new Date(b.date.split("/").reverse().join("-")).getTime()
           : 0;
+
         return dateB - dateA;
       });
     });
-    console.log("testGroups", testGroups);
 
     // Get unique associates and departments for filtering by extracting only the names
-    const associates = Array.from(
-      new Set(
-        historyItems
-          .filter((item) => item.associate)
-          .map((item) => item.associate)
-      )
-    );
+    const associateMap = new Map<string, any>();
+    flattenedTestGroups.forEach(({ associate }) => {
+      if (associate?._id) {
+        if (!associateMap.has(associate._id)) {
+          associateMap.set(associate._id, associate);
+        }
+      }
+    });
+    const uniqueAssociates = Array.from(associateMap.values());
+    console.log("AssociatesAssociates", flattenedTestGroups);
+
+    // 3. Group tests by associate
+    const testsByAssociate = flattenedTestGroups.reduce((acc, group) => {
+      const associateId = group.associate?._id || "unknown";
+      if (!acc[associateId]) {
+        acc[associateId] = {
+          associate: group.associate,
+          tests: [],
+        };
+      }
+      acc[associateId].tests.push(group);
+      return acc;
+    }, {} as Record<string, { associate: any; tests: typeof flattenedTestGroups }>);
 
     const departments = Array.from(
       new Set(
@@ -569,7 +597,6 @@ function DataTable<
       )
     );
 
-    console.log("Associates", associates);
     console.log("Departments", departments);
 
     return (
@@ -581,596 +608,573 @@ function DataTable<
         >
           <TabsList className="mb-4 flex flex-wrap">
             <TabsTrigger value="all">
-              All Tests ({testGroups.length})
+              All Tests ({flattenedTestGroups.length})
             </TabsTrigger>
-            {associates.map((associate) => (
-              <TabsTrigger key={associate} value={associate || "unknown"}>
-                {associate} (
-                {
-                  testGroups.filter((g) => g.test.associate === associate)
-                    .length
-                }
-                )
+            {uniqueAssociates.map((associate) => (
+              <TabsTrigger
+                key={associate._id}
+                value={associate._id}
+                className="flex items-center gap-2"
+              >
+                <User className="h-4 w-4" />
+                {associate.firstName} {associate.lastName}
               </TabsTrigger>
             ))}
-            {/* Uncomment below for department tabs if needed */}
-            {/* {departments.map((department) => (
-              <TabsTrigger
-                key={`dept-${department}`}
-                value={`dept-${department}`}
-              >
-                {department} (
-                {
-                  testGroups.filter((g) => g.test.department === department).length
-                }
-                )
-              </TabsTrigger>
-            ))} */}
           </TabsList>
-
           {/* "All" Tab Content */}
           <TabsContent value="all" className="space-y-6">
             <ScrollArea className="h-[500px] pr-4">
-              {testGroups.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <ClipboardList className="h-12 w-12 mb-4" />
-                  <p>No history data available</p>
+              {flattenedTestGroups.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground bg-muted/5 rounded-lg border">
+                  <ClipboardList className="h-16 w-16 mb-4 text-muted-foreground/70" />
+                  <p className="text-lg">No history data available</p>
                 </div>
               ) : (
-                testGroups.map((group, groupIndex) => (
-                  <div
-                    key={`group-${groupIndex}`}
-                    className="mb-6 bg-muted/20 p-4 rounded-md"
-                  >
-                    <div className="flex justify-between items-center mb-3">
-                      <h3 className="text-lg font-semibold">
-                        {group.test.name || `Test #${group.test._id}`}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        {group.test.department && (
-                          <Badge variant="secondary">
-                            {group.test.department}
-                          </Badge>
-                        )}
-                        {group.test.associate && (
-                          <Badge variant="outline">
-                            {group.test.associate}
-                          </Badge>
-                        )}
+                Object.entries(testsByAssociate).map(
+                  ([associateId, { associate, tests }]) => (
+                    <div
+                      key={associateId}
+                      className="mb-8 border rounded-lg overflow-hidden shadow-sm bg-white"
+                    >
+                      {/* Associate Header */}
+                      <div className="p-5 bg-gradient-to-r from-muted/30 to-muted/5 border-b">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                              {associate?.firstName?.[0] || "U"}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold">
+                                {associate?.firstName || "Unknown"}{" "}
+                                {associate?.lastName || "Associate"}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {tests.length}{" "}
+                                {tests.length === 1 ? "Test" : "Tests"} • Last
+                                updated {new Date().toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="mb-2 text-sm flex flex-wrap gap-4 text-muted-foreground">
-                      <span>
-                        Original Purchase Rate: ₹
-                        {(group.test.originalPurchaseRate || 0).toFixed(2)}
-                      </span>
-                      <span>
-                        Original Sale Rate: ₹
-                        {(group.test.originalSaleRate || 0).toFixed(2)}
-                      </span>
-                      <span>
-                        Current Purchase Rate: ₹
-                        {(group.test.purchasePrice || 0).toFixed(2)}
-                      </span>
-                      <span>
-                        Current Sale Rate: ₹
-                        {(group.test.saleRate || 0).toFixed(2)}
-                      </span>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableCell className="font-medium">Date</TableCell>
-                            <TableCell className="font-medium text-right">
-                              Purchase Rate
-                            </TableCell>
-                            <TableCell className="font-medium text-right">
-                              Sale Rate
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              Change
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              Reason
-                            </TableCell>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {group.history.map((entry, entryIndex) => {
-                            // Calculate previous entry for comparison
-                            const prevEntry = group.history[entryIndex + 1];
-                            const purchaseRateDiff = prevEntry
-                              ? (entry.purchasePrice || 0) -
-                                (prevEntry.purchasePrice || 0)
-                              : 0;
-                            const saleRateDiff = prevEntry
-                              ? (entry.saleRate || 0) -
-                                (prevEntry.saleRate || 0)
-                              : 0;
-
-                            // Determine if this was an increase or decrease
-                            const purchaseDirection =
-                              purchaseRateDiff > 0
-                                ? "text-green-500"
-                                : purchaseRateDiff < 0
-                                ? "text-red-500"
-                                : "text-muted-foreground";
-
-                            const saleDirection =
-                              saleRateDiff > 0
-                                ? "text-green-500"
-                                : saleRateDiff < 0
-                                ? "text-red-500"
-                                : "text-muted-foreground";
-
-                            // Format the date for display
-                            const displayDate =
-                              entry.date ||
-                              (entry.fromDate
-                                ? new Date(entry.fromDate).toLocaleDateString(
-                                    "en-GB",
-                                    {
-                                      day: "2-digit",
-                                      month: "2-digit",
-                                      year: "numeric",
-                                    }
-                                  )
-                                : "Unknown");
-
-                            const displayPurchaseRate =
-                              entry.purchasePrice || 0;
-
-                            return (
-                              <TableRow key={`entry-${entryIndex}`}>
-                                <TableCell className="whitespace-nowrap">
-                                  {displayDate}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  ₹{displayPurchaseRate.toFixed(2)}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  ₹{(entry.saleRate || 0).toFixed(2)}
-                                </TableCell>
-                                <TableCell>
-                                  {prevEntry && (
-                                    <div className="flex flex-col text-xs">
-                                      <span className={purchaseDirection}>
-                                        Purchase:{" "}
-                                        {purchaseRateDiff > 0 ? "+" : ""}
-                                        {purchaseRateDiff.toFixed(2)}
-                                        {purchaseRateDiff !== 0 && (
-                                          <span className="ml-1">
-                                            (
-                                            {Math.abs(
-                                              (purchaseRateDiff /
-                                                (prevEntry.purchasePrice ||
-                                                  1)) *
-                                                100
-                                            ).toFixed(1)}
-                                            %)
-                                          </span>
-                                        )}
-                                      </span>
-                                      <span className={saleDirection}>
-                                        Sale: {saleRateDiff > 0 ? "+" : ""}
-                                        {saleRateDiff.toFixed(2)}
-                                        {saleRateDiff !== 0 && (
-                                          <span className="ml-1">
-                                            (
-                                            {Math.abs(
-                                              (saleRateDiff /
-                                                (prevEntry.saleRate || 1)) *
-                                                100
-                                            ).toFixed(1)}
-                                            %)
-                                          </span>
-                                        )}
-                                      </span>
-                                    </div>
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  <Badge
-                                    variant="outline"
-                                    className="font-normal"
-                                  >
-                                    {entry.reason || "Rate Change"}
-                                  </Badge>
-                                  {entry.percentage && entry.percentage > 0 && (
+                      {/* Tests Container */}
+                      <div className="p-4 space-y-5">
+                        {tests.map((group, groupIndex) => (
+                          <div
+                            key={groupIndex}
+                            className="bg-white rounded-lg border shadow-sm overflow-hidden"
+                          >
+                            {/* Test Header */}
+                            <div className="p-4 border-b bg-muted/5">
+                              <div className="flex justify-between items-center mb-2">
+                                <h3 className="text-lg font-semibold">
+                                  {group.test.name}
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                  {group.test.department && (
                                     <Badge
                                       variant="secondary"
-                                      className="ml-2 font-normal"
+                                      className="px-2.5 py-0.5"
                                     >
-                                      {entry.percentage}% discount
+                                      {group.test.department}
                                     </Badge>
                                   )}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
+                                  <Badge
+                                    variant="outline"
+                                    className="px-2.5 py-0.5"
+                                  >
+                                    {group.history.length} entries
+                                  </Badge>
+                                </div>
+                              </div>
+
+                              {/* Test Info Cards */}
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+                                <div className="bg-muted/10 p-3 rounded-md border border-muted/20">
+                                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                                    Original Purchase
+                                  </div>
+                                  <div className="font-medium text-lg">
+                                    ₹
+                                    {(
+                                      group.test.originalPurchaseRate || 0
+                                    ).toFixed(2)}
+                                  </div>
+                                </div>
+                                <div className="bg-muted/10 p-3 rounded-md border border-muted/20">
+                                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                                    Original Sale
+                                  </div>
+                                  <div className="font-medium text-lg">
+                                    ₹
+                                    {(group.test.originalSaleRate || 0).toFixed(
+                                      2
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="bg-muted/10 p-3 rounded-md border border-muted/20">
+                                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                                    Current Purchase
+                                  </div>
+                                  <div className="font-medium text-lg">
+                                    ₹
+                                    {(group.test.purchasePrice || 0).toFixed(2)}
+                                  </div>
+                                </div>
+                                <div className="bg-muted/10 p-3 rounded-md border border-muted/20">
+                                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                                    Current Sale
+                                  </div>
+                                  <div className="font-medium text-lg">
+                                    ₹{(group.test.saleRate || 0).toFixed(2)}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* History Table */}
+                            <div className="overflow-x-auto px-3 py-2">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow className="bg-muted/5">
+                                    <TableCell className="font-medium">
+                                      Date
+                                    </TableCell>
+                                    <TableCell className="font-medium text-right">
+                                      Purchase Rate
+                                    </TableCell>
+                                    <TableCell className="font-medium text-right">
+                                      Sale Rate
+                                    </TableCell>
+                                    <TableCell className="font-medium">
+                                      Change
+                                    </TableCell>
+                                    <TableCell className="font-medium">
+                                      Reason
+                                    </TableCell>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {group.history.map((entry, entryIndex) => {
+                                    const prevEntry =
+                                      group.history[entryIndex + 1];
+                                    const purchaseRateDiff = prevEntry
+                                      ? (entry.purchasePrice || 0) -
+                                        (prevEntry.purchasePrice || 0)
+                                      : 0;
+                                    const saleRateDiff = prevEntry
+                                      ? (entry.saleRate || 0) -
+                                        (prevEntry.saleRate || 0)
+                                      : 0;
+                                    const purchaseDirection =
+                                      purchaseRateDiff > 0
+                                        ? "text-green-500"
+                                        : purchaseRateDiff < 0
+                                        ? "text-red-500"
+                                        : "text-muted-foreground";
+                                    const saleDirection =
+                                      saleRateDiff > 0
+                                        ? "text-green-500"
+                                        : saleRateDiff < 0
+                                        ? "text-red-500"
+                                        : "text-muted-foreground";
+                                    const displayDate =
+                                      entry.date ||
+                                      (entry.fromDate
+                                        ? new Date(
+                                            entry.fromDate
+                                          ).toLocaleDateString("en-GB", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                          })
+                                        : "Unknown");
+
+                                    return (
+                                      <TableRow
+                                        key={entryIndex}
+                                        className="hover:bg-muted/10 transition-colors"
+                                      >
+                                        <TableCell className="whitespace-nowrap font-medium">
+                                          {displayDate}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          ₹
+                                          {(entry.purchasePrice || 0).toFixed(
+                                            2
+                                          )}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          ₹{(entry.saleRate || 0).toFixed(2)}
+                                        </TableCell>
+                                        <TableCell>
+                                          {prevEntry && (
+                                            <div className="flex flex-col text-xs">
+                                              <div
+                                                className={`${purchaseDirection} flex items-center`}
+                                              >
+                                                <span className="w-16 inline-block font-medium">
+                                                  Purchase:
+                                                </span>
+                                                <div className="flex items-center">
+                                                  <span className="font-medium">
+                                                    {purchaseRateDiff > 0
+                                                      ? "+"
+                                                      : ""}
+                                                    {purchaseRateDiff.toFixed(
+                                                      2
+                                                    )}
+                                                  </span>
+                                                  {purchaseRateDiff !== 0 && (
+                                                    <span className="ml-1 opacity-80">
+                                                      (
+                                                      {Math.abs(
+                                                        (purchaseRateDiff /
+                                                          (prevEntry.purchasePrice ||
+                                                            1)) *
+                                                          100
+                                                      ).toFixed(1)}
+                                                      %)
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              </div>
+                                              <div
+                                                className={`${saleDirection} flex items-center mt-1`}
+                                              >
+                                                <span className="w-16 inline-block font-medium">
+                                                  Sale:
+                                                </span>
+                                                <div className="flex items-center">
+                                                  <span className="font-medium">
+                                                    {saleRateDiff > 0
+                                                      ? "+"
+                                                      : ""}
+                                                    {saleRateDiff.toFixed(2)}
+                                                  </span>
+                                                  {saleRateDiff !== 0 && (
+                                                    <span className="ml-1 opacity-80">
+                                                      (
+                                                      {Math.abs(
+                                                        (saleRateDiff /
+                                                          (prevEntry.saleRate ||
+                                                            1)) *
+                                                          100
+                                                      ).toFixed(1)}
+                                                      %)
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </TableCell>
+                                        <TableCell>
+                                          <div className="flex flex-wrap gap-2">
+                                            <Badge
+                                              variant="outline"
+                                              className="font-normal"
+                                            >
+                                              {entry.reason || "Rate Change"}
+                                            </Badge>
+                                            {entry.percentage &&
+                                              entry.percentage > 0 && (
+                                                <Badge
+                                                  variant="secondary"
+                                                  className="font-normal"
+                                                >
+                                                  {entry.percentage}% discount
+                                                </Badge>
+                                              )}
+                                          </div>
+                                        </TableCell>
+                                      </TableRow>
+                                    );
+                                  })}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))
+                  )
+                )
               )}
             </ScrollArea>
           </TabsContent>
-
-          {/* Tabs Content for each Associate */}
-          {associates.map((associate) => (
-            <TabsContent
-              key={associate}
-              value={associate || "unknown"}
-              className="space-y-6"
-            >
-              <ScrollArea className="h-[500px] pr-4">
-                {testGroups
-                  .filter((group) => group.test.associate === associate)
-                  .map((group, groupIndex) => (
-                    <div
-                      key={`group-${groupIndex}`}
-                      className="mb-6 bg-muted/20 p-4 rounded-md"
-                    >
-                      <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-lg font-semibold">
-                          {group.test.name || `Test #${group.test._id}`}
+          {uniqueAssociates.map((associate) => {
+            const associateTests = testsByAssociate[associate._id]?.tests || [];
+            return (
+              <TabsContent
+                key={associate._id}
+                value={associate._id}
+                className="space-y-6"
+              >
+                {/* Associate Header Card */}
+                <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+                  <div className="p-5 bg-gradient-to-r from-muted/30 to-muted/10">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xl font-semibold">
+                          {associate.firstName} {associate.lastName}
                         </h3>
-                        {group.test.department && (
-                          <Badge variant="secondary">
-                            {group.test.department}
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="font-normal">
+                            {associate.associateType}
                           </Badge>
-                        )}
+                          <span className="text-sm text-muted-foreground">
+                            •
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {associate.organization}
+                          </span>
+                        </div>
                       </div>
-
-                      <div className="mb-2 text-sm flex flex-wrap gap-4 text-muted-foreground">
-                        <span>
-                          Original Purchase Rate: ₹
-                          {(group.test.originalPurchaseRate || 0).toFixed(2)}
-                        </span>
-                        <span>
-                          Original Sale Rate: ₹
-                          {(group.test.originalSaleRate || 0).toFixed(2)}
-                        </span>
-                        <span>
-                          Current Purchase Rate: ₹
-                          {(group.test.purchasePrice || 0).toFixed(2)}
-                        </span>
-                        <span>
-                          Current Sale Rate: ₹
-                          {(group.test.saleRate || 0).toFixed(2)}
-                        </span>
-                      </div>
-
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Date
-                              </TableCell>
-                              <TableCell className="font-medium text-right">
-                                Purchase Rate
-                              </TableCell>
-                              <TableCell className="font-medium text-right">
-                                Sale Rate
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                Change
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                Reason
-                              </TableCell>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {group.history.map((entry, entryIndex) => {
-                              const prevEntry = group.history[entryIndex + 1];
-                              const purchaseRateDiff = prevEntry
-                                ? (entry.purchasePrice || 0) -
-                                  (prevEntry.purchasePrice || 0)
-                                : 0;
-                              const saleRateDiff = prevEntry
-                                ? (entry.saleRate || 0) -
-                                  (prevEntry.saleRate || 0)
-                                : 0;
-
-                              const purchaseDirection =
-                                purchaseRateDiff > 0
-                                  ? "text-green-500"
-                                  : purchaseRateDiff < 0
-                                  ? "text-red-500"
-                                  : "text-muted-foreground";
-
-                              const saleDirection =
-                                saleRateDiff > 0
-                                  ? "text-green-500"
-                                  : saleRateDiff < 0
-                                  ? "text-red-500"
-                                  : "text-muted-foreground";
-
-                              const displayDate =
-                                entry.date ||
-                                (entry.fromDate
-                                  ? new Date(entry.fromDate).toLocaleDateString(
-                                      "en-GB",
-                                      {
-                                        day: "2-digit",
-                                        month: "2-digit",
-                                        year: "numeric",
-                                      }
-                                    )
-                                  : "Unknown");
-
-                              const displayPurchaseRate =
-                                entry.purchasePrice || 0;
-
-                              return (
-                                <TableRow key={`entry-${entryIndex}`}>
-                                  <TableCell className="whitespace-nowrap">
-                                    {displayDate}
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                    ₹{displayPurchaseRate.toFixed(2)}
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                    ₹{(entry.saleRate || 0).toFixed(2)}
-                                  </TableCell>
-                                  <TableCell>
-                                    {prevEntry && (
-                                      <div className="flex flex-col text-xs">
-                                        <span className={purchaseDirection}>
-                                          Purchase:{" "}
-                                          {purchaseRateDiff > 0 ? "+" : ""}
-                                          {purchaseRateDiff.toFixed(2)}
-                                          {purchaseRateDiff !== 0 && (
-                                            <span className="ml-1">
-                                              (
-                                              {Math.abs(
-                                                (purchaseRateDiff /
-                                                  (prevEntry.purchasePrice ||
-                                                    1)) *
-                                                  100
-                                              ).toFixed(1)}
-                                              %)
-                                            </span>
-                                          )}
-                                        </span>
-                                        <span className={saleDirection}>
-                                          Sale: {saleRateDiff > 0 ? "+" : ""}
-                                          {saleRateDiff.toFixed(2)}
-                                          {saleRateDiff !== 0 && (
-                                            <span className="ml-1">
-                                              (
-                                              {Math.abs(
-                                                (saleRateDiff /
-                                                  (prevEntry.saleRate || 1)) *
-                                                  100
-                                              ).toFixed(1)}
-                                              %)
-                                            </span>
-                                          )}
-                                        </span>
-                                      </div>
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Badge
-                                      variant="outline"
-                                      className="font-normal"
-                                    >
-                                      {entry.reason || "Rate Change"}
-                                    </Badge>
-                                    {entry.percentage &&
-                                      entry.percentage > 0 && (
-                                        <Badge
-                                          variant="secondary"
-                                          className="ml-2 font-normal"
-                                        >
-                                          {entry.percentage}% discount
-                                        </Badge>
-                                      )}
-                                  </TableCell>
-                                </TableRow>
-                              );
-                            })}
-                          </TableBody>
-                        </Table>
+                      <div className="hidden md:block">
+                        <Badge
+                          variant="secondary"
+                          className="text-sm px-3 py-1"
+                        >
+                          {associateTests.length} Tests
+                        </Badge>
                       </div>
                     </div>
-                  ))}
-              </ScrollArea>
-            </TabsContent>
-          ))}
+                  </div>
+                </div>
 
-          {/* Department Tabs Content */}
-          {departments.map((department) => (
-            <TabsContent
-              key={`dept-${department}`}
-              value={`dept-${department}`}
-              className="space-y-6"
-            >
-              <ScrollArea className="h-[500px] pr-4">
-                {testGroups
-                  .filter((group) => group.test.department === department)
-                  .map((group, groupIndex) => (
-                    <div
-                      key={`group-${groupIndex}`}
-                      className="mb-6 bg-muted/20 p-4 rounded-md"
-                    >
-                      <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-lg font-semibold">
-                          {group.test.name || `Test #${group.test._id}`}
-                        </h3>
-                        {group.test.associate && (
-                          <Badge variant="outline">
-                            {group.test.associate}
-                          </Badge>
-                        )}
-                      </div>
+                {/* Tests List */}
+                <ScrollArea className="h-[500px] pr-4">
+                  {associateTests.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground bg-muted/5 rounded-lg border">
+                      <ClipboardList className="h-12 w-12 mb-4" />
+                      <p>No test history available</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {associateTests.map((group, groupIndex) => (
+                        <div
+                          key={groupIndex}
+                          className="bg-white rounded-lg border shadow-sm overflow-hidden"
+                        >
+                          {/* Test Header */}
+                          <div className="p-4 border-b bg-muted/5">
+                            <div className="flex justify-between items-center">
+                              <h3 className="text-lg font-semibold">
+                                {group.test.name}
+                              </h3>
+                              {group.test.department && (
+                                <Badge variant="secondary">
+                                  {group.test.department}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
 
-                      <div className="mb-2 text-sm flex flex-wrap gap-4 text-muted-foreground">
-                        <span>
-                          Original Purchase Rate: ₹
-                          {(group.test.originalPurchaseRate || 0).toFixed(2)}
-                        </span>
-                        <span>
-                          Original Sale Rate: ₹
-                          {(group.test.originalSaleRate || 0).toFixed(2)}
-                        </span>
-                        <span>
-                          Current Purchase Rate: ₹
-                          {(group.test.purchasePrice || 0).toFixed(2)}
-                        </span>
-                        <span>
-                          Current Sale Rate: ₹
-                          {(group.test.saleRate || 0).toFixed(2)}
-                        </span>
-                      </div>
+                          {/* Test Rate Cards */}
+                          <div className="p-4 border-b">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                              <div className="bg-muted/10 rounded-md p-3 flex flex-col">
+                                <span className="text-xs text-muted-foreground">
+                                  Original Purchase Rate
+                                </span>
+                                <span className="text-lg font-medium mt-1">
+                                  ₹
+                                  {(
+                                    group.test.originalPurchaseRate || 0
+                                  ).toFixed(2)}
+                                </span>
+                              </div>
+                              <div className="bg-muted/10 rounded-md p-3 flex flex-col">
+                                <span className="text-xs text-muted-foreground">
+                                  Original Sale Rate
+                                </span>
+                                <span className="text-lg font-medium mt-1">
+                                  ₹
+                                  {(group.test.originalSaleRate || 0).toFixed(
+                                    2
+                                  )}
+                                </span>
+                              </div>
+                              <div className="bg-muted/10 rounded-md p-3 flex flex-col">
+                                <span className="text-xs text-muted-foreground">
+                                  Current Purchase Rate
+                                </span>
+                                <span className="text-lg font-medium mt-1">
+                                  ₹{(group.test.purchasePrice || 0).toFixed(2)}
+                                </span>
+                              </div>
+                              <div className="bg-muted/10 rounded-md p-3 flex flex-col">
+                                <span className="text-xs text-muted-foreground">
+                                  Current Sale Rate
+                                </span>
+                                <span className="text-lg font-medium mt-1">
+                                  ₹{(group.test.saleRate || 0).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
 
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Date
-                              </TableCell>
-                              <TableCell className="font-medium text-right">
-                                Purchase Rate
-                              </TableCell>
-                              <TableCell className="font-medium text-right">
-                                Sale Rate
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                Change
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                Reason
-                              </TableCell>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {group.history.map((entry, entryIndex) => {
-                              const prevEntry = group.history[entryIndex + 1];
-                              const purchaseRateDiff = prevEntry
-                                ? (entry.purchasePrice || 0) -
-                                  (prevEntry.purchasePrice || 0)
-                                : 0;
-                              const saleRateDiff = prevEntry
-                                ? (entry.saleRate || 0) -
-                                  (prevEntry.saleRate || 0)
-                                : 0;
-
-                              const purchaseDirection =
-                                purchaseRateDiff > 0
-                                  ? "text-green-500"
-                                  : purchaseRateDiff < 0
-                                  ? "text-red-500"
-                                  : "text-muted-foreground";
-
-                              const saleDirection =
-                                saleRateDiff > 0
-                                  ? "text-green-500"
-                                  : saleRateDiff < 0
-                                  ? "text-red-500"
-                                  : "text-muted-foreground";
-
-                              const displayDate =
-                                entry.date ||
-                                (entry.fromDate
-                                  ? new Date(entry.fromDate).toLocaleDateString(
-                                      "en-GB",
-                                      {
-                                        day: "2-digit",
-                                        month: "2-digit",
-                                        year: "numeric",
-                                      }
-                                    )
-                                  : "Unknown");
-
-                              const displayPurchaseRate =
-                                entry.purchasePrice || 0;
-
-                              return (
-                                <TableRow key={`entry-${entryIndex}`}>
-                                  <TableCell className="whitespace-nowrap">
-                                    {displayDate}
+                          {/* History Table */}
+                          <div className="overflow-x-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="bg-muted/5">
+                                  <TableCell className="font-medium">
+                                    Date
                                   </TableCell>
-                                  <TableCell className="text-right">
-                                    ₹{displayPurchaseRate.toFixed(2)}
+                                  <TableCell className="font-medium text-right">
+                                    Purchase Rate
                                   </TableCell>
-                                  <TableCell className="text-right">
-                                    ₹{(entry.saleRate || 0).toFixed(2)}
+                                  <TableCell className="font-medium text-right">
+                                    Sale Rate
                                   </TableCell>
-                                  <TableCell>
-                                    {prevEntry && (
-                                      <div className="flex flex-col text-xs">
-                                        <span className={purchaseDirection}>
-                                          Purchase:{" "}
-                                          {purchaseRateDiff > 0 ? "+" : ""}
-                                          {purchaseRateDiff.toFixed(2)}
-                                          {purchaseRateDiff !== 0 && (
-                                            <span className="ml-1">
-                                              (
-                                              {Math.abs(
-                                                (purchaseRateDiff /
-                                                  (prevEntry.purchasePrice ||
-                                                    1)) *
-                                                  100
-                                              ).toFixed(1)}
-                                              %)
-                                            </span>
-                                          )}
-                                        </span>
-                                        <span className={saleDirection}>
-                                          Sale: {saleRateDiff > 0 ? "+" : ""}
-                                          {saleRateDiff.toFixed(2)}
-                                          {saleRateDiff !== 0 && (
-                                            <span className="ml-1">
-                                              (
-                                              {Math.abs(
-                                                (saleRateDiff /
-                                                  (prevEntry.saleRate || 1)) *
-                                                  100
-                                              ).toFixed(1)}
-                                              %)
-                                            </span>
-                                          )}
-                                        </span>
-                                      </div>
-                                    )}
+                                  <TableCell className="font-medium">
+                                    Change
                                   </TableCell>
-                                  <TableCell>
-                                    <Badge
-                                      variant="outline"
-                                      className="font-normal"
-                                    >
-                                      {entry.reason || "Rate Change"}
-                                    </Badge>
-                                    {entry.percentage &&
-                                      entry.percentage > 0 && (
-                                        <Badge
-                                          variant="secondary"
-                                          className="ml-2 font-normal"
-                                        >
-                                          {entry.percentage}% discount
-                                        </Badge>
-                                      )}
+                                  <TableCell className="font-medium">
+                                    Reason
                                   </TableCell>
                                 </TableRow>
-                              );
-                            })}
-                          </TableBody>
-                        </Table>
-                      </div>
+                              </TableHeader>
+                              <TableBody>
+                                {group.history.map((entry, entryIndex) => {
+                                  const prevEntry =
+                                    group.history[entryIndex + 1];
+                                  const purchaseRateDiff = prevEntry
+                                    ? (entry.purchasePrice || 0) -
+                                      (prevEntry.purchasePrice || 0)
+                                    : 0;
+                                  const saleRateDiff = prevEntry
+                                    ? (entry.saleRate || 0) -
+                                      (prevEntry.saleRate || 0)
+                                    : 0;
+                                  const purchaseDirection =
+                                    purchaseRateDiff > 0
+                                      ? "text-green-500"
+                                      : purchaseRateDiff < 0
+                                      ? "text-red-500"
+                                      : "text-muted-foreground";
+                                  const saleDirection =
+                                    saleRateDiff > 0
+                                      ? "text-green-500"
+                                      : saleRateDiff < 0
+                                      ? "text-red-500"
+                                      : "text-muted-foreground";
+                                  const displayDate =
+                                    entry.date ||
+                                    (entry.fromDate
+                                      ? new Date(
+                                          entry.fromDate
+                                        ).toLocaleDateString("en-GB", {
+                                          day: "2-digit",
+                                          month: "2-digit",
+                                          year: "numeric",
+                                        })
+                                      : "Unknown");
+
+                                  return (
+                                    <TableRow
+                                      key={entryIndex}
+                                      className="hover:bg-muted/5"
+                                    >
+                                      <TableCell className="whitespace-nowrap font-medium">
+                                        {displayDate}
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        ₹{(entry.purchasePrice || 0).toFixed(2)}
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        ₹{(entry.saleRate || 0).toFixed(2)}
+                                      </TableCell>
+                                      <TableCell>
+                                        {prevEntry && (
+                                          <div className="flex flex-col text-xs">
+                                            <div
+                                              className={`${purchaseDirection} flex items-center gap-1`}
+                                            >
+                                              <span className="font-medium w-16 inline-block">
+                                                Purchase:
+                                              </span>
+                                              <span className="font-medium">
+                                                {purchaseRateDiff > 0
+                                                  ? "+"
+                                                  : ""}
+                                                {purchaseRateDiff.toFixed(2)}
+                                              </span>
+                                              {purchaseRateDiff !== 0 && (
+                                                <span className="ml-1 text-xs opacity-80">
+                                                  (
+                                                  {Math.abs(
+                                                    (purchaseRateDiff /
+                                                      (prevEntry.purchasePrice ||
+                                                        1)) *
+                                                      100
+                                                  ).toFixed(1)}
+                                                  %)
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div
+                                              className={`${saleDirection} flex items-center gap-1 mt-1`}
+                                            >
+                                              <span className="font-medium w-16 inline-block">
+                                                Sale:
+                                              </span>
+                                              <span className="font-medium">
+                                                {saleRateDiff > 0 ? "+" : ""}
+                                                {saleRateDiff.toFixed(2)}
+                                              </span>
+                                              {saleRateDiff !== 0 && (
+                                                <span className="ml-1 text-xs opacity-80">
+                                                  (
+                                                  {Math.abs(
+                                                    (saleRateDiff /
+                                                      (prevEntry.saleRate ||
+                                                        1)) *
+                                                      100
+                                                  ).toFixed(1)}
+                                                  %)
+                                                </span>
+                                              )}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        <div className="flex flex-wrap gap-2">
+                                          <Badge
+                                            variant="outline"
+                                            className="font-normal"
+                                          >
+                                            {entry.reason || "Rate Change"}
+                                          </Badge>
+                                          {entry.percentage &&
+                                            entry.percentage > 0 && (
+                                              <Badge
+                                                variant="secondary"
+                                                className="font-normal"
+                                              >
+                                                {entry.percentage}% discount
+                                              </Badge>
+                                            )}
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-              </ScrollArea>
-            </TabsContent>
-          ))}
+                  )}
+                </ScrollArea>
+              </TabsContent>
+            );
+          })}
         </Tabs>
       </div>
     );
@@ -1310,6 +1314,7 @@ function DataTable<
         {/* History Dialog - Fix z-index and cleanup on close */}
         <Dialog
           open={showHistoryModal}
+          size="3xl"
           onOpenChange={(open) => {
             setShowHistoryModal(open);
             if (!open) {
@@ -1325,7 +1330,7 @@ function DataTable<
             }
           }}
         >
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto z-[1000]">
+          <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto z-[1000]">
             <DialogHeader>
               <DialogTitle>
                 {historyItems.length > 1

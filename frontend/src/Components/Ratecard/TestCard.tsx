@@ -117,6 +117,7 @@ function ProfileForm() {
   const [conflictopen, setconflictopen] = useState(false);
   const [Selectopen, setSelectopen] = useState(false);
   const [SelectedAssociate, setSelectedAssociate] = useState(null);
+  const [watchedassocatetopass, setWatchedassociatetopass] = useState(null);
   const [conflictedselected, setconflictedselected] =
     useState<ConflictedSelected>([]);
   const [ratecardHistory, setRatecardHistory] = useState<any[]>([]);
@@ -142,10 +143,7 @@ function ProfileForm() {
           return;
         }
 
-        console.log(
-          "Processing conflict for test ID:",
-          selectedConflict.testId
-        );
+        console.log("Processing conflict for test ID:", selectedConflict);
         const testIndex = updatedTestMaster.findIndex(
           (test) => test._id === selectedConflict.testId
         );
@@ -255,33 +253,29 @@ function ProfileForm() {
           // Create an array for conflict and non-conflict associates separately.
           // Assume you have arrays of associate objects from your response:
           const conflictAssocs = (test.conflictAssociates || []).map(
-            (assoc) => ({
-              associateId: assoc._id,
-              firstName: assoc.firstName,
-              lastName: assoc.lastName,
-              pricing: prices[assoc._id] || {},
-              history: historyByAssociate[assoc._id] || [],
-            })
-          );
-
-          const nonConflictAssocs = (test.nonConflictAssociates || []).map(
-            (assoc) => ({
-              associateId: assoc._id,
-              firstName: assoc.firstName,
-              lastName: assoc.lastName,
-              pricing: prices[assoc._id] || {},
-              history: historyByAssociate[assoc._id] || [],
-            })
-          );
-          console.log(
-            "PPPPAAAAA",
-            Object.entries(test.historyByAssociate).map(
-              ([associateId, history]) => ({
-                associateId,
-                history,
-              })
+            (assoc) => (
+              console.log("Checking assoc: ", historyByAssociate[assoc._id]),
+              {
+                associateId: assoc._id,
+                firstName: assoc.firstName,
+                lastName: assoc.lastName,
+                pricing: prices[assoc._id] || {},
+                history: historyByAssociate[assoc._id] || [],
+              }
             )
           );
+
+          console.log("Checking id: ", conflictAssocs);
+          const nonConflictAssocs = (test.nonConflictAssociates || []).map(
+            (assoc) => ({
+              associateId: assoc,
+              firstName: assoc.firstName,
+              lastName: assoc.lastName,
+              pricing: prices[assoc._id] || {},
+              history: historyByAssociate[assoc._id] || [],
+            })
+          );
+          console.log("PPPPAAAAA", nonConflictAssocs);
 
           return {
             ...testId, // test details like _id, name, etc.
@@ -315,7 +309,22 @@ function ProfileForm() {
         // setConflictData(updatedtestadded);
         console.log("UPDATED", updatedtestadded);
 
-        console.log("Updatedtestadded", updatedtestadded);
+        const extracted = updatedtestadded.flatMap((item) =>
+          item.Historyassociates.flatMap((assoc) =>
+            assoc.history.map((record) => record.associate)
+          )
+        );
+
+        // Optionally, remove duplicates (if any)
+        const uniqueAssociates = extracted.reduce((acc, curr) => {
+          if (!acc.find((item) => item._id === curr._id)) {
+            acc.push(curr);
+          }
+          return acc;
+        }, []);
+
+        setWatchedassociatetopass(uniqueAssociates);
+        console.log("Updatedtestadded", uniqueAssociates);
         setconflictchecks(updatedtestadded);
         setUpdatedtests(updatedtestadded);
         settestmaster(updatedtestadded);
@@ -468,6 +477,8 @@ function ProfileForm() {
             }
           });
         });
+
+      console.log("Conflict Selected current", conflictedselected);
 
       // Handle conflicted items that were resolved
       const conflictPromises =
@@ -699,6 +710,7 @@ function ProfileForm() {
         <div className="flex w-full">
           <Tablecomponent
             data={FilteredTestData}
+            watchedAssociate={watchedassocatetopass}
             setUpdatedtests={setUpdatedtests}
             setPercentagevalue={setPercentagevalue}
             conflictchecks={conflictchecks}
