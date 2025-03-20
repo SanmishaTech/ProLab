@@ -552,7 +552,6 @@ function ProfileForm() {
           `Rate card updated with ${successCount} successes and ${errorCount} failures`
         );
       } else {
-        toast.success("Rate card updated successfully");
       }
 
       // Refresh the data

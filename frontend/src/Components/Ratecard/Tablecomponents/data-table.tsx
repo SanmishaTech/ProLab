@@ -1183,16 +1183,7 @@ function DataTable<
   return (
     <>
       <div className="space-y-4">
-        <div className="flex justify-end mb-4 gap-2">
-          <Button
-            onClick={() => handleAdd()}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1"
-          >
-            <Plus className="h-4 w-4" /> Add New
-          </Button>
-
+        {/* <div className="flex justify-end mb-4 gap-2">
           {selectedItems.length > 0 && (
             <Button
               onClick={() => handleShowHistory(selectedItems)}
@@ -1203,7 +1194,7 @@ function DataTable<
               <Clock className="h-4 w-4" /> View History
             </Button>
           )}
-        </div>
+        </div> */}
 
         <div className="rounded-md border shadow-sm">
           <Table>
@@ -1271,7 +1262,7 @@ function DataTable<
                   ))}
 
                   <TableCell className="action-cell">
-                    <DropdownMenu>
+                    {/* <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
@@ -1284,12 +1275,7 @@ function DataTable<
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => handleEdit(item)}>
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onDelete([item])}>
-                          Delete
-                        </DropdownMenuItem>
+
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => handleShowHistory([item])}
@@ -1298,7 +1284,16 @@ function DataTable<
                           View History
                         </DropdownMenuItem>
                       </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> */}
+                    <Button
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleShowHistory([item]);
+                      }}
+                    >
+                      <ClipboardList className="h-4 w-4 mr-2" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

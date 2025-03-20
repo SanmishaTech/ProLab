@@ -19,7 +19,7 @@ interface ConflictAssociate {
   id?: string;
   fullName?: string;
   value?: {
-    purchaseRate?: number;
+    purchasePrice?: number;
     purchasePrice?: number;
     saleRate?: number;
     percentage?: number;
@@ -34,7 +34,7 @@ interface TestWithConflicts {
   };
   conflictAssociates: ConflictAssociate[];
   unifiedValue: {
-    purchaseRate?: number;
+    purchasePrice?: number;
     purchasePrice?: number;
     saleRate?: number;
     percentage?: number;
@@ -138,7 +138,7 @@ export default function AlertDialogbox({
             associate,
             index,
             unifiedPurchaseRate:
-              test?.unifiedValue?.purchaseRate ||
+              test?.unifiedValue?.purchasePrice ||
               test?.unifiedValue?.purchasePrice ||
               0,
             unifiedSaleRate: test?.unifiedValue?.saleRate || 0,
@@ -165,7 +165,7 @@ export default function AlertDialogbox({
             associate,
             index,
             unifiedPurchaseRate:
-              test?.unifiedValue?.purchaseRate ||
+              test?.unifiedValue?.purchasePrice ||
               test?.unifiedValue?.purchasePrice ||
               0,
             unifiedSaleRate: test?.unifiedValue?.saleRate || 0,
@@ -193,7 +193,7 @@ export default function AlertDialogbox({
               associate,
               index,
               unifiedPurchaseRate:
-                test?.unifiedValue?.purchaseRate ||
+                test?.unifiedValue?.purchasePrice ||
                 test?.unifiedValue?.purchasePrice ||
                 0,
               unifiedSaleRate: test?.unifiedValue?.saleRate || 0,
@@ -266,8 +266,8 @@ export default function AlertDialogbox({
           ...metadata,
           unifiedPurchaseRate,
           unifiedSaleRate,
-          // Add clear purchaseRate and saleRate values to avoid ambiguity
-          purchaseRate: unifiedPurchaseRate,
+          // Add clear purchasePrice and saleRate values to avoid ambiguity
+          purchasePrice: unifiedPurchaseRate,
           saleRate: unifiedSaleRate,
         };
       });
@@ -282,7 +282,7 @@ export default function AlertDialogbox({
       "Submitting conflict resolution with values:",
       associatesToUpdate.map((a) => ({
         test: a.testName,
-        purchaseRate: a.unifiedPurchaseRate,
+        purchasePrice: a.unifiedPurchaseRate,
         saleRate: a.unifiedSaleRate,
       }))
     );
@@ -398,11 +398,12 @@ export default function AlertDialogbox({
                                 <td className="py-3 px-4 font-medium">
                                   {test.testId?.name || "Unnamed Test"}
                                 </td>
+                                {console.log(test)}
                                 <td className="py-3 px-4 text-right">
-                                  {(test.unifiedValue?.purchaseRate ||
+                                  {(test.unifiedValue?.purchasePrice ||
                                     test.unifiedValue?.purchasePrice) &&
                                     `₹${Math.ceil(
-                                      test.unifiedValue?.purchaseRate ||
+                                      test.unifiedValue?.purchasePrice ||
                                         test.unifiedValue?.purchasePrice ||
                                         0
                                     )}`}
@@ -478,10 +479,10 @@ export default function AlertDialogbox({
                                         </td>
                                         <td className="py-2 px-4"></td>
                                         <td className="py-2 px-4 text-right">
-                                          {(associate.value?.purchaseRate ||
+                                          {(associate.value?.purchasePrice ||
                                             associate.value?.purchasePrice) &&
                                             `₹${Math.ceil(
-                                              associate.value?.purchaseRate ||
+                                              associate.value?.purchasePrice ||
                                                 associate.value
                                                   ?.purchasePrice ||
                                                 0

@@ -50,5 +50,6 @@ const rateCardSchema = new mongoose.Schema(
   { versionKey: false }
 );
 
+rateCardSchema.index({ associate: 1 }, { unique: true });
 const Ratecard = mongoose.model("Ratecard", rateCardSchema);
 module.exports = Ratecard;

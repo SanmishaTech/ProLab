@@ -8,34 +8,99 @@ const csv = require("csv-parser");
 
 const RatecardController = {
   createThread: async (req, res, next) => {
-    try {
-      const { associate, department, test, userId } = req.body;
-      const userObjectId = new mongoose.Types.ObjectId(userId);
-      const now = new Date();
-      const results = [];
+    const MAX_RETRIES = 3;
+    let attempts = 0;
+    let finalResults = null;
 
-      // Filter duplicate associates if any
-      const uniqueAssociates = [...new Set(associate)];
+    while (attempts < MAX_RETRIES) {
+      const session = await mongoose.startSession();
+      try {
+        session.startTransaction();
+        const { associate, department, test, userId } = req.body;
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const now = new Date();
+        const results = [];
 
-      // Process each unique associate
-      for (const associateId of uniqueAssociates) {
-        const associateObjectId = new mongoose.Types.ObjectId(associateId);
-        const testObjectId = new mongoose.Types.ObjectId(test?.testId);
+        // Process each unique associate
+        for (const associateId of associate) {
+          const associateObjectId = new mongoose.Types.ObjectId(associateId);
+          const testObjectId = new mongoose.Types.ObjectId(test?.testId);
 
-        // Retrieve existing document for the associate and user
-        let ratecardDoc = await ServicePayable.findOne({
-          associate: associateObjectId,
-          userId: userObjectId,
-        });
-
-        if (!ratecardDoc) {
-          // Create a new document if it doesn't exist
-          ratecardDoc = new ServicePayable({
+          // Retrieve existing document for the associate and user within the session
+          let ratecardDoc = await ServicePayable.findOne({
             associate: associateObjectId,
             userId: userObjectId,
-            department,
-            test: [
-              {
+          }).session(session);
+
+          if (!ratecardDoc) {
+            // Create a new document if it doesn't exist
+            ratecardDoc = new ServicePayable({
+              associate: associateObjectId,
+              userId: userObjectId,
+              department,
+              test: [
+                {
+                  testId: testObjectId,
+                  purchasePrice: test.purchasePrice,
+                  saleRate: test.saleRate,
+                  currentPercentage: test.percentage,
+                  currentFromDate: now,
+                  currentToDate: null,
+                  history: [],
+                },
+              ],
+              value: {
+                purchasePrice: test.purchasePrice,
+                saleRate: test.saleRate,
+              },
+            });
+          } else {
+            // Update top-level fields
+            ratecardDoc.department = department;
+            ratecardDoc.value = {
+              purchasePrice: test.purchasePrice,
+              saleRate: test.saleRate,
+            };
+
+            // Find the existing test record if it exists
+            const existingTest = ratecardDoc.test.find((t) =>
+              t.testId.equals(testObjectId)
+            );
+
+            if (existingTest) {
+              // Check if pricing has changed
+              if (
+                existingTest.purchasePrice !== test.purchasePrice ||
+                existingTest.saleRate !== test.saleRate
+              ) {
+                if (!existingTest.currentToDate) {
+                  const lastHistory =
+                    existingTest.history[existingTest.history.length - 1];
+                  if (
+                    !lastHistory ||
+                    lastHistory.purchasePrice !== test.purchasePrice ||
+                    lastHistory.saleRate !== test.saleRate
+                  ) {
+                    // Add history record for rate update
+                    existingTest.history.push({
+                      purchasePrice: existingTest.purchasePrice,
+                      saleRate: existingTest.saleRate,
+                      percentage: existingTest.currentPercentage,
+                      fromDate: existingTest.currentFromDate,
+                      toDate: now,
+                    });
+                  }
+                }
+              }
+              // Update the existing test record with new values
+              existingTest.purchasePrice = test.purchasePrice;
+              existingTest.saleRate = test.saleRate;
+              existingTest.currentPercentage = test.percentage;
+              existingTest.currentFromDate = now;
+              existingTest.currentToDate = null;
+            } else {
+              // Add a new test record if one doesn't exist
+              ratecardDoc.test.push({
                 testId: testObjectId,
                 purchasePrice: test.purchasePrice,
                 saleRate: test.saleRate,
@@ -43,79 +108,48 @@ const RatecardController = {
                 currentFromDate: now,
                 currentToDate: null,
                 history: [],
-              },
-            ],
-            value: {
-              purchasePrice: test.purchasePrice,
-              saleRate: test.saleRate,
-            },
-          });
-        } else {
-          // Update top-level fields
-          ratecardDoc.department = department;
-          ratecardDoc.value = {
-            purchasePrice: test.purchasePrice,
-            saleRate: test.saleRate,
-          };
-
-          // Find the existing test record if it exists
-          const existingTest = ratecardDoc.test.find((t) =>
-            t.testId.equals(testObjectId)
-          );
-          console.log("LLLLL", existingTest);
-
-          if (existingTest) {
-            // Check if pricing has changed
-            if (
-              existingTest.purchasePrice !== test.purchasePrice ||
-              existingTest.saleRate !== test.saleRate
-            ) {
-              if (!existingTest.currentToDate) {
-                const lastHistory =
-                  existingTest.history[existingTest.history.length - 1];
-                if (
-                  !lastHistory ||
-                  lastHistory.purchasePrice !== test.purchasePrice ||
-                  lastHistory.saleRate !== test.saleRate
-                ) {
-                  // Add history record for rate update
-                  existingTest.history.push({
-                    purchasePrice: existingTest.purchasePrice,
-                    saleRate: existingTest.saleRate,
-                    percentage: existingTest.currentPercentage,
-                    fromDate: existingTest.currentFromDate,
-                    toDate: now,
-                  });
-                }
-              }
+              });
             }
-            // Update the existing test record with new values
-            existingTest.purchasePrice = test.purchasePrice;
-            existingTest.saleRate = test.saleRate;
-            existingTest.currentPercentage = test.percentage;
-            existingTest.currentFromDate = now;
-            existingTest.currentToDate = null;
-          } else {
-            // Add a new test record if one doesn't exist
-            ratecardDoc.test.push({
-              testId: testObjectId,
-              purchasePrice: test.purchasePrice,
-              saleRate: test.saleRate,
-              currentPercentage: test.percentage,
-              currentFromDate: now,
-              currentToDate: null,
-              history: [],
-            });
           }
+
+          // Save the document with the session so the change is part of the transaction
+          await ratecardDoc.save({ validateBeforeSave: false, session });
+          results.push(ratecardDoc);
         }
 
-        await ratecardDoc.save({ validateBeforeSave: false });
-        results.push(ratecardDoc);
-      }
+        await session.commitTransaction();
+        finalResults = results;
+        session.endSession();
+        break; // success, exit retry loop
+      } catch (error) {
+        if (session.inTransaction()) {
+          await session.abortTransaction();
+        }
+        session.endSession();
 
-      return res.status(200).json(results);
-    } catch (error) {
-      return res.status(500).json({ error: error.message });
+        // Check if the error message indicates a transient write conflict
+        const errorMsg = error.message || "";
+        if (
+          errorMsg.includes("Unable to acquire IX lock") ||
+          errorMsg.includes("Write conflict during plan execution")
+        ) {
+          attempts++;
+          // Optionally increase delay with each attempt (e.g., 50ms per retry)
+          await new Promise((resolve) => setTimeout(resolve, 50 * attempts));
+          continue;
+        }
+        return res.status(500).json({ error: error.message });
+      }
+    }
+
+    if (finalResults) {
+      return res.status(200).json(finalResults);
+    } else {
+      return res
+        .status(500)
+        .json({
+          error: "Transaction failed after retries due to lock contention.",
+        });
     }
   },
 
@@ -259,7 +293,6 @@ const RatecardController = {
         );
 
         services?.forEach((service) => {
-          console.log("MAOAOAOAOAOA", service);
           service?.test?.forEach((serviceTest) => {
             const testId = serviceTest.testId?._id?.toString();
             if (!testId || !testMap.has(testId)) return;
