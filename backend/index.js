@@ -23,13 +23,12 @@ db.once("open", function () {
   console.log("Connected to MongoDB");
 });
 
-const ports = 3000;
-var port = normalizePort(ports || "3000");
+var port = normalizePort(process.env.PORT || "3000");
 // app.set("port", port);
 
 // var server = http.createServer(app);
 const server = app.listen(port, () => {
-  console.log(`Server is working on http://localhost:${port}`);
+  console.log(`Server is working on port ${port}`);
 });
 // server.listen(port);
 

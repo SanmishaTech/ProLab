@@ -450,7 +450,8 @@ export default function Tablecomponent({
         testId: user.testId || testData?.testId?._id || testData?.testId,
         currentPurchasePrice:
           user.currentPurchasePrice || testData?.currentPurchasePrice,
-        saleRate: user.saleRate || testData?.saleRate,
+        currentSaleRate:
+          user.currentSaleRate || user.saleRate || testData?.currentSaleRate || testData?.saleRate,
         currentPercentage:
           user.currentPercentage || testData?.currentPercentage,
         currentFromDate: user.currentFromDate || testData?.currentFromDate,

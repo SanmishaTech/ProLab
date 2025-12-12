@@ -1,5 +1,6 @@
 var createError = require("http-errors");
 var express = require("express");
+var fs = require("fs");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
@@ -121,11 +122,15 @@ app.use("/api/paymentmode", paymentmodeRoutes);
 app.use("/api/unitmaster", unitmasterRoutes);
 app.use("/api/ratecard", ratecardRoutes);
 
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
+const distPath = path.join(__dirname, "../frontend/dist");
+if (process.env.SERVE_FRONTEND === "true" && fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
 
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
-});
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
+  });
+}
+
 // catch 404 and forward to error handler
 
 app.use(function (req, res, next) {

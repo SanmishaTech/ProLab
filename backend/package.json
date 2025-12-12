@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon index.js",
-    "devStart": "nodemon  index.js"
+    "start": "node index.js",
+    "devStart": "nodemon index.js"
   },
   "dependencies": {
     "@faker-js/faker": "^9.5.0",
