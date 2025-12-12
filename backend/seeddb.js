@@ -1,6 +1,7 @@
 const { faker } = require("@faker-js/faker");
 const { MongoClient, ObjectId } = require("mongodb");
-const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+require("dotenv").config();
 
 // Helper function to generate a random integer between min and max (inclusive)
 function randomIntFromInterval(min, max) {
@@ -9,19 +10,64 @@ function randomIntFromInterval(min, max) {
 
 async function seedDB() {
   // Replace with your MongoDB Atlas URI or local connection string
-  const uri =
-    "mongodb+srv://yashc:yash123456@cluster0.xqys6ob.mongodb.net/lab?retryWrites=true&w=majority&appName=Cluster0";
-  const client = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error(
+      "Missing MONGODB_URI in environment. Create backend/.env with MONGODB_URI=... and re-run seeddb.js"
+    );
+  }
+  const client = new MongoClient(uri);
 
   try {
     await client.connect();
     console.log("Connected correctly to server");
 
+    const db = client.db("lab");
+
+    const adminUserId = new ObjectId(
+      process.env.SEED_ADMIN_ID || "6784c2855dd48a187664248f"
+    );
+    const adminEmail = process.env.SEED_ADMIN_EMAIL || "admin@prolab.local";
+    const adminUsername = process.env.SEED_ADMIN_USERNAME || "admin";
+    const adminPassword = process.env.SEED_ADMIN_PASSWORD || "Admin@123";
+
+    const usersCollection = db.collection("users");
+    const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
+
+    await usersCollection.updateOne(
+      { _id: adminUserId },
+      {
+        $set: {
+          username: adminUsername,
+          email: adminEmail,
+          passwordHash: adminPasswordHash,
+          role: "admin",
+        },
+        $setOnInsert: {
+          creationDate: new Date(),
+          lab: [],
+        },
+      },
+      { upsert: true }
+    );
+
+    const userMastersCollection = db.collection("usermasters");
+    await userMastersCollection.updateOne(
+      { user: adminUserId },
+      {
+        $setOnInsert: {
+          firstName: "Admin",
+          lastName: "User",
+          role: "admin",
+          emailId: adminEmail,
+          user: adminUserId,
+        },
+      },
+      { upsert: true }
+    );
+
     // Replace 'yourDatabaseName' with your database name and 'patientmasters' with your collection name
-    const collection = client.db("lab").collection("patientmasters");
+    const collection = db.collection("patientmasters");
 
     // Drop the collection if it already exists (optional)
     await collection.drop().catch((err) => {
@@ -74,7 +120,7 @@ async function seedDB() {
       const priorityCard = faker.datatype.boolean();
       const value = randomIntFromInterval(10, 100);
       // Here, userId should be an ObjectId. For fake data, we create a new ObjectId.
-      const userId = new mongoose.Types.ObjectId("6784c2855dd48a187664248f");
+      const userId = adminUserId;
       const percentage = randomIntFromInterval(0, 100);
 
       // Create a patient document matching your schema

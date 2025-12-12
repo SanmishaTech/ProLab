@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../Schema/userSchema");
+const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.isAuthenticated = async (req, res, next) => {
   let token;
@@ -14,7 +15,7 @@ exports.isAuthenticated = async (req, res, next) => {
   try {
     token = cookies.jwt;
 
-    const decoded = jwt.verify(token, "yash");
+    const decoded = jwt.verify(token, JWT_SECRET);
 
     const user = await User.findOne(
       { _id: decoded.userId },

@@ -1,14 +1,17 @@
 var mongoose = require("mongoose");
+require("dotenv").config();
 var app = require("./app");
 var debug = require("debug")("backend:server");
 var http = require("http");
 var { Server } = require("socket.io");
 var Socketsetup = require("./Socket");
 const cors = require("cors");
-require("dotenv").config();
 
-const mongoDBURI =
-  "mongodb+srv://yashc:yash123456@cluster0.xqys6ob.mongodb.net/lab?retryWrites=true&w=majority&appName=Cluster0";
+const mongoDBURI = process.env.MONGODB_URI;
+if (!mongoDBURI) {
+  console.error("Missing MONGODB_URI in environment. Create backend/.env with MONGODB_URI=... and restart the server.");
+  process.exit(1);
+}
 mongoose.connect(mongoDBURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -34,7 +37,6 @@ server.on("error", onError);
 server.on("listening", onListening);
 const io = new Server(server, {
   cors: {
-    // origin: "https://www.yashportfoliohub.site",
     origin: "*",
     credentials: true,
   },
